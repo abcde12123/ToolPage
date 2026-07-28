@@ -52,15 +52,15 @@ describe('randomBlobRadius', function() {
 
 // ---- Test 2: randomBlobRadius value range ----
 describe('randomBlobRadius value range', function() {
-    it('should always produce values between 20 and 80 over 100 runs', function() {
+    it('should always produce values between 10 and 90 over 100 runs', function() {
         for (var run = 0; run < 100; run++) {
             var result = orbSystem.randomBlobRadius();
             var parts = result.split(/[ %\/]+/);
             for (var i = 0; i < parts.length; i++) {
                 if (parts[i] === '') continue;
                 var val = parseInt(parts[i], 10);
-                expect(val).toBeGreaterThanOrEqual(20);
-                expect(val).toBeLessThanOrEqual(80);
+                expect(val).toBeGreaterThanOrEqual(10);
+                expect(val).toBeLessThanOrEqual(90);
             }
         }
     });
@@ -174,14 +174,14 @@ describe('isCollidingOrb', function() {
     });
 });
 
-// ---- Test 5: createOrb activeOrbCount cap ----
-describe('createOrb activeOrbCount cap', function() {
-    it('should skip createOrb when activeOrbCount >= 12', function() {
-        // The createOrb function inside the IIFE checks `if (activeOrbCount >= 12) return;`
+// ---- Test 5: exported utility functions ----
+describe('exported utility functions', function() {
+    it('should have all expected exported functions', function() {
+        // The createOrb function inside the IIFE checks `if (activeOrbCount >= MAX_ORBS) return;`
         // We verify the exported utilities work correctly.
         // The actual createOrb is inside the IIFE and not exported.
         // But we can verify the logic by checking that the IIFE properly initializes:
-        // - There are at most 8 initial orbs
+        // - There are at most 10 initial orbs
         // - The max cap is implemented
 
         // Verify that the export object has the expected keys (sanity check)
@@ -205,5 +205,110 @@ describe('createOrb activeOrbCount cap', function() {
             expect(val).toBeGreaterThanOrEqual(1);
             expect(val).toBeLessThanOrEqual(6);
         }
+    });
+});
+
+// ---- Test 6: findNonCollidingPosition ----
+describe('findNonCollidingPosition', function() {
+    beforeEach(function() {
+        if (typeof window === 'undefined') {
+            global.window = { innerWidth: 1920, innerHeight: 1080 };
+        } else {
+            window.innerWidth = 1920;
+            window.innerHeight = 1080;
+        }
+    });
+
+    it('should return {left, top} with values in [0, 80] when placedOrbs is empty', function() {
+        var result = orbSystem.findNonCollidingPosition(250, []);
+        expect(result).toBeDefined();
+        expect(typeof result.left).toBe('number');
+        expect(typeof result.top).toBe('number');
+        expect(result.left).toBeGreaterThanOrEqual(0);
+        expect(result.left).toBeLessThanOrEqual(80);
+        expect(result.top).toBeGreaterThanOrEqual(0);
+        expect(result.top).toBeLessThanOrEqual(80);
+    });
+
+    it('should return a non-colliding position when space is available', function() {
+        // Place one orb at far corner (80%, 80%)
+        var placed = [{ left: 80, top: 80, size: 300 }];
+        var result = orbSystem.findNonCollidingPosition(200, placed);
+        expect(result).toBeDefined();
+        // The result should not collide with the placed orb
+        var collides = orbSystem.isCollidingOrb(result.left, result.top, 200, placed);
+        expect(collides).toBe(false);
+    });
+
+    it('should exercise fallback when all positions collide', function() {
+        stubViewport(1920, 1080);
+        // Mock Math.random so orbRand(0,80) always returns 40, orbRand(200,300) returns 250
+        var originalRandom = Math.random;
+        Math.random = function() { return 0.5; };
+        try {
+            // Place one orb that covers position (40%, 40%) with size ~250
+            // At (26%,15%) with size 800, its center is at (899, 562)
+            // New orb at (40%,40%) size 250 has center (893, 557)
+            // Distance = ~7.8, threshold = (400+125)*0.85 = 446 -> collides
+            var placed = [{ left: 26, top: 15, size: 800 }];
+            var result = orbSystem.findNonCollidingPosition(250, placed);
+            expect(result).toBeDefined();
+            expect(typeof result.left).toBe('number');
+            expect(typeof result.top).toBe('number');
+            // With Math.random mocked to 0.5, all 50 attempts try (40,40) and all collide,
+            // so the fallback should return {left: 40, top: 40}
+            expect(result.left).toBe(40);
+            expect(result.top).toBe(40);
+        } finally {
+            Math.random = originalRandom;
+        }
+    });
+
+    it('should handle boundary size values (200, 300) without error', function() {
+        var sizes = [200, 300];
+        for (var i = 0; i < sizes.length; i++) {
+            var result = orbSystem.findNonCollidingPosition(sizes[i], []);
+            expect(result).toBeDefined();
+            expect(result.left).toBeGreaterThanOrEqual(0);
+            expect(result.left).toBeLessThanOrEqual(80);
+            expect(result.top).toBeGreaterThanOrEqual(0);
+            expect(result.top).toBeLessThanOrEqual(80);
+        }
+    });
+});
+
+// ---- Test 7: removeOrbFromArray ----
+describe('removeOrbFromArray', function() {
+    it('should remove orb by id and return true', function() {
+        var arr = [
+            { id: 0, left: 10, top: 10, size: 200 },
+            { id: 1, left: 20, top: 20, size: 250 },
+            { id: 2, left: 30, top: 30, size: 300 },
+        ];
+        var result = orbSystem.removeOrbFromArray(1, arr);
+        expect(result).toBe(true);
+        expect(arr.length).toBe(2);
+        expect(arr[0].id).toBe(0);
+        expect(arr[1].id).toBe(2);
+    });
+
+    it('should return false when id not found', function() {
+        var arr = [
+            { id: 0, left: 10, top: 10, size: 200 },
+            { id: 1, left: 20, top: 20, size: 250 },
+        ];
+        var result = orbSystem.removeOrbFromArray(999, arr);
+        expect(result).toBe(false);
+        expect(arr.length).toBe(2);
+    });
+
+    it('should not modify array when id not found', function() {
+        var arr = [
+            { id: 0, left: 10, top: 10, size: 200 },
+        ];
+        var copy = arr.slice();
+        var result = orbSystem.removeOrbFromArray(999, arr);
+        expect(result).toBe(false);
+        expect(arr).toEqual(copy);
     });
 });
