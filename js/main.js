@@ -17,22 +17,24 @@ var TOOL_LOADED = {};
 
 // --- 渲染卡片 ---
 var grid = document.getElementById('toolsGrid');
-tools.forEach(function(tool, index) {
-    var card = document.createElement('div');
-    card.className = 'glass-card';
-    var delay = 0.05 + index * 0.06;
-    card.style.transitionDelay = delay + 's';
-    card.innerHTML =
-        '<span class="glass-card__icon">' + tool.icon + '</span>' +
-        '<h3 class="glass-card__title">' + tool.name + '</h3>' +
-        '<p class="glass-card__desc">' + tool.desc + '</p>';
+if (grid) {
+    tools.forEach(function(tool, index) {
+        var card = document.createElement('div');
+        card.className = 'glass-card';
+        var delay = 0.05 + index * 0.06;
+        card.style.transitionDelay = delay + 's';
+        card.innerHTML =
+            '<span class="glass-card__icon">' + tool.icon + '</span>' +
+            '<h3 class="glass-card__title">' + tool.name + '</h3>' +
+            '<p class="glass-card__desc">' + tool.desc + '</p>';
 
-    card.addEventListener('click', function() {
-        openTool(tool);
+        card.addEventListener('click', function() {
+            openTool(tool);
+        });
+
+        grid.appendChild(card);
     });
-
-    grid.appendChild(card);
-});
+}
 
 // --- 打开工具 ---
 function openTool(tool) {
@@ -86,23 +88,26 @@ function onCardVisible(entry) {
     observer.unobserve(card);
 }
 
-var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-            onCardVisible(entry);
-        }
-    });
-}, { threshold: 0.1 });
+var observer;
+if (typeof IntersectionObserver !== 'undefined') {
+    observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                onCardVisible(entry);
+            }
+        });
+    }, { threshold: 0.1 });
 
-document.querySelectorAll('.glass-card').forEach(function(card) {
-    observer.observe(card);
-});
-
-if (!('IntersectionObserver' in window)) {
     document.querySelectorAll('.glass-card').forEach(function(card) {
-        card.classList.add('visible');
-        card.style.transitionDelay = '';
+        observer.observe(card);
     });
+
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.glass-card').forEach(function(card) {
+            card.classList.add('visible');
+            card.style.transitionDelay = '';
+        });
+    }
 }
 
 // --- ✦ 神秘光灵系统 v3 — 不规则 Blob + 碰撞规避 ---
@@ -347,11 +352,15 @@ function isCollidingOrb(left, top, size, placedOrbs) {
 })();
 
 // --- Toast 提示 ---
-var toastContainer = document.createElement('div');
-toastContainer.className = 'toast-container';
-document.body.appendChild(toastContainer);
+var toastContainer;
+if (document.body) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+}
 
 function showToast(text) {
+    if (!toastContainer) return;
     var toast = document.createElement('div');
     toast.className = 'toast';
     toast.textContent = text;
@@ -365,7 +374,10 @@ function showToast(text) {
 }
 
 // --- 页脚年份 ---
-document.getElementById('year').textContent = '' + new Date().getFullYear();
+var yearEl = document.getElementById('year');
+if (yearEl) {
+    yearEl.textContent = '' + new Date().getFullYear();
+}
 
 // 导出供 Jest 单元测试
 if (typeof module !== 'undefined' && module.exports) {
