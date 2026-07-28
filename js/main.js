@@ -106,8 +106,58 @@ if (!('IntersectionObserver' in window)) {
 }
 
 // --- ✦ 神秘光灵系统 v3 — 不规则 Blob + 碰撞规避 ---
+
+// ---- 公用工具函数（提取以供测试） ----
+function orbRand(min, max) { return Math.random() * (max - min) + min; }
+function orbRandInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function randomBlobRadius() {
+    var lastVals = null;
+    for (var attempt = 0; attempt < 20; attempt++) {
+        var vals = [];
+        for (var i = 0; i < 8; i++) {
+            vals.push(orbRandInt(20, 80));
+        }
+        var sum = 0;
+        for (var i = 0; i < 8; i++) { sum += vals[i]; }
+        var mean = sum / 8;
+        var variance = 0;
+        for (var i = 0; i < 8; i++) { variance += (vals[i] - mean) * (vals[i] - mean); }
+        variance /= 8;
+        if (Math.sqrt(variance) >= 15) {
+            return vals[0] + '% ' + vals[1] + '% ' + vals[2] + '% ' + vals[3] + '% / ' +
+                   vals[4] + '% ' + vals[5] + '% ' + vals[6] + '% ' + vals[7] + '%';
+        }
+        lastVals = vals;
+    }
+    return lastVals[0] + '% ' + lastVals[1] + '% ' + lastVals[2] + '% ' + lastVals[3] + '% / ' +
+           lastVals[4] + '% ' + lastVals[5] + '% ' + lastVals[6] + '% ' + lastVals[7] + '%';
+}
+
+function isCollidingOrb(left, top, size, placedOrbs) {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var cx = left / 100 * vw + size / 2;
+    var cy = top / 100 * vh + size / 2;
+    var r = size / 2;
+    for (var i = 0; i < placedOrbs.length; i++) {
+        var o = placedOrbs[i];
+        var ocx = o.left / 100 * vw + o.size / 2;
+        var ocy = o.top / 100 * vh + o.size / 2;
+        var or = o.size / 2;
+        var dx = cx - ocx;
+        var dy = cy - ocy;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < (r + or) * 0.7) {
+            return true;
+        }
+    }
+    return false;
+}
+
 (function() {
     var container = document.getElementById('orbContainer');
+    if (!container) return;
     var palette = [
         { c1: [167, 139, 250], c2: [232, 121, 249] },  // 紫罗兰 → 品紫
         { c1: [244, 114, 182], c2: [251, 146,  60] },  // 粉 → 暖橙
@@ -117,55 +167,10 @@ if (!('IntersectionObserver' in window)) {
         { c1: [129, 140, 248], c2: [ 96, 165, 250] },  // 靛蓝 → 天蓝
     ];
 
-    function rand(min, max) { return Math.random() * (max - min) + min; }
-    function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-    // ---- 不规则 Blob 半径生成 ----
-    function randomBlobRadius() {
-        var vals = [];
-        for (var i = 0; i < 8; i++) {
-            vals.push(randInt(20, 80));
-        }
-        // 不规则度检查：标准差过低则重新生成
-        var sum = 0;
-        for (var i = 0; i < 8; i++) { sum += vals[i]; }
-        var mean = sum / 8;
-        var variance = 0;
-        for (var i = 0; i < 8; i++) { variance += (vals[i] - mean) * (vals[i] - mean); }
-        variance /= 8;
-        if (Math.sqrt(variance) < 15) {
-            return randomBlobRadius();
-        }
-        return vals[0] + '% ' + vals[1] + '% ' + vals[2] + '% ' + vals[3] + '% / ' +
-               vals[4] + '% ' + vals[5] + '% ' + vals[6] + '% ' + vals[7] + '%';
-    }
-
     // ---- 位置追踪 ----
     var placedOrbs = [];
     var activeOrbCount = 0;
     var gridIndex = 0;
-
-    // ---- 碰撞检测 ----
-    function isColliding(left, top, size) {
-        var vw = window.innerWidth;
-        var vh = window.innerHeight;
-        var cx = left / 100 * vw + size / 2;
-        var cy = top / 100 * vh + size / 2;
-        var r = size / 2;
-        for (var i = 0; i < placedOrbs.length; i++) {
-            var o = placedOrbs[i];
-            var ocx = o.left / 100 * vw + o.size / 2;
-            var ocy = o.top / 100 * vh + o.size / 2;
-            var or = o.size / 2;
-            var dx = cx - ocx;
-            var dy = cy - ocy;
-            var dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < (r + or) * 0.7) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     function createOrb() {
         if (activeOrbCount >= 12) return;
@@ -176,7 +181,7 @@ if (!('IntersectionObserver' in window)) {
 
         var pair = palette[Math.floor(Math.random() * palette.length)];
         var c1 = pair.c1, c2 = pair.c2;
-        var size = rand(200, 420);
+        var size = orbRand(200, 420);
 
         // ---- 位置计算 ----
         var left, top;
@@ -186,8 +191,8 @@ if (!('IntersectionObserver' in window)) {
             var row = Math.floor(gridIndex / 4);
             var cellLeft = col * 25;
             var cellTop = row * 50;
-            left = cellLeft + rand(0, 25);
-            top = cellTop + rand(0, 50);
+            left = cellLeft + orbRand(0, 25);
+            top = cellTop + orbRand(0, 50);
             gridIndex++;
         } else {
             // 持续生成：碰撞规避，最多重试 5 次
@@ -195,10 +200,10 @@ if (!('IntersectionObserver' in window)) {
             var rangeMax = size > 320 ? 80 : 85;
             var attempts = 0;
             do {
-                left = rand(rangeMin, rangeMax);
-                top = rand(rangeMin, rangeMax);
+                left = orbRand(rangeMin, rangeMax);
+                top = orbRand(rangeMin, rangeMax);
                 attempts++;
-            } while (attempts < 5 && isColliding(left, top, size));
+            } while (attempts < 5 && isCollidingOrb(left, top, size, placedOrbs));
         }
 
         orb.style.width = size + 'px';
@@ -208,18 +213,18 @@ if (!('IntersectionObserver' in window)) {
 
         // ---- 多层内层：每层独立动画，叠加出融合消解感 ----
         var layers = [];
-        var layerCount = randInt(2, 3);
+        var layerCount = orbRandInt(2, 3);
 
         for (var li = 0; li < layerCount; li++) {
             var inner = document.createElement('div');
             inner.className = 'orb-inner';
 
-            var cx = rand(20, 80), cy = rand(20, 80);
-            var mix = rand(0.2, 0.8);
+            var cx = orbRand(20, 80), cy = orbRand(20, 80);
+            var mix = orbRand(0.2, 0.8);
             var r = Math.round(c1[0] * (1 - mix) + c2[0] * mix);
             var g = Math.round(c1[1] * (1 - mix) + c2[1] * mix);
             var b = Math.round(c1[2] * (1 - mix) + c2[2] * mix);
-            var alpha = rand(0.25, 0.55);
+            var alpha = orbRand(0.25, 0.55);
 
             inner.style.background = 'radial-gradient(circle at ' + cx + '% ' + cy + '%, ' +
                 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ') 0%, ' +
@@ -227,16 +232,16 @@ if (!('IntersectionObserver' in window)) {
                 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.15) + ') 55%, ' +
                 'transparent 75%)';
 
-            var scale = rand(0.5, 1.0);
-            var blurAmt = rand(25, 60);
-            var rot = rand(0, 360);
+            var scale = orbRand(0.5, 1.0);
+            var blurAmt = orbRand(25, 60);
+            var rot = orbRand(0, 360);
             var blobRadius = randomBlobRadius();
 
             inner.style.transform = 'scale(' + scale + ') rotate(' + rot + 'deg)';
             inner.style.filter = 'blur(' + blurAmt + 'px)';
             inner.style.borderRadius = blobRadius;
             inner.style.opacity = '0';
-            inner.style.transition = 'opacity ' + rand(2.5, 5) + 's ease';
+            inner.style.transition = 'opacity ' + orbRand(2.5, 5) + 's ease';
 
             orb.appendChild(inner);
             layers.push({
@@ -252,8 +257,8 @@ if (!('IntersectionObserver' in window)) {
         }
 
         // ---- 初始位移 ----
-        var driftX = rand(-50, 50);
-        var driftY = rand(-50, 50);
+        var driftX = orbRand(-50, 50);
+        var driftY = orbRand(-50, 50);
         orb.style.transform = 'translate(' + driftX + 'px, ' + driftY + 'px)';
 
         container.appendChild(orb);
@@ -276,13 +281,13 @@ if (!('IntersectionObserver' in window)) {
 
             for (var i = 0; i < layers.length; i++) {
                 var L = layers[i];
-                var newScale = L.baseScale * rand(0.6, 1.5);
-                var newBlur = rand(15, 70);
-                var newRot = L.baseRot + rand(-40, 40);
+                var newScale = L.baseScale * orbRand(0.6, 1.5);
+                var newBlur = orbRand(15, 70);
+                var newRot = L.baseRot + orbRand(-40, 40);
                 var newBlobRadius = randomBlobRadius();
-                var durScale = rand(4, 9);
-                var durBlur = rand(3, 7);
-                var durBlob = rand(6, 12);
+                var durScale = orbRand(4, 9);
+                var durBlur = orbRand(3, 7);
+                var durBlob = orbRand(6, 12);
 
                 L.el.style.transition = 'transform ' + durScale + 's cubic-bezier(0.25, 0.1, 0.25, 1), ' +
                     'filter ' + durBlur + 's ease, ' +
@@ -293,29 +298,29 @@ if (!('IntersectionObserver' in window)) {
             }
 
             // 整体缓慢漂移
-            driftX += rand(-30, 30);
-            driftY += rand(-30, 30);
+            driftX += orbRand(-30, 30);
+            driftY += orbRand(-30, 30);
             driftX = Math.max(-120, Math.min(120, driftX));
             driftY = Math.max(-120, Math.min(120, driftY));
-            orb.style.transition = 'transform ' + rand(8, 14) + 's cubic-bezier(0.25, 0.1, 0.25, 1)';
+            orb.style.transition = 'transform ' + orbRand(8, 14) + 's cubic-bezier(0.25, 0.1, 0.25, 1)';
             orb.style.transform = 'translate(' + driftX + 'px, ' + driftY + 'px)';
 
-            breathTimer = setTimeout(scheduleBreath, rand(3000, 7000));
+            breathTimer = setTimeout(scheduleBreath, orbRand(3000, 7000));
         }
 
-        var breathTimer = setTimeout(scheduleBreath, rand(2000, 4000));
+        var breathTimer = setTimeout(scheduleBreath, orbRand(2000, 4000));
 
         // ---- ★ 渐出 & 消解 ----
-        var lifespan = rand(18000, 35000);
+        var lifespan = orbRand(18000, 35000);
         setTimeout(function() {
             clearTimeout(breathTimer);
             // 消解效果：模糊增大 + 透明度渐降
             for (var i = 0; i < layers.length; i++) {
                 var L = layers[i];
-                L.el.style.transition = 'opacity ' + rand(3, 5) + 's ease, filter 4s ease, transform 4s ease, border-radius 4s ease';
+                L.el.style.transition = 'opacity ' + orbRand(3, 5) + 's ease, filter 4s ease, transform 4s ease, border-radius 4s ease';
                 L.el.style.opacity = '0';
-                L.el.style.filter = 'blur(' + rand(60, 100) + 'px)';
-                L.el.style.transform = 'scale(' + rand(1.2, 1.8) + ') rotate(' + rand(0, 360) + 'deg)';
+                L.el.style.filter = 'blur(' + orbRand(60, 100) + 'px)';
+                L.el.style.transform = 'scale(' + orbRand(1.2, 1.8) + ') rotate(' + orbRand(0, 360) + 'deg)';
                 L.el.style.borderRadius = '50%';
             }
             setTimeout(function() {
@@ -332,13 +337,13 @@ if (!('IntersectionObserver' in window)) {
     // ---- 初始生成：错峰出现（分层网格） ----
     gridIndex = 0;
     for (var i = 0; i < 8; i++) {
-        setTimeout(createOrb, i * 600 + rand(0, 300));
+        setTimeout(createOrb, i * 600 + orbRand(0, 300));
     }
 
     // ---- 持续生成新光灵 ----
     setInterval(function() {
         createOrb();
-    }, rand(1200, 3000));
+    }, orbRand(1200, 3000));
 })();
 
 // --- Toast 提示 ---
@@ -361,3 +366,13 @@ function showToast(text) {
 
 // --- 页脚年份 ---
 document.getElementById('year').textContent = '' + new Date().getFullYear();
+
+// 导出供 Jest 单元测试
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        orbRand: orbRand,
+        orbRandInt: orbRandInt,
+        randomBlobRadius: randomBlobRadius,
+        isCollidingOrb: isCollidingOrb,
+    };
+}
