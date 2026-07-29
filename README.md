@@ -1,6 +1,5 @@
 <div align="center">
 
-```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 280" width="100%" height="auto" style="max-width:800px;">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -16,10 +15,6 @@
       <stop offset="100%" stop-color="#7C3AED"/>
       <animate attributeName="x1" values="0%;100%;0%" dur="8s" repeatCount="indefinite"/>
       <animate attributeName="x2" values="100%;200%;100%" dur="8s" repeatCount="indefinite"/>
-    </linearGradient>
-    <linearGradient id="cardGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0.35)"/>
     </linearGradient>
     <linearGradient id="subtitleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#78716C"/>
@@ -38,7 +33,6 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <!-- Orb gradients -->
     <radialGradient id="orb1" cx="40%" cy="40%" r="60%">
       <stop offset="0%" stop-color="rgba(220,200,255,0.7)"/>
       <stop offset="60%" stop-color="rgba(200,230,255,0.3)"/>
@@ -62,10 +56,8 @@
     </radialGradient>
   </defs>
 
-  <!-- Background -->
   <rect width="800" height="280" rx="24" fill="url(#bgGrad)"/>
 
-  <!-- Floating Orbs -->
   <circle cx="150" cy="80" r="120" fill="url(#orb1)" opacity="0.8">
     <animate attributeName="r" values="120;140;110;120" dur="10s" repeatCount="indefinite"/>
   </circle>
@@ -76,38 +68,32 @@
     <animate attributeName="r" values="90;110;80;90" dur="14s" repeatCount="indefinite"/>
   </circle>
 
-  <!-- Glass card background -->
-  <rect x="60" y="30" width="680" height="220" rx="20" fill="url(#cardGrad1)" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" filter="url(#glass)">
+  <rect x="60" y="30" width="680" height="220" rx="20" fill="rgba(255,255,255,0.55)" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" filter="url(#glass)">
     <animate attributeName="opacity" values="0.85;0.95;0.85" dur="6s" repeatCount="indefinite"/>
   </rect>
 
-  <!-- ✧ Icon -->
   <text x="400" y="82" font-size="36" text-anchor="middle" fill="#7C3AED" filter="url(#glow)">✧
     <animate attributeName="y" values="82;78;82" dur="3s" repeatCount="indefinite"/>
     <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>
   </text>
 
-  <!-- Title -->
-  <text x="400" y="142" font-family="system-ui,-apple-system,sans-serif" font-size="48" font-weight="800" text-anchor="middle" fill="url(#titleGrad)" letter-spacing="2">夏夜工具集</text>
+  <text x="400" y="142" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="48" font-weight="800" text-anchor="middle" fill="url(#titleGrad)" letter-spacing="2">夏夜工具集</text>
 
-  <!-- Subtitle -->
-  <text x="400" y="182" font-family="system-ui,-apple-system,sans-serif" font-size="16" text-anchor="middle" fill="url(#subtitleGrad)" letter-spacing="4">✦ 随手做的小工具，希望能帮到你 ✦</text>
+  <text x="400" y="182" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="16" text-anchor="middle" fill="url(#subtitleGrad)" letter-spacing="4">✦ 随手做的小工具，希望能帮到你 ✦</text>
 
-  <!-- Tool count badges -->
   <g transform="translate(190, 210)">
-    <rect x="0" y="0" width="56" height="24" rx="12" fill="rgba(167,139,250,0.2)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
-    <text x="28" y="16" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#7C3AED">9 工具</text>
+    <rect x="0" y="-6" width="70" height="26" rx="13" fill="rgba(167,139,250,0.2)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+    <text x="35" y="11" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#7C3AED">🎯 9 工具</text>
   </g>
-  <g transform="translate(262, 210)">
-    <rect x="0" y="0" width="56" height="24" rx="12" fill="rgba(251,146,60,0.15)" stroke="rgba(251,146,60,0.2)" stroke-width="1"/>
-    <text x="28" y="16" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#D97706">纯原生</text>
+  <g transform="translate(275, 210)">
+    <rect x="0" y="-6" width="70" height="26" rx="13" fill="rgba(251,146,60,0.15)" stroke="rgba(251,146,60,0.2)" stroke-width="1"/>
+    <text x="35" y="11" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#D97706">⚡ 纯原生</text>
   </g>
-  <g transform="translate(334, 210)">
-    <rect x="0" y="0" width="56" height="24" rx="12" fill="rgba(96,165,250,0.2)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
-    <text x="28" y="16" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#2563EB">零依赖</text>
+  <g transform="translate(360, 210)">
+    <rect x="0" y="-6" width="70" height="26" rx="13" fill="rgba(96,165,250,0.2)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+    <text x="35" y="11" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#2563EB">📦 零依赖</text>
   </g>
 
-  <!-- Floating sparkle particles -->
   <text x="680" y="90" font-size="14" fill="#C4B5FD" opacity="0.6">✦
     <animate attributeName="y" values="90;60;120;90" dur="7s" repeatCount="indefinite"/>
     <animate attributeName="opacity" values="0.6;1;0.3;0.6" dur="7s" repeatCount="indefinite"/>
@@ -121,7 +107,6 @@
     <animate attributeName="opacity" values="0.5;0.8;0.2;0.5" dur="11s" repeatCount="indefinite"/>
   </text>
 </svg>
-```
 
 <br>
 
@@ -130,9 +115,9 @@
 [![license](https://img.shields.io/badge/许可-MIT-10B981?style=flat-square&labelColor=1E293B)]()
 [![deploy](https://img.shields.io/badge/部署-Nginx+-D97706?style=flat-square&labelColor=1E293B)]()
 
-<br>
-
 </div>
+
+---
 
 ## 🌈 包含工具
 
@@ -140,81 +125,42 @@
 
 | 工具 | 功能 | 状态 |
 |:-----|:-----|:----:|
-| 🤖 **AI 聊天** | 智能 AI 对话助手，随时提问 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| `{}` **JSON 格式化** | 格式化、校验、压缩 JSON 数据 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 🔤 **Base64 编解码** | 文本与 Base64 互转 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 🕐 **时间戳转换** | 时间戳与日期格式互转 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 🧪 **正则测试器** | 在线测试正则表达式匹配结果 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 🎨 **色值转换** | HEX / RGB / HSL 色值互转 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 📱 **二维码生成** | 文本或链接 → 二维码图片 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 🖼️ **图片压缩** | 智能压缩，清晰度与大/小的平衡 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
-| 📝 **文字识别** | OCR 识别图片中的文字 | <img src="https://img.shields.io/badge/-已上线-22C55E?style=flat-square"/> |
+| 🤖 **AI 聊天** | 智能 AI 对话助手，随时提问 | ✅ 已上线 |
+| `{}` **JSON 格式化** | 格式化、校验、压缩 JSON 数据 | ✅ 已上线 |
+| 🔤 **Base64 编解码** | 文本与 Base64 互转 | ✅ 已上线 |
+| 🕐 **时间戳转换** | 时间戳与日期格式互转 | ✅ 已上线 |
+| 🧪 **正则测试器** | 在线测试正则表达式匹配结果 | ✅ 已上线 |
+| 🎨 **色值转换** | HEX / RGB / HSL 色值互转 | ✅ 已上线 |
+| 📱 **二维码生成** | 文本或链接 → 二维码图片 | ✅ 已上线 |
+| 🖼️ **图片压缩** | 智能压缩，清晰度与体积的平衡 | ✅ 已上线 |
+| 📝 **文字识别** | OCR 识别图片中的文字 | ✅ 已上线 |
 
 </div>
 
 ## ✨ 设计亮点
 
-<table>
-<tr>
-<td width="50%">
-
-### 🪟 毛玻璃质感
-```
-background: rgba(255,255,255,0.55);
-backdrop-filter: blur(20px);
-border-radius: 20px;
-```
-通透的玻璃卡片 + 柔和暖白底色，呼吸感十足
-
-</td>
-<td width="50%">
-
-### 🌀 弹性交互
-```css
-cubic-bezier(0.34, 1.56, 0.64, 1)
-```
-卡片悬停上浮、弹窗弹入、Toast 弹出——所有动效都带着 QQ 的弹簧感
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🎨 浮动光灵系统
-页面上漂浮着 **8 个动态光团**，每一个都拥有：
-- 随机渐变配色（淡紫/浅粉/薄荷/天蓝...）
-- 独立呼吸动画（透明度缓变）
-- 碰撞规避算法
-- 寿命结束后自然消散 → 再新生
-
-> 每一帧都是独一无二的组合 🌌
-
-</td>
-<td width="50%">
-
-### 👁️ 入场即表演
-- 卡片通过 `IntersectionObserver` 逐张淡入
-- 依次延时入场（`transitionDelay: 0.05 + i * 0.06s`）
-- 入场后自动清除延迟，保持后续交互流畅
-- 弹窗带缩放 + 淡入双重动画
-
-</td>
-</tr>
-</table>
+| | |
+|:---|---:|
+| 🪟 **毛玻璃质感** `backdrop-filter: blur(20px)` | 通透的玻璃卡片 + 暖白底色，呼吸感十足 |
+| 🌀 **弹性交互** `cubic-bezier(0.34, 1.56, 0.64, 1)` | 悬停上浮、弹窗弹入、Toast 弹出，自带弹簧感 |
+| 🎨 **浮动光灵系统 v4** | 8 个动态光团，随机渐变、独立呼吸、碰撞规避、生灭循环 |
+| 👁️ **IntersectionObserver 入场** | 卡片逐张淡入，依次延时，入场后自动清除延迟 |
+| 📱 **响应式布局** | 768px / 480px 双断点适配手机和平板 |
+| 🌙 **温柔配色** | 暖白底色 `#FFFAF7` + 浅色毛玻璃，久看不累 |
 
 ## 🏗️ 技术架构
 
 ```
 📦 ToolPage
-├── 📄 index.html              # 主页面骨架
+├── 📄 index.html               # 主页面骨架
 ├── 🎨 css/
-│   └── style.css              # 完整样式系统（~600行）
-│       ├── 毛玻璃卡片系统        .glass-card
-│       ├── 光灵系统              #orbContainer + .orb
-│       ├── 导航栏 / Hero / 页脚  .navbar / .hero / .footer
-│       ├── Toast 提示系统        .toast-container
-│       ├── 弹窗 Modal            .modal-overlay / .modal-panel
-│       └── 8 个工具 UI           .jt- / .b64- / .ts- / .rx- / .cc- / .qr- / .ic- / .ocr-
+│   └── style.css               # 完整样式系统（~600行）
+│       ├── 毛玻璃卡片系统  →  .glass-card
+│       ├── 光灵系统        →  #orbContainer + .orb
+│       ├── 导航栏/Hero/页脚 →  .navbar / .hero / .footer
+│       ├── Toast 提示系统   →  .toast-container
+│       ├── 弹窗 Modal       →  .modal-overlay / .modal-panel
+│       └── 8 个工具 UI      →  .jt- / .b64- / .ts- / .rx- / .cc- / .qr- / .ic- / .ocr-
 ├── ⚡ js/
 │   ├── main.js                 # 主逻辑（~440行）
 │   │   ├── 卡片渲染引擎
@@ -223,14 +169,14 @@ cubic-bezier(0.34, 1.56, 0.64, 1)
 │   │   └── Toast 管理器
 │   ├── modal.js                # 弹窗管理器
 │   └── tools/                  # 工具模块（按需动态加载）
-│       ├── base64.js
-│       ├── color-converter.js
-│       ├── image-compress.js
-│       ├── json-formatter.js
-│       ├── ocr.js
-│       ├── qrcode.js
-│       ├── regex-tester.js
-│       └── timestamp.js
+│       ├── base64.js           # Base64 编解码
+│       ├── color-converter.js  # 色值转换
+│       ├── image-compress.js   # 图片压缩
+│       ├── json-formatter.js   # JSON 格式化
+│       ├── ocr.js              # 文字识别
+│       ├── qrcode.js           # 二维码生成
+│       ├── regex-tester.js     # 正则测试器
+│       └── timestamp.js        # 时间戳转换
 ├── 🖼️ images/
 │   └── 像素2.jpg
 └── 📝 README.md
@@ -252,7 +198,7 @@ npx serve .
 
 ## 📜 开源许可
 
-本项目基于 **MIT License** 开源，随意玩耍～
+本项目基于 **MIT License** 开源。
 
 ---
 
@@ -260,10 +206,14 @@ npx serve .
 
 **✧ 夏夜工具集** · 用 ❤️ 和 ✨ 做成
 
-<sub>v1.0 · 持续建设中 🚧</sub>
+🚧 持续建设中 ...
+
+<sub>v1.0</sub>
 
 <br>
 
-[![xiaye.xyz](https://img.shields.io/badge/🌐%20xiaye.xyz-在线访问-7C3AED?style=for-the-badge)](https://xiaye.xyz)
+<a href="https://xiaye.xyz">
+  <img src="https://img.shields.io/badge/%F0%9F%8C%90%20xiaye.xyz-%E5%9C%A8%E7%BA%BF%E8%AE%BF%E9%97%AE-7C3AED?style=for-the-badge" alt="xiaye.xyz">
+</a>
 
 </div>
