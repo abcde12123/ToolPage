@@ -424,6 +424,67 @@ if (yearEl) {
     yearEl.textContent = '' + new Date().getFullYear();
 }
 
+// --- 导航栏：平滑滚动 + 滚动高亮 ---
+(function() {
+    var navbar = document.getElementById('navbar');
+    if (!navbar) return;
+
+    // 平滑滚动
+    navbar.querySelectorAll('.navbar__link[data-section]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var target = document.getElementById(link.getAttribute('data-section'));
+            if (target) {
+                var top = target.getBoundingClientRect().top + window.pageYOffset - navbar.offsetHeight + 1;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+            }
+        });
+    });
+
+    // 品牌链接回到顶部
+    var brand = document.querySelector('.navbar__brand');
+    if (brand) {
+        brand.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // 滚动高亮当前 section
+    var sections = ['hero', 'tools', 'about'];
+    var ticking = false;
+
+    function updateActive() {
+        var scrollY = window.pageYOffset;
+        var offset = navbar.offsetHeight + 2;
+        var current = 'hero';
+
+        for (var i = sections.length - 1; i >= 0; i--) {
+            var el = document.getElementById(sections[i]);
+            if (el && el.offsetTop - offset <= scrollY + 1) {
+                current = sections[i];
+                break;
+            }
+        }
+
+        navbar.querySelectorAll('.navbar__link[data-section]').forEach(function(link) {
+            link.classList.toggle('active', link.getAttribute('data-section') === current);
+        });
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                updateActive();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    updateActive();
+})();
+
 // 导出供 Jest 单元测试
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

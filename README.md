@@ -208,7 +208,7 @@ npx serve .
 
 🚧 持续建设中 ...
 
-<sub>v1.1</sub>
+<sub>v1.2</sub>
 
 <br>
 
