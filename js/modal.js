@@ -44,6 +44,13 @@ var ModalManager = (function() {
     var isOpen = false;
     var escHandler = null;
     var closeTimer = null;
+    var scrollbarWidth = null;
+
+    function getScrollbarWidth() {
+        if (scrollbarWidth !== null) return scrollbarWidth;
+        scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        return scrollbarWidth;
+    }
 
     function init() {
         overlay = document.getElementById('toolModal');
@@ -97,7 +104,8 @@ var ModalManager = (function() {
         panel.style.opacity = '1';
         panel.style.transform = 'translateY(0) scale(1)';
 
-        // 锁定 body 滚动
+        // 锁定 body 滚动，补偿滚动条宽度防止页面跳动
+        document.body.style.paddingRight = getScrollbarWidth() + 'px';
         document.body.classList.add('modal-open');
 
         isOpen = true;
@@ -123,6 +131,7 @@ var ModalManager = (function() {
         // 动画结束后隐藏
         closeTimer = setTimeout(function() {
             overlay.style.display = 'none';
+            document.body.style.paddingRight = '';
             document.body.classList.remove('modal-open');
             closeTimer = null;
         }, 350);
@@ -143,6 +152,7 @@ var ModalManager = (function() {
         overlay.style.display = 'none';
         overlay.style.opacity = '0';
         overlay.classList.remove('open');
+        document.body.style.paddingRight = '';
         document.body.classList.remove('modal-open');
         isOpen = false;
         if (escHandler) {
