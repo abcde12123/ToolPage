@@ -1,0 +1,5 @@
+.well-known/
+.DS_Store
+Thumbs.db
+node_modules/
+*.log
