@@ -87,7 +87,7 @@
   </g>
   <g transform="translate(275, 210)">
     <rect x="0" y="-6" width="70" height="26" rx="13" fill="rgba(251,146,60,0.15)" stroke="rgba(251,146,60,0.2)" stroke-width="1"/>
-    <text x="35" y="11" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#D97706">⚡ 纯原生</text>
+    <text x="35" y="11" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#D97706">⚡ 轻量级</text>
   </g>
   <g transform="translate(360, 210)">
     <rect x="0" y="-6" width="70" height="26" rx="13" fill="rgba(96,165,250,0.2)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
