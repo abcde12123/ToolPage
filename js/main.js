@@ -11,6 +11,13 @@ var tools = [
     { icon: '📱', name: '二维码生成', desc: '将文本或链接转换成二维码图片', file: 'qrcode.js', initFn: 'initQRCode' },
     { icon: '🖼️', name: '图片压缩', desc: '智能压缩图片，保持清晰度的同时缩小体积', file: 'image-compress.js', initFn: 'initImageCompress' },
     { icon: '📝', name: '文字识别', desc: 'OCR 识别图片中的文字，快速提取', file: 'ocr.js', initFn: 'initOCR' },
+    { icon: '📝', name: 'Markdown 编辑器', desc: '实时预览与导出 HTML', file: 'markdown.js', initFn: 'initMarkdown' },
+    { icon: '🔐', name: '密码生成器', desc: '安全随机密码，可配置复杂度', file: 'password.js', initFn: 'initPassword' },
+    { icon: '📏', name: '文本差异对比', desc: '两段文本 diff 高亮比较', file: 'text-diff.js', initFn: 'initTextDiff' },
+    { icon: '🧮', name: 'Cron 表达式解析', desc: '解析 cron 表达式，查看执行计划', file: 'cron-parser.js', initFn: 'initCronParser' },
+    { icon: '🔗', name: 'URL 编解码', desc: 'URL encode / decode 互转', file: 'url-encode.js', initFn: 'initUrlEncode' },
+    { icon: '🎲', name: '随机数生成器', desc: 'UUID v4、随机整数与小数', file: 'random-gen.js', initFn: 'initRandomGen' },
+    { icon: '📐', name: '单位换算器', desc: '长度/重量/温度/面积/体积/速度', file: 'unit-convert.js', initFn: 'initUnitConvert' },
 ];
 
 // 已加载的工具脚本
@@ -423,6 +430,72 @@ var yearEl = document.getElementById('year');
 if (yearEl) {
     yearEl.textContent = '' + new Date().getFullYear();
 }
+
+// --- 导航栏：平滑滚动 + 滚动高亮 ---
+(function() {
+    var navbar = document.getElementById('navbar');
+    if (!navbar) return;
+
+    var links = navbar.querySelectorAll('.navbar__link[data-section]');
+    var sections = {};
+    var sectionIds = [];
+
+    links.forEach(function(link) {
+        var id = link.getAttribute('data-section');
+        var el = document.getElementById(id);
+        if (el) {
+            sections[id] = { link: link, el: el };
+            sectionIds.push(id);
+        }
+    });
+
+    if (sectionIds.length === 0) return;
+
+    links.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var id = link.getAttribute('data-section');
+            var target = document.getElementById(id);
+            if (target) {
+                var offset = navbar.offsetHeight;
+                var top = target.getBoundingClientRect().top + window.pageYOffset - offset + 1;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+            }
+        });
+    });
+
+    var ticking = false;
+    function updateActive() {
+        var scrollY = window.pageYOffset;
+        var offset = navbar.offsetHeight + 2;
+        var current = sectionIds[0];
+
+        for (var i = sectionIds.length - 1; i >= 0; i--) {
+            var el = sections[sectionIds[i]].el;
+            if (el.offsetTop - offset <= scrollY + 1) {
+                current = sectionIds[i];
+                break;
+            }
+        }
+
+        links.forEach(function(link) {
+            var isActive = link.getAttribute('data-section') === current;
+            link.classList.toggle('active', isActive);
+        });
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                updateActive();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    updateActive();
+})();
 
 // 导出供 Jest 单元测试
 if (typeof module !== 'undefined' && module.exports) {
