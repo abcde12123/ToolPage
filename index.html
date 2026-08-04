@@ -5,35 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>夏夜工具集</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=25">
+    <link rel="stylesheet" href="/css/style.css?v=31">
 </head>
 <body>
     <div id="orbContainer"></div>
 
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="container">
-            <a class="navbar__brand" href="/">
+            <a class="navbar__brand" href="#hero">
                 <span class="navbar__logo">✧</span>
                 <span>夏夜工具集</span>
             </a>
             <div class="navbar__links">
-                <a href="#" class="navbar__link active">首页</a>
-                <a href="#" class="navbar__link">工具</a>
-                <a href="#" class="navbar__link">关于</a>
+                <a href="#hero" class="navbar__link active" data-section="hero">首页</a>
+                <a href="#tools" class="navbar__link" data-section="tools">工具</a>
+                <a href="#about" class="navbar__link" data-section="about">关于</a>
+                <a href="/register" class="navbar__link" style="background: rgba(74,144,217,0.15); border-radius: 6px; padding: 6px 12px;">📋 签到</a>
+                <a href="/admin" class="navbar__link" style="opacity: 0.7; font-size: 0.85em;">⚙️</a>
             </div>
         </div>
     </nav>
 
-    <section class="hero">
+    <section class="hero" id="hero">
         <div class="container">
             <h1 class="hero__title">一些小工具 ✨</h1>
             <p class="hero__subtitle">随手做的小工具，希望能帮到你～ 慢慢添加中...</p>
         </div>
     </section>
 
-    <section class="tools">
+    <section class="tools" id="tools">
         <div class="container">
             <div class="tools__grid" id="toolsGrid"></div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="container">
+            <h2 class="about__title">关于本站 ✧</h2>
+            <div class="about__content">
+                <p>夏夜工具集是一个由个人维护的在线小工具集合，主打毛玻璃质感和轻盈交互体验。</p>
+                <p>所有工具均为纯前端实现，数据不会上传到服务器，放心使用～</p>
+                <div class="about__info">
+                    <span class="about__tag">🪟 毛玻璃设计</span>
+                    <span class="about__tag">⚡ 纯原生</span>
+                    <span class="about__tag">📦 零依赖</span>
+                    <span class="about__tag">🚧 持续更新</span>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -54,7 +72,7 @@
         </div>
     </div>
 
-    <script src="/js/modal.js?v=25"></script>
-    <script src="/js/main.js?v=25"></script>
+    <script src="/js/modal.js?v=31"></script>
+    <script src="/js/main.js?v=31"></script>
 </body>
 </html>
