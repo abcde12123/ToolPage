@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /umami
+Disallow: /ai/
+Disallow: /pm-update/
+
+Sitemap: https://xiaye.xyz/sitemap.xml
