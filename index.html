@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=31">
+    <link rel="stylesheet" href="/css/style.css?v=32">
 </head>
 <body>
     <div id="orbContainer"></div>
@@ -25,8 +25,7 @@
                 <a href="#hero" class="navbar__link active" data-section="hero">首页</a>
                 <a href="#tools" class="navbar__link" data-section="tools">工具</a>
                 <a href="#about" class="navbar__link" data-section="about">关于</a>
-                <a href="https://xiayevfx.cn/register" class="navbar__link" style="opacity: 0.7; font-size: 0.85em;" rel="nofollow">📋</a>
-                <a href="https://xiayevfx.cn/admin" class="navbar__link" style="opacity: 0.7; font-size: 0.85em;" rel="nofollow">⚙️</a>
+                <button type="button" class="navbar__link navbar__btn-settings" id="btnConsole" title="后台控制台">⚙️ 设置</button>
             </div>
         </div>
     </nav>
@@ -77,7 +76,47 @@
         </div>
     </div>
 
-    <script src="/js/modal.js?v=31"></script>
-    <script src="/js/main.js?v=31"></script>
+    <!-- 后台控制台浮层（登录 + 跳转枢纽，签到系统本体在 xiayevfx.cn，这里只负责入口） -->
+    <div id="consoleOverlay" class="console-overlay" style="display:none;">
+        <!-- 登录视图 -->
+        <div class="console-panel console-panel--login" id="consoleLogin">
+            <button type="button" class="console__close" id="consoleLoginClose" aria-label="关闭">&#10005;</button>
+            <div class="console__icon">&#x1F512;</div>
+            <h3 class="console__title">管理员登录</h3>
+            <p class="console__subtitle">登录后进入后台控制台</p>
+            <form id="consoleLoginForm" novalidate>
+                <div class="console__field">
+                    <input type="password" id="consolePassword" placeholder="请输入管理密码" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="console__btn" id="consoleLoginBtn">&#x2713; 登录</button>
+            </form>
+            <div class="console__msg" id="consoleLoginMsg" hidden></div>
+        </div>
+
+        <!-- 控制台视图（跳转枢纽） -->
+        <div class="console-panel console-panel--main" id="consoleMain" hidden>
+            <button type="button" class="console__close" id="consoleClose" aria-label="关闭">&#10005;</button>
+            <div class="console__icon">&#x1F6E0;</div>
+            <h3 class="console__title">后台控制台</h3>
+            <p class="console__subtitle">选择功能，将跳转到对应页面</p>
+            <div class="console__grid">
+                <button type="button" class="console-card" id="consoleCardCheckin">
+                    <span class="console-card__icon">&#x1F4CB;</span>
+                    <span class="console-card__name">签到登记</span>
+                    <span class="console-card__desc">打开签到表单页</span>
+                </button>
+                <button type="button" class="console-card" id="consoleCardAdmin">
+                    <span class="console-card__icon">&#x1F4CA;</span>
+                    <span class="console-card__name">签到管理</span>
+                    <span class="console-card__desc">打开后台管理页</span>
+                </button>
+            </div>
+            <button type="button" class="console__logout" id="consoleLogout">退出登录</button>
+        </div>
+    </div>
+
+    <script src="/js/modal.js?v=32"></script>
+    <script src="/js/console.js?v=32"></script>
+    <script src="/js/main.js?v=32"></script>
 </body>
 </html>
