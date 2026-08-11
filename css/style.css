@@ -948,14 +948,11 @@ body.modal-open { overflow: hidden; }
 .console-overlay.open .console-panel { opacity: 1; transform: translateY(0) scale(1); }
 /* hidden 必须真正生效（类选择器的 display 会压过 UA 的 [hidden]，需强制隐藏） */
 .console-panel[hidden] { display: none !important; }
-/* 控制台集成页：全屏毛玻璃 */
+/* 控制台集成页：毛玻璃大卡片（不占满屏，放得下内容即可） */
 .console-panel--main {
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    border-radius: 0;
-    border: none;
+    width: min(960px, 94vw);
+    height: auto;
+    max-height: 92vh;
     padding: 36px 44px 28px;
     text-align: left;
     align-items: stretch;
