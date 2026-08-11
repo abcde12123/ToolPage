@@ -56,6 +56,14 @@
   var isOpen = false;
   var closeTimer = null;
   var escHandler = null;
+  var scrollbarWidth = null;
+
+  // 测量滚动条宽度（缓存），锁定 body 滚动时用它补偿 padding，防止背景位移
+  function getScrollbarWidth() {
+    if (scrollbarWidth !== null) return scrollbarWidth;
+    scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    return scrollbarWidth;
+  }
 
   // ===== 视图切换 =====
   function setMsg(text, type) {
@@ -127,6 +135,8 @@
     loginView.style.transform = 'translateY(0) scale(1)';
     mainView.style.transform = 'translateY(0) scale(1)';
 
+    // 锁定 body 滚动，补偿滚动条宽度防止背景位移
+    document.body.style.paddingRight = getScrollbarWidth() + 'px';
     document.body.classList.add('modal-open');
 
     decideView();
@@ -149,6 +159,7 @@
 
     closeTimer = setTimeout(function () {
       overlay.style.display = 'none';
+      document.body.style.paddingRight = '';
       document.body.classList.remove('modal-open');
       closeTimer = null;
       isOpen = false;
