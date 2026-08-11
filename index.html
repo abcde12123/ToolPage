@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=32">
+    <link rel="stylesheet" href="/css/style.css?v=36">
 </head>
 <body>
     <div id="orbContainer"></div>
@@ -76,7 +76,7 @@
         </div>
     </div>
 
-    <!-- 后台控制台浮层（登录 + 跳转枢纽，签到系统本体在 xiayevfx.cn，这里只负责入口） -->
+    <!-- 后台控制台浮层（登录 + 全屏集成页：签到系统入口 + 服务器状态，签到本体仍在 xiayevfx.cn） -->
     <div id="consoleOverlay" class="console-overlay" style="display:none;">
         <!-- 登录视图 -->
         <div class="console-panel console-panel--login" id="consoleLogin">
@@ -93,30 +93,76 @@
             <div class="console__msg" id="consoleLoginMsg" hidden></div>
         </div>
 
-        <!-- 控制台视图（跳转枢纽） -->
+        <!-- 控制台视图（全屏集成：签到系统 + 服务器状态） -->
         <div class="console-panel console-panel--main" id="consoleMain" hidden>
             <button type="button" class="console__close" id="consoleClose" aria-label="关闭">&#10005;</button>
-            <div class="console__icon">&#x1F6E0;</div>
-            <h3 class="console__title">后台控制台</h3>
-            <p class="console__subtitle">选择功能，将跳转到对应页面</p>
-            <div class="console__grid">
-                <button type="button" class="console-card" id="consoleCardCheckin">
-                    <span class="console-card__icon">&#x1F4CB;</span>
-                    <span class="console-card__name">签到登记</span>
-                    <span class="console-card__desc">打开签到表单页</span>
-                </button>
-                <button type="button" class="console-card" id="consoleCardAdmin">
-                    <span class="console-card__icon">&#x1F4CA;</span>
-                    <span class="console-card__name">签到管理</span>
-                    <span class="console-card__desc">打开后台管理页</span>
-                </button>
+            <div class="console__head">
+                <span class="console__icon">&#x1F6E0;</span>
+                <div class="console__head-text">
+                    <h3 class="console__title">后台控制台</h3>
+                    <p class="console__subtitle">签到系统 · 服务器状态，一览尽知</p>
+                </div>
+                <button type="button" class="console__logout" id="consoleLogout">退出登录</button>
             </div>
-            <button type="button" class="console__logout" id="consoleLogout">退出登录</button>
+
+            <!-- 签到系统 -->
+            <section class="console__section">
+                <h4 class="console__section-title">&#x1F4CB; 签到系统</h4>
+                <div class="console__grid console__grid--checkin">
+                    <button type="button" class="console-card" id="consoleCardCheckin">
+                        <span class="console-card__icon">&#x1F4DD;</span>
+                        <span class="console-card__name">签到登记</span>
+                        <span class="console-card__desc">打开员工签到表单页</span>
+                    </button>
+                    <button type="button" class="console-card" id="consoleCardAdmin">
+                        <span class="console-card__icon">&#x1F4CA;</span>
+                        <span class="console-card__name">签到管理</span>
+                        <span class="console-card__desc">打开签到后台管理页</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 服务器状态 -->
+            <section class="console__section">
+                <h4 class="console__section-title">
+                    <span>&#x1F5A5; 服务器状态</span>
+                    <button type="button" class="console__refresh" id="consoleRefreshStatus" title="重新检测服务器状态">&#x27F3; 刷新</button>
+                </h4>
+                <div class="console__grid console__grid--servers">
+                    <div class="server-card" id="serverAliyun">
+                        <div class="server-card__head">
+                            <span class="server-card__icon">&#x2601;&#xFE0F;</span>
+                            <span class="server-card__name">阿里云主站</span>
+                            <span class="server-card__status server-card__status--checking"><span class="server-dot"></span><span class="server-text">检测中...</span></span>
+                        </div>
+                        <p class="server-card__addr">47.122.126.238 · 工具集 / 签到</p>
+                        <button type="button" class="server-card__btn" data-entry="aliyun">打开站点</button>
+                    </div>
+                    <div class="server-card" id="serverOulu">
+                        <div class="server-card__head">
+                            <span class="server-card__icon">&#x1F1EF;&#x1F1F5;</span>
+                            <span class="server-card__name">OuluCloud 东京</span>
+                            <span class="server-card__status server-card__status--checking"><span class="server-dot"></span><span class="server-text">检测中...</span></span>
+                        </div>
+                        <p class="server-card__addr">38.175.203.230 · 看视频主力</p>
+                        <button type="button" class="server-card__btn" data-entry="oulu">打开面板</button>
+                    </div>
+                    <div class="server-card" id="serverCC">
+                        <div class="server-card__head">
+                            <span class="server-card__icon">&#x1F1FA;&#x1F1F8;</span>
+                            <span class="server-card__name">CloudCone 洛杉矶</span>
+                            <span class="server-card__status server-card__status--checking"><span class="server-dot"></span><span class="server-text">检测中...</span></span>
+                        </div>
+                        <p class="server-card__addr">103.11.77.119 · SEO 轻活</p>
+                        <button type="button" class="server-card__btn" data-entry="cc">打开面板</button>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
-    <script src="/js/modal.js?v=32"></script>
-    <script src="/js/console.js?v=32"></script>
-    <script src="/js/main.js?v=32"></script>
+    <script src="/js/modal.js?v=36"></script>
+    <script src="/js/console.js?v=36"></script>
+    <script src="/js/main.js?v=36"></script>
 </body>
 </html>
