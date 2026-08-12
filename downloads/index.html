@@ -68,6 +68,8 @@
         }
         .file:hover { background: rgba(255,255,255,0.9); box-shadow: 0 8px 20px rgba(30,41,59,0.08); }
         .file-icon { font-size: 1.9rem; }
+        .file-icon-img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+        .file-icon-svg { width: 40px; height: 40px; flex-shrink: 0; color: #4a5568; }
         .file-meta { flex: 1; min-width: 0; }
         .file-name {
             font-size: 0.98rem; font-weight: 700; color: #1E293B;
@@ -139,9 +141,28 @@
             '.pdf': '📄', '.doc': '📝', '.docx': '📝', '.xls': '📊', '.xlsx': '📊', '.png': '🖼️',
             '.jpg': '🖼️', '.jpeg': '🖼️', '.webp': '🖼️', '.mp4': '🎬', '.mkv': '🎬', '.mp3': '🎵' };
 
+        // 压缩包统一用内联 SVG（tabler-file-zip），替换原 🗜️
+        const ZIP_RE = /\.(zip|rar|7z)$/i;
+        const ZIP_SVG = '<svg class="file-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 20.735A2 2 0 0 1 5 19V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2h-1"/><path d="M11 17a2 2 0 0 1 2 2v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2a2 2 0 0 1 2-2m0-12h-1m3 2h-1m-1 2h-1m3 2h-1m-1 2h-1m3 2h-1"/></g></svg>';
+
         function fileIcon(name) {
             const dot = name.lastIndexOf('.');
             return ICONS[name.slice(dot).toLowerCase()] || '📦';
+        }
+
+        function isImage(name) { return /\.(png|jpe?g|webp|gif)$/i.test(name); }
+
+        // 列表图标：exe 用提取的原生图标、图片用缩略图，其余回退 emoji
+        function iconHtml(f) {
+            if (f.icon) {
+                return '<img class="file-icon-img" loading="lazy" src="icons/' +
+                    encodeURIComponent(f.name.replace(/\.exe$/i, '')) + '.png" alt="">';
+            }
+            if (isImage(f.name)) {
+                return '<img class="file-icon-img" loading="lazy" src="' + encodeURIComponent(f.name) + '" alt="">';
+            }
+            if (ZIP_RE.test(f.name)) return ZIP_SVG;
+            return '<span class="file-icon">' + fileIcon(f.name) + '</span>';
         }
 
         function fmtSize(n) {
@@ -173,7 +194,7 @@
                     li.className = 'file';
                     const url = encodeURIComponent(f.name);
                     li.innerHTML =
-                        '<span class="file-icon">' + fileIcon(f.name) + '</span>' +
+                        iconHtml(f) +
                         '<div class="file-meta">' +
                         '  <p class="file-name" title="' + f.name.replace(/"/g, '&quot;') + '">' +
                         '    <a href="' + url + '" download style="color:inherit;text-decoration:none">' + f.name + '</a>' +
