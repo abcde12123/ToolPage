@@ -81,6 +81,7 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-danger { border-color: rgba(225,29,72,0.35); background: rgba(225,29,72,0.1); color: #BE123C; }
         .btn-danger:hover { background: rgba(225,29,72,0.22); }
+        .btn-danger.pending { background: rgba(225,29,72,0.28); border-color: #BE123C; box-shadow: 0 0 0 2px rgba(225,29,72,0.18); font-weight: 800; }
         .file-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
         .file {
             display: flex; align-items: center; gap: 14px;
@@ -114,6 +115,8 @@
         .btn-download:active { transform: scale(0.96); }
         .empty { text-align: center; color: #78716C; font-size: 0.9rem; padding: 24px 0; }
         .status { text-align: center; font-size: 0.82rem; color: #6D28D9; margin: -8px 0 14px; min-height: 1.2em; }
+        .status.ok { color: #059669; }
+        .status.error { color: #BE123C; }
         footer { text-align: center; font-size: 0.75rem; color: #A8A29E; margin-top: 18px; }
         input[type=file] { display: none; }
     </style>
@@ -143,6 +146,12 @@
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const statusEl = document.getElementById('status');
+        // 网页内状态提示：kind = '' 中性 / 'ok' 成功 / 'error' 错误（不再用浏览器弹窗）
+        function setStatus(msg, kind) {
+            statusEl.textContent = msg;
+            statusEl.classList.toggle('ok', kind === 'ok');
+            statusEl.classList.toggle('error', kind === 'error');
+        }
         const uploadUI = {
             icon: uploadZone.querySelector('.upload-icon'),
             text: uploadZone.querySelector('.upload-text'),
@@ -223,8 +232,11 @@
                 ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
         }
 
-        async function loadList() {
-            statusEl.textContent = '';
+        async function loadList(keepStatus) {
+            if (!keepStatus) {
+                statusEl.textContent = '';
+                statusEl.classList.remove('ok', 'error');
+            }
             try {
                 const r = await fetch('api/list');
                 const data = await parseResp(r);
@@ -251,10 +263,7 @@
                         '</div>';
                     listEl.appendChild(li);
                 }
-                // 绑定删除
-                listEl.querySelectorAll('[data-del]').forEach((btn) => {
-                    btn.addEventListener('click', () => delFile(btn.getAttribute('data-del')));
-                });
+                // 删除走事件委托 + 网页内二次确认（见下方 delPending 逻辑），不再逐个绑定
             } catch (e) {
                 listEl.innerHTML = '<li class="empty">加载失败：' + esc(e && e.message ? e.message : '未知错误') + '</li>';
             }
@@ -266,10 +275,9 @@
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
         });
 
-        // 统一上传流程：文件选择与拖拽共用
+        // 统一上传流程：文件选择与拖拽共用（选定即上传，不做浏览器确认）
         async function doUpload(file) {
             if (!file) return;
-            if (!confirm('确定上传「' + file.name + '」（' + fmtSize(file.size) + '）到下载站？')) return;
             const fd = new FormData();
             fd.append('name', file.name);   // 显式传原始文件名（普通字段 UTF-8 解码），后端用它落盘，避免 multipart filename 中文乱码
             fd.append('file', file);
@@ -280,12 +288,11 @@
             try {
                 const r = await fetch('api/upload', { method: 'POST', body: fd });
                 const data = await parseResp(r);
-                statusEl.textContent = '✅ 上传成功：' + data.name;
-                loadList();
+                setStatus('✅ 上传成功：' + data.name, 'ok');
+                loadList(true);   // 保留成功提示，只刷新列表
             } catch (e) {
                 const msg = (e && e.message) || '未知错误';
-                alert('上传失败：' + msg);
-                statusEl.textContent = '❌ ' + msg;
+                setStatus('上传失败：' + msg, 'error');
             } finally {
                 uploadUI.state = '';
                 uploadUI.icon.textContent = '⬆️';
@@ -315,22 +322,48 @@
             uploadZone.classList.remove('dragover');
             const files = e.dataTransfer && e.dataTransfer.files;
             if (!files || !files.length) return;
-            if (files.length > 1) statusEl.textContent = '一次只能上传一个文件，已选择第一个';
+            if (files.length > 1) setStatus('一次只能上传一个文件，已选择第一个');
             doUpload(files[0]);
         });
         // 拖到上传区之外时不触发浏览器默认「打开文件」，避免误导航
         window.addEventListener('dragover', (e) => e.preventDefault());
         window.addEventListener('drop', (e) => e.preventDefault());
 
+        // 删除：网页内二次确认（点 🗑 → 变「确认删除？」→ 再点一次执行），3 秒无操作自动复位
+        let delPending = null;
+        let delTimer = null;
+        function resetDelPending() {
+            if (delTimer) { clearTimeout(delTimer); delTimer = null; }
+            listEl.querySelectorAll('.btn-danger.pending').forEach((b) => {
+                b.classList.remove('pending');
+                b.textContent = '🗑';
+            });
+            delPending = null;
+        }
+        listEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-del]');
+            if (!btn) return;
+            const name = btn.getAttribute('data-del');
+            if (delPending === name) {
+                resetDelPending();
+                delFile(name);                       // 第二次点击：真正删除
+            } else {
+                resetDelPending();                   // 换文件/误触时复位上一个
+                delPending = name;
+                btn.classList.add('pending');
+                btn.textContent = '确认删除？';
+                delTimer = setTimeout(resetDelPending, 3000);
+                setStatus('再点一次「确认删除？」执行删除', 'error');
+            }
+        });
         async function delFile(name) {
-            if (!confirm('确定删除「' + name + '」？此操作不可恢复')) return;
             try {
                 const r = await fetch('api/delete?name=' + encodeURIComponent(name), { method: 'DELETE' });
-                const data = await parseResp(r);
-                statusEl.textContent = '🗑 已删除：' + name;
-                loadList();
+                await parseResp(r);
+                setStatus('🗑 已删除：' + name, 'ok');
+                loadList(true);   // 保留成功提示，只刷新列表
             } catch (e) {
-                alert('删除失败：' + ((e && e.message) || '未知错误'));
+                setStatus('删除失败：' + ((e && e.message) || '未知错误'), 'error');
             }
         }
 
