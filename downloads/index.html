@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-store">
     <title>夏夜下载站</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📥</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -17,21 +18,25 @@
             position: relative;
             overflow-x: hidden;
         }
-        /* 背景彩色光团：毛玻璃背后的内容，透过面板呈现玻璃质感（与主站光团主题一致） */
-        .orb { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
-        .orb--violet { width: 360px; height: 360px; top: -80px; left: -100px; background: rgba(167,139,250,0.55); }
-        .orb--orange { width: 300px; height: 300px; top: 38%; right: -110px; background: rgba(251,146,60,0.45); }
-        .orb--blue   { width: 340px; height: 340px; bottom: -90px; left: 28%;  background: rgba(96,165,250,0.45); }
+        /* 背景光团：与主站同款柔和渐变 blob（每团 2-3 层渐变 + 大模糊 + 漂浮呼吸），毛玻璃质感来源 */
+        #orbContainer { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; pointer-events: none; animation: orbFloat 14s ease-in-out infinite alternate; }
+        .orb-inner {
+            position: absolute; inset: 0;
+            animation: orbBreathe 9s ease-in-out infinite alternate;
+        }
+        @keyframes orbFloat { from { transform: translate(0, 0); } to { transform: translate(28px, -22px); } }
+        @keyframes orbBreathe { from { transform: scale(1) rotate(0deg); } to { transform: scale(1.14) rotate(6deg); } }
         .panel {
             position: relative; z-index: 1;
             width: min(620px, 94vw);
             background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
             padding: 32px 28px;
-            box-shadow: 0 20px 50px rgba(30,41,59,0.12);
-            border: 1px solid rgba(255,255,255,0.85);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid rgba(255,255,255,0.8);
         }
         header { text-align: center; margin-bottom: 20px; }
         .logo { font-size: 2.4rem; }
@@ -88,12 +93,10 @@
     </style>
 </head>
 <body>
-    <div class="orb orb--violet"></div>
-    <div class="orb orb--orange"></div>
-    <div class="orb orb--blue"></div>
+    <div id="orbContainer" aria-hidden="true"></div>
     <main class="panel">
         <header>
-            <div class="logo">📥</div>
+            <div class="logo">✧</div>
             <h1>夏夜下载站</h1>
             <p class="sub">私人文件中转</p>
         </header>
@@ -202,6 +205,7 @@
                 return;
             }
             const fd = new FormData();
+            fd.append('name', file.name);   // 显式传原始文件名（普通字段 UTF-8 解码），后端用它落盘，避免 multipart filename 中文乱码
             fd.append('file', file);
             uploadBtn.disabled = true;
             uploadBtn.textContent = '上传中…';
@@ -235,6 +239,53 @@
 
         document.getElementById('year').textContent = new Date().getFullYear();
         loadList();
+
+        // ===== 背景光团（复刻主站 main.js 同款柔和渐变 blob，静态 + CSS 动画）=====
+        var orbPalette = [
+            { c1: [220, 200, 255], c2: [255, 218, 230] },
+            { c1: [200, 230, 255], c2: [220, 210, 255] },
+            { c1: [210, 245, 220], c2: [200, 230, 255] },
+            { c1: [255, 228, 200], c2: [255, 218, 230] },
+            { c1: [230, 210, 255], c2: [210, 240, 250] },
+            { c1: [255, 218, 230], c2: [255, 240, 210] },
+            { c1: [210, 240, 250], c2: [220, 200, 255] },
+            { c1: [255, 235, 210], c2: [210, 245, 220] },
+        ];
+        function orbRand(min, max) { return Math.random() * (max - min) + min; }
+        function orbRandInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function spawnOrbs() {
+            var container = document.getElementById('orbContainer');
+            if (!container) return;
+            for (var n = 0; n < 5; n++) {
+                var pair = orbPalette[Math.floor(Math.random() * orbPalette.length)];
+                var size = orbRand(220, 320);
+                var orb = document.createElement('div');
+                orb.className = 'orb';
+                orb.style.width = size + 'px';
+                orb.style.height = size + 'px';
+                orb.style.left = orbRand(-12, 84) + '%';
+                orb.style.top = orbRand(-12, 84) + '%';
+                orb.style.animationDuration = orbRand(12, 18) + 's';
+                var layers = orbRandInt(2, 3);
+                for (var i = 0; i < layers; i++) {
+                    var inner = document.createElement('div');
+                    inner.className = 'orb-inner';
+                    var r = Math.round(orbRand(195, 255)), g = Math.round(orbRand(195, 255)), b = Math.round(orbRand(205, 255));
+                    var alpha = orbRand(0.45, 0.75);
+                    inner.style.background =
+                        'radial-gradient(circle at 30% 30%, rgba(' + r + ',' + g + ',' + b + ',' + alpha + ') 0%, ' +
+                        'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.3) + ') 55%, transparent 100%)';
+                    inner.style.transform = 'scale(' + orbRand(0.5, 1.0) + ') rotate(' + orbRand(0, 360) + 'deg)';
+                    inner.style.filter = 'blur(' + orbRand(25, 60) + 'px)';
+                    inner.style.borderRadius = '60% 40% 55% 45% / 50% 60% 40% 50%';
+                    inner.style.animationDelay = '-' + orbRand(0, 8) + 's';
+                    inner.style.animationDuration = orbRand(8, 12) + 's';
+                    orb.appendChild(inner);
+                }
+                container.appendChild(orb);
+            }
+        }
+        spawnOrbs();
     </script>
 </body>
 </html>
