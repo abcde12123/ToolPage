@@ -113,7 +113,7 @@
         .btn-download:hover { background: rgba(124,58,237,0.3); transform: translateY(-1px); }
         .btn-download:active { transform: scale(0.96); }
         .empty { text-align: center; color: #78716C; font-size: 0.9rem; padding: 24px 0; }
-        .status { text-align: center; font-size: 0.82rem; color: #6D28D9; margin-top: 12px; min-height: 1.2em; }
+        .status { text-align: center; font-size: 0.82rem; color: #6D28D9; margin: -8px 0 14px; min-height: 1.2em; }
         footer { text-align: center; font-size: 0.75rem; color: #A8A29E; margin-top: 18px; }
         input[type=file] { display: none; }
     </style>
@@ -131,10 +131,10 @@
             <div class="upload-text">上传文件</div>
             <div class="upload-hint">点击选择，或将文件拖拽到此处</div>
         </div>
+        <p class="status" id="status"></p>
         <ul class="file-list" id="fileList">
             <li class="empty">加载中…</li>
         </ul>
-        <p class="status" id="status"></p>
         <footer>© <span id="year"></span> xiaye.xyz</footer>
     </main>
     <input type="file" id="fileInput">
