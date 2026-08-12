@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=38">
+    <link rel="stylesheet" href="/css/style.css?v=40">
 </head>
 <body>
     <div id="orbContainer"></div>
@@ -100,7 +100,7 @@
                 <span class="console__icon">&#x1F6E0;</span>
                 <div class="console__head-text">
                     <h3 class="console__title">后台控制台</h3>
-                    <p class="console__subtitle">签到系统 · 服务器状态，一览尽知</p>
+                    <p class="console__subtitle">签到系统 · 服务器状态 · 下载站，一览尽知</p>
                 </div>
                 <button type="button" class="console__logout" id="consoleLogout">退出登录</button>
             </div>
@@ -118,6 +118,18 @@
                         <span class="console-card__icon">&#x1F4CA;</span>
                         <span class="console-card__name">签到管理</span>
                         <span class="console-card__desc">打开签到后台管理页</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 下载站（独立下载页，Basic Auth 密码保护） -->
+            <section class="console__section">
+                <h4 class="console__section-title">&#x1F4E5; 下载站</h4>
+                <div class="console__grid console__grid--single">
+                    <button type="button" class="console-card" id="consoleCardDownload">
+                        <span class="console-card__icon">&#x1F4E5;</span>
+                        <span class="console-card__name">文件下载</span>
+                        <span class="console-card__desc">打开私人下载页（凭密码访问）</span>
                     </button>
                 </div>
             </section>
@@ -161,8 +173,8 @@
         </div>
     </div>
 
-    <script src="/js/modal.js?v=38"></script>
-    <script src="/js/console.js?v=38"></script>
-    <script src="/js/main.js?v=38"></script>
+    <script src="/js/modal.js?v=40"></script>
+    <script src="/js/console.js?v=40"></script>
+    <script src="/js/main.js?v=40"></script>
 </body>
 </html>

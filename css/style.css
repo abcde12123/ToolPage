@@ -991,6 +991,10 @@ body.modal-open { overflow: hidden; }
     grid-template-columns: repeat(2, minmax(200px, 320px));
     justify-content: center;
 }
+.console__grid--single {
+    grid-template-columns: minmax(200px, 320px);
+    justify-content: center;
+}
 .console__grid--servers { grid-template-columns: repeat(3, 1fr); }
 .console__close {
     position: absolute; top: 16px; right: 16px;

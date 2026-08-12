@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>夏夜下载站</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📥</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            font-family: system-ui, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background-color: #FFFAF7;               /* 与主站统一的暖白底 */
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* 背景彩色光团：毛玻璃背后的内容，透过面板呈现玻璃质感（与主站光团主题一致） */
+        .orb { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+        .orb--violet { width: 360px; height: 360px; top: -80px; left: -100px; background: rgba(167,139,250,0.55); }
+        .orb--orange { width: 300px; height: 300px; top: 38%; right: -110px; background: rgba(251,146,60,0.45); }
+        .orb--blue   { width: 340px; height: 340px; bottom: -90px; left: 28%;  background: rgba(96,165,250,0.45); }
+        .panel {
+            position: relative; z-index: 1;
+            width: min(620px, 94vw);
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 24px;
+            padding: 32px 28px;
+            box-shadow: 0 20px 50px rgba(30,41,59,0.12);
+            border: 1px solid rgba(255,255,255,0.85);
+        }
+        header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 2.4rem; }
+        h1 { font-size: 1.5rem; font-weight: 800; color: #1E293B; letter-spacing: -0.02em; margin-top: 4px; }
+        .sub { font-size: 0.9rem; color: #78716C; margin-top: 6px; }
+        .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; gap: 10px; }
+        .btn {
+            flex-shrink: 0; cursor: pointer; font-family: inherit;
+            padding: 9px 18px; border-radius: 100px;
+            border: 1px solid rgba(124,58,237,0.35);
+            background: rgba(124,58,237,0.15);
+            color: #6D28D9; font-weight: 700; font-size: 0.85rem;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn:hover { background: rgba(124,58,237,0.3); transform: translateY(-1px); }
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-danger { border-color: rgba(225,29,72,0.35); background: rgba(225,29,72,0.1); color: #BE123C; }
+        .btn-danger:hover { background: rgba(225,29,72,0.22); }
+        .file-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .file {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.85);
+            border-radius: 16px;
+            padding: 14px 16px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .file:hover { background: rgba(255,255,255,0.9); box-shadow: 0 8px 20px rgba(30,41,59,0.08); }
+        .file-icon { font-size: 1.9rem; }
+        .file-meta { flex: 1; min-width: 0; }
+        .file-name {
+            font-size: 0.98rem; font-weight: 700; color: #1E293B;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .file-info { font-size: 0.78rem; color: #78716C; margin-top: 2px; }
+        .file-actions { flex-shrink: 0; display: flex; gap: 8px; }
+        .btn-download {
+            flex-shrink: 0; cursor: pointer; font-family: inherit;
+            padding: 8px 16px; border-radius: 100px;
+            border: 1px solid rgba(124,58,237,0.35);
+            background: rgba(124,58,237,0.15);
+            color: #6D28D9; font-weight: 700; font-size: 0.82rem;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-download:hover { background: rgba(124,58,237,0.3); transform: translateY(-1px); }
+        .btn-download:active { transform: scale(0.96); }
+        .empty { text-align: center; color: #78716C; font-size: 0.9rem; padding: 24px 0; }
+        .status { text-align: center; font-size: 0.82rem; color: #6D28D9; margin-top: 12px; min-height: 1.2em; }
+        footer { text-align: center; font-size: 0.75rem; color: #A8A29E; margin-top: 18px; }
+        input[type=file] { display: none; }
+    </style>
+</head>
+<body>
+    <div class="orb orb--violet"></div>
+    <div class="orb orb--orange"></div>
+    <div class="orb orb--blue"></div>
+    <main class="panel">
+        <header>
+            <div class="logo">📥</div>
+            <h1>夏夜下载站</h1>
+            <p class="sub">私人文件中转</p>
+        </header>
+        <div class="toolbar">
+            <button class="btn" id="uploadBtn">⬆️ 上传文件</button>
+        </div>
+        <ul class="file-list" id="fileList">
+            <li class="empty">加载中…</li>
+        </ul>
+        <p class="status" id="status"></p>
+        <footer>© <span id="year"></span> xiaye.xyz</footer>
+    </main>
+    <input type="file" id="fileInput">
+    <script>
+        const listEl = document.getElementById('fileList');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const statusEl = document.getElementById('status');
+
+        const HTTP_MSG = { 400:'请求无效', 401:'未授权', 403:'拒绝访问', 404:'不存在',
+            405:'方法不允许', 409:'冲突', 413:'超出大小限制', 429:'请求过多',
+            500:'服务器错误', 502:'网关错误', 503:'服务不可用', 504:'网关超时' };
+
+        // 统一解析后端响应：JSON 带 error 或非 2xx 时抛出具体原因，而非笼统的"网络错误"
+        async function parseResp(r) {
+            let data = null;
+            try { data = await r.json(); } catch (_) { /* 非 JSON（如 nginx 错误页） */ }
+            if (data && data.ok) return data;
+            if (data && data.error) throw new Error(data.error);
+            throw new Error('HTTP ' + r.status + (HTTP_MSG[r.status] ? ' · ' + HTTP_MSG[r.status] : ''));
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = String(s == null ? '' : s);
+            return d.innerHTML;
+        }
+
+        const ICONS = { '.zip': '🗜️', '.rar': '🗜️', '.7z': '🗜️', '.exe': '⚙️', '.msi': '⚙️',
+            '.pdf': '📄', '.doc': '📝', '.docx': '📝', '.xls': '📊', '.xlsx': '📊', '.png': '🖼️',
+            '.jpg': '🖼️', '.jpeg': '🖼️', '.webp': '🖼️', '.mp4': '🎬', '.mkv': '🎬', '.mp3': '🎵' };
+
+        function fileIcon(name) {
+            const dot = name.lastIndexOf('.');
+            return ICONS[name.slice(dot).toLowerCase()] || '📦';
+        }
+
+        function fmtSize(n) {
+            if (n < 1024) return n + ' B';
+            if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+            if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB';
+            return (n / 1073741824).toFixed(2) + ' GB';
+        }
+
+        function fmtTime(iso) {
+            const d = new Date(iso);
+            const p = (x) => String(x).padStart(2, '0');
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+                ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+        }
+
+        async function loadList() {
+            statusEl.textContent = '';
+            try {
+                const r = await fetch('api/list');
+                const data = await parseResp(r);
+                listEl.innerHTML = '';
+                if (!data.files.length) {
+                    listEl.innerHTML = '<li class="empty">暂无文件，点击右上角上传～</li>';
+                    return;
+                }
+                for (const f of data.files) {
+                    const li = document.createElement('li');
+                    li.className = 'file';
+                    const url = encodeURIComponent(f.name);
+                    li.innerHTML =
+                        '<span class="file-icon">' + fileIcon(f.name) + '</span>' +
+                        '<div class="file-meta">' +
+                        '  <p class="file-name" title="' + f.name.replace(/"/g, '&quot;') + '">' +
+                        '    <a href="' + url + '" download style="color:inherit;text-decoration:none">' + f.name + '</a>' +
+                        '  </p>' +
+                        '  <p class="file-info">' + fmtSize(f.size) + ' · ' + fmtTime(f.mtime) + '</p>' +
+                        '</div>' +
+                        '<div class="file-actions">' +
+                        '  <a class="btn-download" href="' + url + '" download>⬇ 下载</a>' +
+                        '  <button class="btn-download btn-danger" data-del="' + f.name.replace(/"/g, '&quot;') + '">🗑</button>' +
+                        '</div>';
+                    listEl.appendChild(li);
+                }
+                // 绑定删除
+                listEl.querySelectorAll('[data-del]').forEach((btn) => {
+                    btn.addEventListener('click', () => delFile(btn.getAttribute('data-del')));
+                });
+            } catch (e) {
+                listEl.innerHTML = '<li class="empty">加载失败：' + esc(e && e.message ? e.message : '未知错误') + '</li>';
+            }
+        }
+
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            if (!confirm('确定上传「' + file.name + '」（' + fmtSize(file.size) + '）到下载站？')) {
+                fileInput.value = '';
+                return;
+            }
+            const fd = new FormData();
+            fd.append('file', file);
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '上传中…';
+            try {
+                const r = await fetch('api/upload', { method: 'POST', body: fd });
+                const data = await parseResp(r);
+                statusEl.textContent = '✅ 上传成功：' + data.name;
+                loadList();
+            } catch (e) {
+                const msg = (e && e.message) || '未知错误';
+                alert('上传失败：' + msg);
+                statusEl.textContent = '❌ ' + msg;
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '⬆️ 上传文件';
+                fileInput.value = '';
+            }
+        });
+
+        async function delFile(name) {
+            if (!confirm('确定删除「' + name + '」？此操作不可恢复')) return;
+            try {
+                const r = await fetch('api/delete?name=' + encodeURIComponent(name), { method: 'DELETE' });
+                const data = await parseResp(r);
+                statusEl.textContent = '🗑 已删除：' + name;
+                loadList();
+            } catch (e) {
+                alert('删除失败：' + ((e && e.message) || '未知错误'));
+            }
+        }
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+        loadList();
+    </script>
+</body>
+</html>

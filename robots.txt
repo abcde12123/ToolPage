@@ -2,5 +2,6 @@ User-agent: *
 Disallow: /umami
 Disallow: /ai/
 Disallow: /pm-update/
+Disallow: /downloads/
 
 Sitemap: https://xiaye.xyz/sitemap.xml

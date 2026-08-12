@@ -8,6 +8,9 @@
   var CHECKIN_API = 'https://xiayevfx.cn/api/admin/stats';  // 仅用于密码校验（只读，不传数据）
   var REGISTER_URL = 'https://xiayevfx.cn/register';        // 签到登记（公司二维码固定入口）
   var ADMIN_URL = 'https://xiayevfx.cn/admin';              // 签到后台管理
+  var DOWNLOAD_URL = 'https://xiaye.xyz/downloads/';        // 私人下载站（登录控制台后自动放行）
+  var SESSION_URL = '/downloads/api/session';               // 换下载站访问 cookie（控制台密码静默换取）
+  var LOGOUT_URL = '/downloads/api/logout';                 // 登出时清下载站 cookie
   var SESSION_KEY = 'console_admin_password';               // 会话内记住已登录（页面刷新不丢）
 
   // 服务器状态探测：checkUrl 相对/绝对均可（面板走同源相对路径，避免 CORS）
@@ -50,6 +53,7 @@
   var btnConsole = document.getElementById('btnConsole');
   var cardCheckin = document.getElementById('consoleCardCheckin');
   var cardAdmin = document.getElementById('consoleCardAdmin');
+  var cardDownload = document.getElementById('consoleCardDownload');
   var refreshBtn = document.getElementById('consoleRefreshStatus');
 
   var password = null;
@@ -200,6 +204,7 @@
       .then(function () {
         password = val;
         try { sessionStorage.setItem(SESSION_KEY, val); } catch (err) { /* 忽略 */ }
+        obtainDownloadAccess();   // 静默换下载站 cookie（失败不阻塞控制台登录）
         showMainView();
       })
       .catch(function (err) {
@@ -218,6 +223,15 @@
     void passwordInput.offsetWidth;
     passwordInput.classList.add('shake');
     setTimeout(function () { passwordInput.classList.remove('shake'); }, 500);
+  }
+
+  // 换取下载站访问 cookie（用已登录的管理密码，用户无感；失败静默不影响控制台）
+  function obtainDownloadAccess() {
+    if (!password) return Promise.resolve(false);
+    return fetch(SESSION_URL, {
+      method: 'POST',
+      headers: { 'X-Admin-Password': password }
+    }).then(function (r) { return r.ok; }).catch(function () { return false; });
   }
 
   // ===== 服务器状态探测 =====
@@ -292,6 +306,7 @@
   logoutBtn.addEventListener('click', function () {
     password = null;
     try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* 忽略 */ }
+    fetch(LOGOUT_URL, { method: 'POST' }).catch(function () { /* 忽略 */ });  // 清下载站 cookie
     showLoginView();
   });
 
@@ -304,6 +319,15 @@
   cardAdmin.addEventListener('click', function () {
     window.open(ADMIN_URL, '_blank', 'noopener');
   });
+
+  // 下载站 → 先静默续 cookie 再新标签打开（光知道 URL 进不来，靠控制台登录态放行）
+  if (cardDownload) {
+    cardDownload.addEventListener('click', function () {
+      obtainDownloadAccess().finally(function () {
+        window.open(DOWNLOAD_URL, '_blank', 'noopener');
+      });
+    });
+  }
 
   // 服务器入口 → 新标签打开对应站点/面板
   document.querySelectorAll('.server-card__btn').forEach(function (btn) {
