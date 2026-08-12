@@ -141,9 +141,20 @@
             '.pdf': '📄', '.doc': '📝', '.docx': '📝', '.xls': '📊', '.xlsx': '📊', '.png': '🖼️',
             '.jpg': '🖼️', '.jpeg': '🖼️', '.webp': '🖼️', '.mp4': '🎬', '.mkv': '🎬', '.mp3': '🎵' };
 
-        // 压缩包统一用内联 SVG（tabler-file-zip），替换原 🗜️
-        const ZIP_RE = /\.(zip|rar|7z)$/i;
-        const ZIP_SVG = '<svg class="file-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 20.735A2 2 0 0 1 5 19V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2h-1"/><path d="M11 17a2 2 0 0 1 2 2v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2a2 2 0 0 1 2-2m0-12h-1m3 2h-1m-1 2h-1m3 2h-1m-1 2h-1m3 2h-1"/></g></svg>';
+        // 内联 SVG 图标（tabler 文件系）：压缩包 file-zip、txt file-text、bat file-code
+        const _ic = (inner) => '<svg class="file-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">' + inner + '</g></svg>';
+        const ZIP_PATH = '<path d="M6 20.735A2 2 0 0 1 5 19V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2h-1"/><path d="M11 17a2 2 0 0 1 2 2v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2a2 2 0 0 1 2-2m0-12h-1m3 2h-1m-1 2h-1m3 2h-1m-1 2h-1m3 2h-1"/>';
+        const FILE_SVGS = {
+            '.zip': _ic(ZIP_PATH),
+            '.rar': _ic(ZIP_PATH),
+            '.7z': _ic(ZIP_PATH),
+            '.txt': _ic('<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2M9 9h1m-1 4h6m-6 4h6"/>'),
+            '.bat': _ic('<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2"/><path d="m10 13l-1 2l1 2m4-4l1 2l1 2"/>'),
+        };
+        function svgIcon(name) {
+            const dot = name.lastIndexOf('.');
+            return FILE_SVGS[name.slice(dot).toLowerCase()];
+        }
 
         function fileIcon(name) {
             const dot = name.lastIndexOf('.');
@@ -161,7 +172,8 @@
             if (isImage(f.name)) {
                 return '<img class="file-icon-img" loading="lazy" src="' + encodeURIComponent(f.name) + '" alt="">';
             }
-            if (ZIP_RE.test(f.name)) return ZIP_SVG;
+            const svg = svgIcon(f.name);
+            if (svg) return svg;
             return '<span class="file-icon">' + fileIcon(f.name) + '</span>';
         }
 
