@@ -42,7 +42,31 @@
         .logo { font-size: 2.4rem; }
         h1 { font-size: 1.5rem; font-weight: 800; color: #1E293B; letter-spacing: -0.02em; margin-top: 4px; }
         .sub { font-size: 0.9rem; color: #78716C; margin-top: 6px; }
-        .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; gap: 10px; }
+        .upload-zone {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+            padding: 26px 20px;
+            border: 2px dashed rgba(124,58,237,0.45);
+            border-radius: 16px;
+            background: rgba(124,58,237,0.07);
+            cursor: pointer;
+            color: #6D28D9;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .upload-zone:hover { background: rgba(124,58,237,0.14); border-color: rgba(124,58,237,0.7); }
+        .upload-zone:active { transform: scale(0.98); }
+        .upload-zone:focus-visible { outline: 2px solid rgba(124,58,237,0.6); outline-offset: 2px; }
+        .upload-zone.dragover {
+            border-style: solid; border-color: #6D28D9;
+            background: rgba(124,58,237,0.2);
+            transform: scale(1.02);
+        }
+        .upload-zone.uploading { opacity: 0.6; pointer-events: none; cursor: wait; }
+        .upload-icon { font-size: 2.2rem; line-height: 1; }
+        .upload-text { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.02em; }
+        .upload-hint { font-size: 0.8rem; color: #78716C; }
         .btn {
             flex-shrink: 0; cursor: pointer; font-family: inherit;
             padding: 9px 18px; border-radius: 100px;
@@ -102,8 +126,10 @@
             <h1>夏夜下载站</h1>
             <p class="sub">私人文件中转</p>
         </header>
-        <div class="toolbar">
-            <button class="btn" id="uploadBtn">⬆️ 上传文件</button>
+        <div class="upload-zone" id="uploadZone" role="button" tabindex="0" title="点击或拖拽文件上传">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-text">上传文件</div>
+            <div class="upload-hint">点击选择，或将文件拖拽到此处</div>
         </div>
         <ul class="file-list" id="fileList">
             <li class="empty">加载中…</li>
@@ -114,9 +140,15 @@
     <input type="file" id="fileInput">
     <script>
         const listEl = document.getElementById('fileList');
-        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const statusEl = document.getElementById('status');
+        const uploadUI = {
+            icon: uploadZone.querySelector('.upload-icon'),
+            text: uploadZone.querySelector('.upload-text'),
+            hint: uploadZone.querySelector('.upload-hint'),
+            set state(s) { uploadZone.classList.toggle('uploading', s === 'uploading'); }
+        };
 
         const HTTP_MSG = { 400:'请求无效', 401:'未授权', 403:'拒绝访问', 404:'不存在',
             405:'方法不允许', 409:'冲突', 413:'超出大小限制', 429:'请求过多',
@@ -228,20 +260,23 @@
             }
         }
 
-        uploadBtn.addEventListener('click', () => fileInput.click());
+        // 点击 / 键盘回车 → 打开文件选择
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+        });
 
-        fileInput.addEventListener('change', async () => {
-            const file = fileInput.files[0];
+        // 统一上传流程：文件选择与拖拽共用
+        async function doUpload(file) {
             if (!file) return;
-            if (!confirm('确定上传「' + file.name + '」（' + fmtSize(file.size) + '）到下载站？')) {
-                fileInput.value = '';
-                return;
-            }
+            if (!confirm('确定上传「' + file.name + '」（' + fmtSize(file.size) + '）到下载站？')) return;
             const fd = new FormData();
             fd.append('name', file.name);   // 显式传原始文件名（普通字段 UTF-8 解码），后端用它落盘，避免 multipart filename 中文乱码
             fd.append('file', file);
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = '上传中…';
+            uploadUI.state = 'uploading';
+            uploadUI.icon.textContent = '⏳';
+            uploadUI.text.textContent = '上传中…';
+            uploadUI.hint.textContent = file.name;
             try {
                 const r = await fetch('api/upload', { method: 'POST', body: fd });
                 const data = await parseResp(r);
@@ -252,11 +287,40 @@
                 alert('上传失败：' + msg);
                 statusEl.textContent = '❌ ' + msg;
             } finally {
-                uploadBtn.disabled = false;
-                uploadBtn.textContent = '⬆️ 上传文件';
+                uploadUI.state = '';
+                uploadUI.icon.textContent = '⬆️';
+                uploadUI.text.textContent = '上传文件';
+                uploadUI.hint.textContent = '点击选择，或将文件拖拽到此处';
                 fileInput.value = '';
             }
+        }
+
+        fileInput.addEventListener('change', () => doUpload(fileInput.files[0]));
+
+        // 拖拽上传：dragenter/dragleave 计数配对，避免鼠标在子元素间移动时高亮闪烁
+        let dragDepth = 0;
+        uploadZone.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragDepth++;
+            uploadZone.classList.add('dragover');
         });
+        uploadZone.addEventListener('dragover', (e) => e.preventDefault());
+        uploadZone.addEventListener('dragleave', (e) => {
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (dragDepth === 0) uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragDepth = 0;
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer && e.dataTransfer.files;
+            if (!files || !files.length) return;
+            if (files.length > 1) statusEl.textContent = '一次只能上传一个文件，已选择第一个';
+            doUpload(files[0]);
+        });
+        // 拖到上传区之外时不触发浏览器默认「打开文件」，避免误导航
+        window.addEventListener('dragover', (e) => e.preventDefault());
+        window.addEventListener('drop', (e) => e.preventDefault());
 
         async function delFile(name) {
             if (!confirm('确定删除「' + name + '」？此操作不可恢复')) return;
