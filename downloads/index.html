@@ -42,6 +42,18 @@
         .logo { font-size: 2.4rem; }
         h1 { font-size: 1.5rem; font-weight: 800; color: #1E293B; letter-spacing: -0.02em; margin-top: 4px; }
         .sub { font-size: 0.9rem; color: #78716C; margin-top: 6px; }
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 5px;
+            cursor: pointer; font-family: inherit;
+            padding: 6px 14px; border-radius: 100px;
+            border: 1px solid rgba(124,58,237,0.25);
+            background: rgba(255,255,255,0.5);
+            color: #6D28D9; font-weight: 600; font-size: 0.8rem;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        .btn-back:hover { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.4); }
+        .btn-back:active { transform: scale(0.97); }
         .upload-zone {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 5px;
@@ -124,6 +136,7 @@
 <body>
     <div id="orbContainer" aria-hidden="true"></div>
     <main class="panel">
+        <button class="btn-back" id="backBtn" type="button">← 返回</button>
         <header>
             <div class="logo">✧</div>
             <h1>夏夜下载站</h1>
@@ -146,6 +159,12 @@
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const statusEl = document.getElementById('status');
+        // 返回按钮：有历史就回退（从控制台跳过来），直接访问时兜底回工具集主页
+        const backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', () => {
+            if (history.length > 1) history.back();
+            else location.href = 'https://xiaye.xyz/';
+        });
         // 网页内状态提示：kind = '' 中性 / 'ok' 成功 / 'error' 错误（不再用浏览器弹窗）
         function setStatus(msg, kind) {
             statusEl.textContent = msg;

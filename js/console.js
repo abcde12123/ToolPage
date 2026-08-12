@@ -320,11 +320,11 @@
     window.open(ADMIN_URL, '_blank', 'noopener');
   });
 
-  // 下载站 → 先静默续 cookie 再新标签打开（光知道 URL 进不来，靠控制台登录态放行）
+  // 下载站 → 先静默续 cookie 再当前标签页跳转（光知道 URL 进不来，靠控制台登录态放行）
   if (cardDownload) {
     cardDownload.addEventListener('click', function () {
       obtainDownloadAccess().finally(function () {
-        window.open(DOWNLOAD_URL, '_blank', 'noopener');
+        location.href = DOWNLOAD_URL;
       });
     });
   }
