@@ -30,17 +30,35 @@
     p.style.height = h.toFixed(1) + 'px';
     p.style.left = (Math.random() * 100).toFixed(2) + 'vw';
     p.style.background = petalColor();
-    p.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
-    p.style.animationDuration = (5 + Math.random() * 5).toFixed(2) + 's';
-    // 旋转：总旋转量 360~720 度随机，方向正负随机（正=顺时针，负=逆时针）
-    var turn = (360 + Math.random() * 360) * (Math.random() < 0.5 ? -1 : 1);
-    p.style.setProperty('--r50', (-45 + turn * 0.5).toFixed(1) + 'deg');
-    p.style.setProperty('--r100', (-45 + turn).toFixed(1) + 'deg');
     layer.appendChild(p);
+
+    // 旋转：总旋转量 360~720 度随机，方向正负随机（正=顺时针，负=逆时针）
+    // 左右摇摆：一个完整正弦周期，幅度 1~3vw 适中；相位随机 → 初始横向速度方向随机
+    // 用 WAAPI 生成 21 个采样点（每 5%），引擎在关键帧间自动 lerp，轨迹平滑无转折
+    var turn = (360 + Math.random() * 360) * (Math.random() < 0.5 ? -1 : 1);
+    var amp = 1 + Math.random() * 2;
+    var ph = Math.random() * 2 * Math.PI;
+    var dur = 5000 + Math.random() * 5000;   // 5~10s，随机下落速度
+    var delay = Math.random() * 4000;        // 0~4s 随机起步，错落自然
+
+    var keyframes = [];
+    for (var k = 0; k <= 20; k++) {
+      var t = k / 20;
+      var y = -6 + 112 * t;                                   // 匀速下落
+      var sx = Math.sin(ph + 2 * Math.PI * t) * amp;          // 正弦左右摆动
+      var r = -45 + turn * t;                                 // 匀速旋转
+      var op = k === 0 ? 0 : (0.95 - 0.1 * t);                // 快速淡入后缓降
+      keyframes.push({
+        transform: 'translateY(' + y.toFixed(1) + 'vh) translateX(' + sx.toFixed(2) + 'vw) rotate(' + r.toFixed(1) + 'deg)',
+        opacity: op.toFixed(3)
+      });
+    }
+
+    var anim = p.animate(keyframes, { duration: dur, delay: delay, easing: 'linear', fill: 'forwards' });
     // 动画结束后移除该花瓣，避免 DOM 无限堆积
-    p.addEventListener('animationend', function () {
+    anim.onfinish = function () {
       if (p.parentNode) p.parentNode.removeChild(p);
-    });
+    };
   }
 
   // 触发后浮现一句淡淡的提示，增加仪式感
