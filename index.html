@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=42">
+    <link rel="stylesheet" href="/css/style.css?v=44">
 </head>
 <body>
     <div id="orbContainer"></div>
@@ -25,6 +25,7 @@
                 <a href="#hero" class="navbar__link active" data-section="hero">首页</a>
                 <a href="#tools" class="navbar__link" data-section="tools">工具</a>
                 <a href="#about" class="navbar__link" data-section="about">关于</a>
+                <button type="button" class="navbar__link navbar__btn-feedback" id="btnFeedback" title="反馈与建议">💬 反馈</button>
                 <button type="button" class="navbar__link navbar__btn-settings" id="btnConsole" title="后台控制台">⚙️ 设置</button>
             </div>
         </div>
@@ -73,6 +74,31 @@
                 <button class="modal__close" id="modalClose" aria-label="关闭">&#10005;</button>
             </div>
             <div class="modal__body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- 反馈浮窗（右上角小浮窗 + 全屏模糊遮罩） -->
+    <div id="feedbackOverlay" class="feedback-overlay" style="display:none;">
+        <div class="feedback-panel" role="dialog" aria-label="反馈与建议">
+            <div class="feedback__header">
+                <h3 class="feedback__title">💬 反馈与建议</h3>
+                <button type="button" class="feedback__close" id="feedbackClose" aria-label="关闭">&#10005;</button>
+            </div>
+            <p class="feedback__desc">有建议或遇到了问题？告诉我，帮你尽快解决～</p>
+            <form id="feedbackForm" novalidate>
+                <div class="feedback__field">
+                    <input type="text" id="feedbackName" placeholder="昵称（选填）" maxlength="30" autocomplete="off">
+                </div>
+                <div class="feedback__field">
+                    <input type="text" id="feedbackContact" placeholder="联系方式（选填）QQ / 邮箱 / 微信" maxlength="60" autocomplete="off">
+                </div>
+                <div class="feedback__field">
+                    <textarea id="feedbackContent" placeholder="请描述你的反馈内容或建议…" maxlength="2000" rows="5" required></textarea>
+                </div>
+                <input type="text" class="feedback__honeypot" id="feedbackHoneypot" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <button type="submit" class="feedback__btn" id="feedbackSubmit">提交反馈 ✨</button>
+                <div class="feedback__msg" id="feedbackMsg" hidden></div>
+            </form>
         </div>
     </div>
 
@@ -176,5 +202,6 @@
     <script src="/js/modal.js?v=40"></script>
     <script src="/js/console.js?v=41"></script>
     <script src="/js/main.js?v=48"></script>
+    <script src="/js/feedback.js?v=2"></script>
 </body>
 </html>
