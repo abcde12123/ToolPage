@@ -3,6 +3,7 @@
 // --- 工具卡片数据 ---
 var tools = [
     { icon: '🤖', name: 'AI 聊天', desc: '智能 AI 对话助手，随时提问', url: '/ai/' },
+    { icon: '📥', name: '文件下载', desc: '访问工具文件下载区', url: '/downloads-public/' },
     { icon: '{}', name: 'JSON 格式化', desc: '格式化、校验、压缩 JSON 数据', file: 'json-formatter.js', initFn: 'initJSONFormatter' },
     { icon: '🔤', name: 'Base64 编解码', desc: '文本与 Base64 互转', file: 'base64.js', initFn: 'initBase64' },
     { icon: '🕐', name: '时间戳转换', desc: '时间戳与日期格式互转', file: 'timestamp.js', initFn: 'initTimestamp' },

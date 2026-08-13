@@ -3,5 +3,6 @@ Disallow: /umami
 Disallow: /ai/
 Disallow: /pm-update/
 Disallow: /downloads/
+Disallow: /downloads-public/
 
 Sitemap: https://xiaye.xyz/sitemap.xml

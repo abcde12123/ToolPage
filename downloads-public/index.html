@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta http-equiv="Cache-Control" content="no-store">
-    <title>夏夜下载站</title>
+    <title>夏夜文件下载</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -54,58 +54,6 @@
         }
         .btn-back:hover { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.4); }
         .btn-back:active { transform: scale(0.97); }
-        .upload-zone {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 5px;
-            margin-bottom: 20px;
-            padding: 26px 20px;
-            border: 2px dashed rgba(124,58,237,0.45);
-            border-radius: 16px;
-            background: rgba(124,58,237,0.07);
-            cursor: pointer;
-            color: #6D28D9;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .upload-zone:hover { background: rgba(124,58,237,0.14); border-color: rgba(124,58,237,0.7); }
-        .upload-zone:active { transform: scale(0.98); }
-        .upload-zone:focus-visible { outline: 2px solid rgba(124,58,237,0.6); outline-offset: 2px; }
-        .upload-zone.dragover {
-            border-style: solid; border-color: #6D28D9;
-            background: rgba(124,58,237,0.2);
-            transform: scale(1.02);
-        }
-        .upload-zone.uploading { opacity: 0.6; pointer-events: none; cursor: wait; }
-        .upload-icon { font-size: 2.2rem; line-height: 1; }
-        .upload-text { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.02em; }
-        .upload-hint { font-size: 0.8rem; color: #78716C; }
-        .btn {
-            flex-shrink: 0; cursor: pointer; font-family: inherit;
-            padding: 9px 18px; border-radius: 100px;
-            border: 1px solid rgba(124,58,237,0.35);
-            background: rgba(124,58,237,0.15);
-            color: #6D28D9; font-weight: 700; font-size: 0.85rem;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .btn:hover { background: rgba(124,58,237,0.3); transform: translateY(-1px); }
-        .btn:active { transform: scale(0.96); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-danger { border-color: rgba(225,29,72,0.35); background: rgba(225,29,72,0.1); color: #BE123C; }
-        .btn-danger:hover { background: rgba(225,29,72,0.22); }
-        .btn-danger.pending { background: rgba(225,29,72,0.28); border-color: #BE123C; box-shadow: 0 0 0 2px rgba(225,29,72,0.18); font-weight: 800; }
-        .btn-eye {
-            flex-shrink: 0; cursor: pointer; font-family: inherit;
-            padding: 6px 14px; border-radius: 20px;
-            border: 1px solid rgba(22,163,74,0.35);
-            background: rgba(22,163,74,0.12);
-            color: #15803D; font-size: 0.85rem; font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .btn-eye:hover { background: rgba(22,163,74,0.25); transform: translateY(-1px); }
-        .btn-eye:active { transform: scale(0.96); }
-        .btn-eye.hidden { border-color: rgba(225,29,72,0.35); background: rgba(225,29,72,0.1); color: #BE123C; }
-        .btn-eye.hidden:hover { background: rgba(225,29,72,0.22); }
         .file-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
         .file {
             display: flex; align-items: center; gap: 14px;
@@ -142,53 +90,30 @@
         .status.ok { color: #059669; }
         .status.error { color: #BE123C; }
         footer { text-align: center; font-size: 0.75rem; color: #A8A29E; margin-top: 18px; }
-        input[type=file] { display: none; }
     </style>
 </head>
 <body>
     <div id="orbContainer" aria-hidden="true"></div>
     <main class="panel">
-        <button class="btn-back" id="backBtn" type="button">← 返回</button>
+        <button class="btn-back" id="backBtn" type="button">← 返回工具集</button>
         <header>
             <div class="logo">✧</div>
-            <h1>夏夜下载站</h1>
-            <p class="sub">私人文件中转</p>
+            <h1>夏夜文件下载</h1>
+            <p class="sub">访客下载区 · 由控制台维护</p>
         </header>
-        <div class="upload-zone" id="uploadZone" role="button" tabindex="0" title="点击或拖拽文件上传">
-            <div class="upload-icon">⬆️</div>
-            <div class="upload-text">上传文件</div>
-            <div class="upload-hint">点击选择，或将文件拖拽到此处</div>
-        </div>
         <p class="status" id="status"></p>
         <ul class="file-list" id="fileList">
             <li class="empty">加载中…</li>
         </ul>
         <footer>© <span id="year"></span> xiaye.xyz</footer>
     </main>
-    <input type="file" id="fileInput">
     <script>
         const listEl = document.getElementById('fileList');
-        const uploadZone = document.getElementById('uploadZone');
-        const fileInput = document.getElementById('fileInput');
         const statusEl = document.getElementById('status');
-        // 返回按钮：有历史就回退（从控制台跳过来），直接访问时兜底回工具集主页
-        const backBtn = document.getElementById('backBtn');
-        backBtn.addEventListener('click', () => {
-            if (history.length > 1) history.back();
-            else location.href = 'https://xiaye.xyz/';
+        // 返回按钮：直接回工具集主页（访客页独立入口，不走历史回退）
+        document.getElementById('backBtn').addEventListener('click', () => {
+            location.href = 'https://xiaye.xyz/';
         });
-        // 网页内状态提示：kind = '' 中性 / 'ok' 成功 / 'error' 错误（不再用浏览器弹窗）
-        function setStatus(msg, kind) {
-            statusEl.textContent = msg;
-            statusEl.classList.toggle('ok', kind === 'ok');
-            statusEl.classList.toggle('error', kind === 'error');
-        }
-        const uploadUI = {
-            icon: uploadZone.querySelector('.upload-icon'),
-            text: uploadZone.querySelector('.upload-text'),
-            hint: uploadZone.querySelector('.upload-hint'),
-            set state(s) { uploadZone.classList.toggle('uploading', s === 'uploading'); }
-        };
 
         const HTTP_MSG = { 400:'请求无效', 401:'未授权', 403:'拒绝访问', 404:'不存在',
             405:'方法不允许', 409:'冲突', 413:'超出大小限制', 429:'请求过多',
@@ -233,16 +158,19 @@
             return ICONS[name.slice(dot).toLowerCase()] || '📦';
         }
 
-        function isImage(name) { return /\.(png|jpe?g|webp|gif)$/i.test(name); }
+        function isImage(name) { return /\\.(png|jpe?g|webp|gif)$/i.test(name); }
+
+        // 公开文件下载与图标的基准路径（nginx 公开静态目录）
+        const FILES_BASE = '/downloads-public/files/';
 
         // 列表图标：exe 用提取的原生图标、图片用缩略图，其余回退 emoji
         function iconHtml(f) {
             if (f.icon) {
-                return '<img class="file-icon-img" loading="lazy" src="icons/' +
+                return '<img class="file-icon-img" loading="lazy" src="' + FILES_BASE + 'icons/' +
                     encodeURIComponent(f.name.replace(/\.exe$/i, '')) + '.png" alt="">';
             }
             if (isImage(f.name)) {
-                return '<img class="file-icon-img" loading="lazy" src="' + encodeURIComponent(f.name) + '" alt="">';
+                return '<img class="file-icon-img" loading="lazy" src="' + FILES_BASE + encodeURIComponent(f.name) + '" alt="">';
             }
             const svg = svgIcon(f.name);
             if (svg) return svg;
@@ -263,23 +191,21 @@
                 ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
         }
 
-        async function loadList(keepStatus) {
-            if (!keepStatus) {
-                statusEl.textContent = '';
-                statusEl.classList.remove('ok', 'error');
-            }
+        async function loadList() {
+            statusEl.textContent = '';
+            statusEl.classList.remove('ok', 'error');
             try {
-                const r = await fetch('api/list');
+                const r = await fetch('/downloads-public/api/list');
                 const data = await parseResp(r);
                 listEl.innerHTML = '';
                 if (!data.files.length) {
-                    listEl.innerHTML = '<li class="empty">暂无文件，点击右上角上传～</li>';
+                    listEl.innerHTML = '<li class="empty">暂无文件～</li>';
                     return;
                 }
                 for (const f of data.files) {
                     const li = document.createElement('li');
                     li.className = 'file';
-                    const url = encodeURIComponent(f.name);
+                    const url = FILES_BASE + encodeURIComponent(f.name);
                     li.innerHTML =
                         iconHtml(f) +
                         '<div class="file-meta">' +
@@ -290,155 +216,15 @@
                         '</div>' +
                         '<div class="file-actions">' +
                         '  <a class="btn-download" href="' + url + '" download>⬇ 下载</a>' +
-                        '  <button class="btn-eye" data-eye="' + f.name.replace(/"/g, '&quot;') + '" title="访客页可见">显示</button>' +
-                        '  <button class="btn-download btn-danger" data-del="' + f.name.replace(/"/g, '&quot;') + '">🗑</button>' +
                         '</div>';
                     listEl.appendChild(li);
                 }
-                applyEyeStates();   // 列表渲染后按隐藏名单刷新眼睛状态
-                // 删除走事件委托 + 网页内二次确认（见下方 delPending 逻辑），不再逐个绑定
             } catch (e) {
                 listEl.innerHTML = '<li class="empty">加载失败：' + esc(e && e.message ? e.message : '未知错误') + '</li>';
             }
         }
 
-        // 点击 / 键盘回车 → 打开文件选择
-        uploadZone.addEventListener('click', () => fileInput.click());
-        uploadZone.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
-        });
-
-        // 统一上传流程：文件选择与拖拽共用（选定即上传，不做浏览器确认）
-        async function doUpload(file) {
-            if (!file) return;
-            const fd = new FormData();
-            fd.append('name', file.name);   // 显式传原始文件名（普通字段 UTF-8 解码），后端用它落盘，避免 multipart filename 中文乱码
-            fd.append('file', file);
-            uploadUI.state = 'uploading';
-            uploadUI.icon.textContent = '⏳';
-            uploadUI.text.textContent = '上传中…';
-            uploadUI.hint.textContent = file.name;
-            try {
-                const r = await fetch('api/upload', { method: 'POST', body: fd });
-                const data = await parseResp(r);
-                setStatus('✅ 上传成功：' + data.name, 'ok');
-                loadList(true);   // 保留成功提示，只刷新列表
-            } catch (e) {
-                const msg = (e && e.message) || '未知错误';
-                setStatus('上传失败：' + msg, 'error');
-            } finally {
-                uploadUI.state = '';
-                uploadUI.icon.textContent = '⬆️';
-                uploadUI.text.textContent = '上传文件';
-                uploadUI.hint.textContent = '点击选择，或将文件拖拽到此处';
-                fileInput.value = '';
-            }
-        }
-
-        fileInput.addEventListener('change', () => doUpload(fileInput.files[0]));
-
-        // 拖拽上传：dragenter/dragleave 计数配对，避免鼠标在子元素间移动时高亮闪烁
-        let dragDepth = 0;
-        uploadZone.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            dragDepth++;
-            uploadZone.classList.add('dragover');
-        });
-        uploadZone.addEventListener('dragover', (e) => e.preventDefault());
-        uploadZone.addEventListener('dragleave', (e) => {
-            dragDepth = Math.max(0, dragDepth - 1);
-            if (dragDepth === 0) uploadZone.classList.remove('dragover');
-        });
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dragDepth = 0;
-            uploadZone.classList.remove('dragover');
-            const files = e.dataTransfer && e.dataTransfer.files;
-            if (!files || !files.length) return;
-            if (files.length > 1) setStatus('一次只能上传一个文件，已选择第一个');
-            doUpload(files[0]);
-        });
-        // 拖到上传区之外时不触发浏览器默认「打开文件」，避免误导航
-        window.addEventListener('dragover', (e) => e.preventDefault());
-        window.addEventListener('drop', (e) => e.preventDefault());
-
-        // 删除：网页内二次确认（点 🗑 → 变「确认删除？」→ 再点一次执行），3 秒无操作自动复位
-        let delPending = null;
-        let delTimer = null;
-        function resetDelPending() {
-            if (delTimer) { clearTimeout(delTimer); delTimer = null; }
-            listEl.querySelectorAll('.btn-danger.pending').forEach((b) => {
-                b.classList.remove('pending');
-                b.textContent = '🗑';
-            });
-            delPending = null;
-        }
-        listEl.addEventListener('click', (e) => {
-            const eyeBtn = e.target.closest('[data-eye]');
-            if (eyeBtn) {
-                toggleEye(eyeBtn.getAttribute('data-eye'), eyeBtn);
-                return;
-            }
-            const btn = e.target.closest('[data-del]');
-            if (!btn) return;
-            const name = btn.getAttribute('data-del');
-            if (delPending === name) {
-                resetDelPending();
-                delFile(name);                       // 第二次点击：真正删除
-            } else {
-                resetDelPending();                   // 换文件/误触时复位上一个
-                delPending = name;
-                btn.classList.add('pending');
-                btn.textContent = '确认删除？';
-                delTimer = setTimeout(resetDelPending, 3000);
-                setStatus('再点一次「确认删除？」执行删除', 'error');
-            }
-        });
-        async function delFile(name) {
-            try {
-                const r = await fetch('api/delete?name=' + encodeURIComponent(name), { method: 'DELETE' });
-                await parseResp(r);
-                setStatus('🗑 已删除：' + name, 'ok');
-                loadList(true);   // 保留成功提示，只刷新列表
-            } catch (e) {
-                setStatus('删除失败：' + ((e && e.message) || '未知错误'), 'error');
-            }
-        }
-
-        // ===== 访客可见开关（控制台登录后 cookie 放行，切换文件是否在访客页展示）=====
-        let hiddenSet = new Set();
-        // 拉取隐藏名单并刷新眼睛按钮状态（列表可能还没渲染完，两处 apply 兜底）
-        async function loadVisibility() {
-            try {
-                const r = await fetch('api/visibility');
-                const data = await parseResp(r);
-                hiddenSet = new Set((data.hidden || []).map((n) => n.toLowerCase()));
-                applyEyeStates();
-            } catch (_) { /* 静默：拿不到名单时全部按可见处理，不阻塞列表 */ }
-        }
-        function applyEyeStates() {
-            listEl.querySelectorAll('[data-eye]').forEach((b) => {
-                const isHidden = hiddenSet.has(b.getAttribute('data-eye').toLowerCase());
-                b.classList.toggle('hidden', isHidden);
-                b.textContent = isHidden ? '不显示' : '显示';
-                b.title = isHidden ? '访客页不展示（点击恢复可见）' : '访客页可见（点击隐藏）';
-            });
-        }
-        async function toggleEye(name, btn) {
-            try {
-                const r = await fetch('api/toggle-hidden?name=' + encodeURIComponent(name), { method: 'POST' });
-                const data = await parseResp(r);
-                if (data.hidden) hiddenSet.add(name.toLowerCase());
-                else hiddenSet.delete(name.toLowerCase());
-                applyEyeStates();
-                setStatus(data.hidden ? '🙈 已隐藏：' + name + '（访客页不再展示）' : '👁️ 已恢复可见：' + name, 'ok');
-            } catch (e) {
-                setStatus('操作失败：' + ((e && e.message) || '未知错误'), 'error');
-            }
-        }
-
         document.getElementById('year').textContent = new Date().getFullYear();
-        loadVisibility();   // 拉取隐藏名单初始化眼睛状态
         loadList();
 
         // ===== 背景光团（复刻主站 main.js 同款柔和渐变 blob，静态 + CSS 动画）=====
