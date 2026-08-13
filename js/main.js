@@ -290,7 +290,7 @@ function removeOrbFromArray(id, arr) {
             if (activeOrbCount < MAX_ORBS) {
                 createOrb();
             }
-        }, orbRand(1000, 2000));
+        }, orbRand(1500, 3000));
     }
 
     function createOrb() {
@@ -346,7 +346,8 @@ function removeOrbFromArray(id, arr) {
             inner.style.filter = 'blur(' + blurAmt + 'px)';
             inner.style.borderRadius = blobRadius;
             inner.style.opacity = '0';
-            inner.style.transition = 'opacity ' + orbRand(2.0, 3.0) + 's ease';
+            var fadeDur = orbRand(2.0, 3.0);                    // 记录淡入时长，morph 覆盖 transition 时保留 opacity
+            inner.style.transition = 'opacity ' + fadeDur + 's ease';
 
             orb.appendChild(inner);
             layers.push({
@@ -355,6 +356,7 @@ function removeOrbFromArray(id, arr) {
                 baseBlur: blurAmt,
                 baseRot: rot,
                 blobRadius: blobRadius,
+                fadeDur: fadeDur,
                 stopBreath: null,
             });
         }
@@ -362,7 +364,7 @@ function removeOrbFromArray(id, arr) {
         // ---- 方向与速度：直线运动 ----
         var angle = orbRand(0, Math.PI * 2);
         var speed = orbRand(4, 6);
-        var lifespanMs = orbRand(3000, 6000);
+        var lifespanMs = orbRand(3500, 7000);
         var dist = speed * lifespanMs / 1000;
         var dx = Math.cos(angle) * dist;
         var dy = Math.sin(angle) * dist;
@@ -394,7 +396,8 @@ function removeOrbFromArray(id, arr) {
             for (var i = 0; i < layers.length; i++) {
                 var L = layers[i];
                 var newBlobRadius = randomBlobRadius();
-                L.el.style.transition = 'transform 2s ease, border-radius 3s ease';
+                // 保留 opacity 过渡：morph 若在淡入途中触发，不把淡入掐断（否则光球会突然变亮）
+                L.el.style.transition = 'transform 2s ease, border-radius 3s ease, opacity ' + L.fadeDur + 's ease';
                 L.el.style.transform = 'scale(' + L.baseScale * orbRand(0.6, 1.5) + ') rotate(' + orbRand(0, 360) + 'deg)';
                 L.el.style.borderRadius = newBlobRadius;
             }
@@ -421,7 +424,12 @@ function removeOrbFromArray(id, arr) {
     }
 
     // ---- 初始直接生成 3 个，陆续再补 5 个 ----
-    for (var i = 0; i < 3; i++) { createOrb(); }
+    // 初始 3 个错开出生（0→0.7→1.4s 起，各加随机抖动），避免同批同时出现形成"一波一波"
+    for (var i = 0; i < 3; i++) {
+        (function(idx) {
+            setTimeout(function() { createOrb(); }, idx * 700 + orbRand(0, 400));
+        })(i);
+    }
     var initialSpawned = 3;
     function spawnInitial() {
         if (initialSpawned >= MAX_ORBS) return;
