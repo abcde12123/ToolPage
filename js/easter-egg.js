@@ -35,11 +35,14 @@
     // 旋转：总旋转量 360~720 度随机，方向正负随机（正=顺时针，负=逆时针）
     // 左右摇摆：一个完整正弦周期，幅度 1~3vw 适中；相位随机 → 初始横向速度方向随机
     // 用 WAAPI 生成 21 个采样点（每 5%），引擎在关键帧间自动 lerp，轨迹平滑无转折
+    // 伪 3D 翻转：scaleX = cos(翻转角) 压缩宽度模拟绕竖轴翻面；翻转 1~2 次、起始相位随机
     var turn = (360 + Math.random() * 360) * (Math.random() < 0.5 ? -1 : 1);
     var amp = 1 + Math.random() * 2;
     var ph = Math.random() * 2 * Math.PI;
     var dur = 5000 + Math.random() * 5000;   // 5~10s，随机下落速度
     var delay = Math.random() * 4000;        // 0~4s 随机起步，错落自然
+    var flips = 1 + Math.floor(Math.random() * 2);   // 完整翻转次数
+    var flipPhase = Math.random() * Math.PI;          // 翻转起始相位
 
     var keyframes = [];
     for (var k = 0; k <= 20; k++) {
@@ -47,10 +50,12 @@
       var y = -6 + 112 * t;                                   // 匀速下落
       var sx = Math.sin(ph + 2 * Math.PI * t) * amp;          // 正弦左右摆动
       var r = -45 + turn * t;                                 // 匀速旋转
+      var scx = Math.cos(flipPhase + t * flips * Math.PI);    // 宽度压缩，负值=镜像背面
       var op = k === 0 ? 0 : (0.95 - 0.1 * t);                // 快速淡入后缓降
+      var fade = 0.7 + 0.3 * Math.abs(scx);                   // 翻到侧面时略压暗，增强立体感
       keyframes.push({
-        transform: 'translateY(' + y.toFixed(1) + 'vh) translateX(' + sx.toFixed(2) + 'vw) rotate(' + r.toFixed(1) + 'deg)',
-        opacity: op.toFixed(3)
+        transform: 'translateY(' + y.toFixed(1) + 'vh) translateX(' + sx.toFixed(2) + 'vw) rotate(' + r.toFixed(1) + 'deg) scaleX(' + scx.toFixed(3) + ')',
+        opacity: (op * fade).toFixed(3)
       });
     }
 
