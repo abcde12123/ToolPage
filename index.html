@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=48">
+    <link rel="stylesheet" href="/css/style.css?v=50">
 </head>
 <body>
     <div id="orbContainer"></div>
@@ -50,6 +50,11 @@
             <div class="about__content">
                 <p>夏夜工具集是一个由个人维护的在线小工具集合，主打毛玻璃质感和轻盈交互体验。</p>
                 <p>所有工具均为纯前端实现，数据不会上传到服务器，放心使用～</p>
+                <p class="about__contact">
+                    <span class="about__contact-label">📮 联系我</span>
+                    <span id="contactEmail" class="about__mail" title="点击复制邮箱"></span>
+                    <button type="button" id="contactCopy" class="about__copy" title="复制邮箱">📋 复制</button>
+                </p>
                 <div class="about__info">
                     <span class="about__tag">🪟 毛玻璃设计</span>
                     <span class="about__tag">⚡ 纯原生</span>
@@ -205,5 +210,6 @@
     <script src="/js/feedback.js?v=2"></script>
     <script src="/js/easter-egg.js?v=5"></script>
     <script src="/js/mouse-fx.js?v=2"></script>
+    <script src="/js/contact.js?v=2"></script>
 </body>
 </html>
