@@ -1283,6 +1283,9 @@ body.modal-open { overflow: hidden; }
     transform: rotate(-45deg);
     opacity: 0;
     box-shadow: 0 0 6px rgba(255, 182, 193, 0.35);
+    /* 每片由 JS 覆盖：--r50/--r100 为旋转中途/结束角度（正负随机） */
+    --r50: 135deg;
+    --r100: 315deg;
     animation-name: petal-fall;
     animation-timing-function: linear;
     animation-iteration-count: 1;
@@ -1292,8 +1295,8 @@ body.modal-open { overflow: hidden; }
 @keyframes petal-fall {
     0%   { transform: translateY(-6vh) translateX(0) rotate(-45deg); opacity: 0; }
     8%   { opacity: 0.95; }
-    50%  { transform: translateY(50vh) translateX(6vw) rotate(135deg); opacity: 0.9; }
-    100% { transform: translateY(106vh) translateX(-4vw) rotate(315deg); opacity: 0.85; }
+    50%  { transform: translateY(50vh) translateX(6vw) rotate(var(--r50)); opacity: 0.9; }
+    100% { transform: translateY(106vh) translateX(-4vw) rotate(var(--r100)); opacity: 0.85; }
 }
 .petal-toast {
     position: fixed;

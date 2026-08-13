@@ -32,6 +32,10 @@
     p.style.background = petalColor();
     p.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
     p.style.animationDuration = (5 + Math.random() * 5).toFixed(2) + 's';
+    // 旋转：总旋转量 360~720 度随机，方向正负随机（正=顺时针，负=逆时针）
+    var turn = (360 + Math.random() * 360) * (Math.random() < 0.5 ? -1 : 1);
+    p.style.setProperty('--r50', (-45 + turn * 0.5).toFixed(1) + 'deg');
+    p.style.setProperty('--r100', (-45 + turn).toFixed(1) + 'deg');
     layer.appendChild(p);
     // 动画结束后移除该花瓣，避免 DOM 无限堆积
     p.addEventListener('animationend', function () {
