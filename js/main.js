@@ -30,8 +30,6 @@ if (grid) {
     tools.forEach(function(tool, index) {
         var card = document.createElement('div');
         card.className = 'glass-card';
-        var delay = 0.05 + index * 0.06;
-        card.style.transitionDelay = delay + 's';
         card.innerHTML =
             '<span class="glass-card__icon">' + tool.icon + '</span>' +
             '<h3 class="glass-card__title">' + tool.name + '</h3>' +
@@ -46,6 +44,18 @@ if (grid) {
         });
 
         grid.appendChild(card);
+    });
+
+    // 按真实渲染位置给卡片打行号（同一 offsetTop 为一行），并标记是否在首屏内；入场动画在进入视口时按行逐张计算
+    var rowTop = null, rowIdx = -1, viewH = window.innerHeight;
+    grid.querySelectorAll('.glass-card').forEach(function(card) {
+        var top = card.offsetTop;
+        if (rowTop === null || Math.abs(top - rowTop) > 4) {
+            rowIdx++;
+            rowTop = top;
+        }
+        card.dataset.row = rowIdx;
+        card.dataset.initial = (card.getBoundingClientRect().top < viewH) ? '1' : '0';   // 首屏内的行
     });
 }
 
@@ -90,25 +100,45 @@ function openTool(tool) {
     document.body.appendChild(script);
 }
 
-// --- 入场动画 + 清除 transitionDelay ---
-function onCardVisible(entry) {
-    var card = entry.target;
-    card.classList.add('visible');
-    setTimeout(function() {
-        card.style.transitionDelay = '';
-        card.style.transitionDuration = '0.35s';
-    }, 400);
-    observer.unobserve(card);
+// --- 入场动画：无论首屏还是滚动，同一批进入视口的卡片按行逐张错峰（行内 +0.1s，行间串行） ---
+function revealCards(cardsInBatch) {
+    // 按行分组（渲染时已打好 dataset.row）
+    var byRow = {};
+    cardsInBatch.forEach(function(card) {
+        var r = card.dataset.row;
+        (byRow[r] = byRow[r] || []).push(card);
+    });
+    var rows = Object.keys(byRow).map(Number).sort(function(a, b) { return a - b; });
+    var rowStart = 0;
+    rows.forEach(function(r) {
+        var cards = byRow[r];
+        var isInitial = cards.every(function(c) { return c.dataset.initial === '1'; });
+        var leadIn = isInitial ? 0 : 0.2;   // 首屏不加前置延迟；滚动行先顿 0.2s 再开始逐张进场
+        cards.forEach(function(card, col) {
+            var delay = (rowStart + leadIn + col * 0.1).toFixed(2) + 's';   // 行内 0.1s 逐个出现
+            card.style.transitionDelay = delay;
+            card.classList.add('visible');
+            setTimeout(function() {
+                card.style.transitionDelay = '';   // 动画播完清掉错峰，避免 hover 被延迟影响
+            }, parseFloat(delay) * 1000 + 450);
+            observer.unobserve(card);
+        });
+        rowStart += leadIn + (cards.length - 1) * 0.1 + 0.35;   // 下一行起始 = 本行首张前置 + 末张动画播完
+    });
 }
 
 var observer;
 if (typeof IntersectionObserver !== 'undefined') {
     observer = new IntersectionObserver(function(entries) {
+        var batch = [];
         entries.forEach(function(entry) {
             if (entry.isIntersecting) {
-                onCardVisible(entry);
+                batch.push(entry.target);
             }
         });
+        if (batch.length) {
+            revealCards(batch);
+        }
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.glass-card').forEach(function(card) {
