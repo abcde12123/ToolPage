@@ -11,6 +11,7 @@ var tools = [
     { icon: '🎨', name: '色值转换', desc: 'HEX / RGB / HSL 色值互转', file: 'color-converter.js', initFn: 'initColorConverter' },
     { icon: '📱', name: '二维码生成', desc: '将文本或链接转换成二维码图片', file: 'qrcode.js', initFn: 'initQRCode' },
     { icon: '🖼️', name: '图片压缩', desc: '智能压缩图片，保持清晰度的同时缩小体积', file: 'image-compress.js', initFn: 'initImageCompress' },
+    { icon: '🔁', name: '图片格式转换', desc: 'PNG / JPEG / WebP / AVIF / ICO 互转，支持 SVG 转位图', file: 'image-format.js', initFn: 'initImageFormat' },
     { icon: '📝', name: '文字识别', desc: 'OCR 识别图片中的文字，快速提取', file: 'ocr.js', initFn: 'initOCR' },
     { icon: '📝', name: 'Markdown 编辑器', desc: '实时预览与导出 HTML', file: 'markdown.js', initFn: 'initMarkdown' },
     { icon: '🔐', name: '密码生成器', desc: '安全随机密码，可配置复杂度', file: 'password.js', initFn: 'initPassword' },
