@@ -128,17 +128,24 @@ window.initImageFormat = function (container) {
     }
 
     // --- 转换 ---
+    // 版本号：每次 convert 锁定当时的格式/质量，所有异步回调（onload/toBlob/ICO）都校验版本，
+    // 只有最新一次转换的结果会显示，杜绝快速切换时旧结果晚到覆盖新值
+    var convertVersion = 0;
     function convert() {
         if (!originalDataUrl) return;
+        var myVer = ++convertVersion;
+        var format = formatSelect.value; // 调用时锁定格式，避免 onload 时读到已切换的新格式
+        var isLossless = (format === 'image/png' || format === 'image/x-icon');
+        var quality = isLossless ? undefined : parseFloat(qualitySlider.value);
+        var isCurrent = function () { return myVer === convertVersion; };
+
         var img = new Image();
         img.onload = function () {
+            if (!isCurrent()) return; // 过期结果，丢弃
             // SVG 无固有尺寸时兜底
             var w = img.naturalWidth || img.width;
             var h = img.naturalHeight || img.height;
             if (!w || !h) { w = 800; h = 600; }
-
-            var format = formatSelect.value;
-            var isLossless = (format === 'image/png' || format === 'image/x-icon');
 
             // ICO 限 256px（favicon 常用尺寸，超过部分系统可能不认）
             var outW = w, outH = h;
@@ -159,13 +166,13 @@ window.initImageFormat = function (container) {
             }
             ctx.drawImage(img, 0, 0, outW, outH);
 
-            var quality = isLossless ? undefined : parseFloat(qualitySlider.value);
-
             if (format === 'image/x-icon') {
                 // 先出 PNG 再封装 ICO
                 canvas.toBlob(function (pngBlob) {
+                    if (!isCurrent()) return;
                     if (!pngBlob) { failToast(); return; }
                     buildIco(pngBlob, outW, outH, function (icoBlob) {
+                        if (!isCurrent()) return;
                         showResult(icoBlob, 'ico', format);
                     });
                 }, 'image/png');
@@ -173,6 +180,7 @@ window.initImageFormat = function (container) {
                 showToast('当前浏览器不支持 AVIF，请换用 Chrome / Edge');
             } else {
                 canvas.toBlob(function (blob) {
+                    if (!isCurrent()) return;
                     if (!blob) { failToast(); return; }
                     showResult(blob, extOf(format), format);
                 }, format, quality);
@@ -227,19 +235,42 @@ window.initImageFormat = function (container) {
         qualitySlider.value = '0.9';
         qualityVal.textContent = '0.90';
         formatSelect.value = 'image/png';
+        setSliderDisabled(true);
+    }
+
+    // --- 滑块禁用状态：只随格式变化，绝不在拖动中途改动（否则拖到一半被锁死） ---
+    function setSliderDisabled(v) {
+        qualitySlider.disabled = v;
+        qualitySlider.title = v ? '当前格式为无损（PNG/ICO），无需质量设置' : '质量越高，文件越大';
+    }
+
+    // 初始格式为 PNG（无损）→ 滑块一开始就是禁用态（灰着是正常，不是卡死）
+    setSliderDisabled(true);
+
+    // --- 转换调度：rAF 节流（拖动时每帧最多一次，防大图转换风暴），
+    //     加定时器兜底：无头/后台标签页 rAF 可能不触发，保证最终值一定被转换 ---
+    var convertScheduled = false;
+    function scheduleConvert() {
+        if (convertScheduled) return;
+        convertScheduled = true;
+        var run = function () {
+            if (!convertScheduled) return;
+            convertScheduled = false;
+            convert();
+        };
+        requestAnimationFrame(run);
+        setTimeout(run, 40); // 谁先到谁执行，另一个因 convertScheduled=false 跳过
     }
 
     // --- 事件绑定 ---
     qualitySlider.addEventListener('input', function () {
         qualityVal.textContent = parseFloat(qualitySlider.value).toFixed(2);
-        var lossless = (formatSelect.value === 'image/png' || formatSelect.value === 'image/x-icon');
-        qualitySlider.disabled = lossless;
-        if (originalDataUrl && !lossless) convert();
+        if (originalDataUrl) scheduleConvert();
     });
 
     formatSelect.addEventListener('change', function () {
         var lossless = (formatSelect.value === 'image/png' || formatSelect.value === 'image/x-icon');
-        qualitySlider.disabled = lossless;
+        setSliderDisabled(lossless);
         if (originalDataUrl) convert();
     });
 
