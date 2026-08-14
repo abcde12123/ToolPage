@@ -122,13 +122,14 @@
     spawnTail(t.clientX, t.clientY, 1);
   }, { passive: true });
 
-  // 点击/触摸 → 荡起涟漪 + 迸溅 8 颗星屑
+  // 点击/触摸 → 荡起涟漪 + 迸溅 8 颗星屑（涟漪随主题换色：白天金/夜间星空蓝紫）
   window.addEventListener('pointerdown', function (e) {
     var x = e.clientX, y = e.clientY;
+    var night = !!(document.body && document.body.classList.contains('night'));
     rings.push({
       x: x, y: y, r: 4, v: 2.4,
       life: 1, decay: 0.042,
-      color: 'hsla(340, 80%, 74%, 1)'
+      color: night ? 'hsla(230, 70%, 78%, 1)' : 'hsla(42, 85%, 72%, 1)'
     });
     if (rings.length > 8) rings.shift();
     spawnTail(x, y, 8);

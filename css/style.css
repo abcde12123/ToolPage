@@ -15,13 +15,15 @@ body {
 
 .container { max-width:1200px; margin:0 auto; padding:0 24px; }
 
-/* 光团容器 */
+/* 光团容器（纯装饰 pointer-events:none，隐藏只靠 opacity——不用 visibility，
+   否则 visibility 的离散过渡会"最后一刻才翻转"，正好在 opacity 淡到 1 那瞬弹出 → 啪一下出现） */
 #orbContainer {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
+    opacity: 1;
 }
 
 .orb {
@@ -1342,3 +1344,332 @@ body.modal-open { overflow: hidden; }
 }
 .about__copy:hover { background: rgba(237, 233, 254, 0.9); }
 .about__copy--done { background: rgba(220, 252, 231, 0.8); color: #16A34A; border-color: rgba(22, 163, 74, 0.3); }
+
+/* ===== ✦ 星空夜幕模式（body.night 覆盖块） =====
+   现有样式全硬编码，此块追加在末尾，用「body.night + 原类」提升特异性覆盖，不重构原规则。
+   深色基调：夜空底 #0B1026 / 玻璃 rgba(30,41,59,.55) / 面板 rgba(11,16,38,.92) /
+   主文字 #E2E8F0 / 次级 #94A3B8 / 边框 rgba(148,163,184,.16) */
+
+/* 基础 */
+body.night {
+    background-color: #0B1026;
+    color: #E2E8F0;
+    color-scheme: dark;
+}
+/* 夜间隐藏彩色光球：夜晚的「光」改由 starfield 的流星 + 萤火虫接管。
+   用 opacity 而非 display:none——这样黑夜→白天能平滑淡入、且不破坏 orb 生命周期 */
+body.night #orbContainer {
+    opacity: 0;
+}
+
+/* 导航 / Hero */
+body.night .navbar {
+    background: rgba(11, 16, 38, 0.7);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+body.night .navbar__brand { color: #E2E8F0; }
+body.night .navbar__link { color: #94A3B8; }
+body.night .navbar__link:hover,
+body.night .navbar__link.active {
+    color: #E2E8F0;
+    background: rgba(30, 41, 59, 0.55);
+}
+body.night .navbar__btn-feedback { color: #C4B5FD; }
+body.night .navbar__btn-feedback:hover { color: #DDD6FE; background: rgba(139, 92, 246, 0.18); }
+body.night .hero__title { color: #E2E8F0; }
+body.night .hero__subtitle { color: #94A3B8; }
+
+/* 毛玻璃卡片（hover/active 的 transform 保持原样不动，仅换底色与描边） */
+body.night .glass-card {
+    background: rgba(30, 41, 59, 0.55);
+    border-color: rgba(148, 163, 184, 0.16);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+}
+body.night .glass-card:hover {
+    background: rgba(51, 65, 85, 0.65);
+    border-color: rgba(148, 163, 184, 0.28);
+}
+body.night .glass-card__title { color: #E2E8F0; }
+body.night .glass-card__desc { color: #94A3B8; }
+
+/* 关于 / 页脚 / Toast */
+body.night .about__title { color: #E2E8F0; }
+body.night .about__content { color: #94A3B8; }
+body.night .about__tag {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(148, 163, 184, 0.16);
+    color: #94A3B8;
+}
+body.night .about__contact-label { color: #94A3B8; }
+body.night .about__mail { color: #E2E8F0; }
+body.night .about__copy {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #C4B5FD;
+}
+body.night .about__copy:hover { background: rgba(139, 92, 246, 0.18); }
+body.night .about__copy--done { background: rgba(22, 163, 74, 0.18); color: #4ADE80; border-color: rgba(74, 222, 128, 0.3); }
+body.night .footer { color: #64748B; }
+body.night .toast {
+    background: rgba(11, 16, 38, 0.9);
+    color: #E2E8F0;
+    border-color: rgba(148, 163, 184, 0.2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+
+/* 弹窗面板（Modal / 反馈 / 控制台） */
+body.night .modal-panel {
+    background: rgba(11, 16, 38, 0.94);
+    border-color: rgba(148, 163, 184, 0.16);
+}
+body.night .modal__header {
+    background: rgba(11, 16, 38, 0.85);
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+body.night .modal__title { color: #E2E8F0; }
+body.night .modal__close { color: #94A3B8; }
+body.night .modal__close:hover { background: rgba(51, 65, 85, 0.7); color: #E2E8F0; }
+body.night .feedback-panel {
+    background: rgba(11, 16, 38, 0.94);
+    border-color: rgba(148, 163, 184, 0.16);
+}
+body.night .feedback__title { color: #E2E8F0; }
+body.night .feedback__close { color: #94A3B8; }
+body.night .feedback__close:hover { background: rgba(51, 65, 85, 0.7); color: #E2E8F0; }
+body.night .feedback__desc { color: #94A3B8; }
+body.night .feedback__field input,
+body.night .feedback__field textarea {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: #E2E8F0;
+}
+body.night .feedback__field input:focus,
+body.night .feedback__field textarea:focus { background: #1E293B; }
+body.night .feedback__field input::placeholder,
+body.night .feedback__field textarea::placeholder { color: #64748B; }
+body.night .console-panel {
+    background: rgba(11, 16, 38, 0.94);
+    border-color: rgba(148, 163, 184, 0.16);
+}
+body.night .console__head { border-bottom-color: rgba(148, 163, 184, 0.16); }
+body.night .console__title,
+body.night .console__section-title { color: #E2E8F0; }
+body.night .console__subtitle { color: #94A3B8; }
+body.night .console__close { color: #94A3B8; }
+body.night .console__close:hover { background: rgba(51, 65, 85, 0.7); color: #E2E8F0; }
+body.night .console__field input {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: #E2E8F0;
+}
+body.night .console__field input:focus { background: #1E293B; }
+body.night .console__field input::placeholder { color: #64748B; }
+body.night .console__btn { color: #E2E8F0; }
+body.night .console-card {
+    background: rgba(30, 41, 59, 0.55);
+    border-color: rgba(148, 163, 184, 0.16);
+}
+body.night .console-card:hover { background: rgba(51, 65, 85, 0.65); border-color: rgba(148, 163, 184, 0.28); }
+body.night .console-card__name { color: #E2E8F0; }
+body.night .console-card__desc { color: #94A3B8; }
+body.night .console__logout {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: #94A3B8;
+}
+body.night .console__refresh { color: #C4B5FD; }
+body.night .server-card {
+    background: rgba(30, 41, 59, 0.55);
+    border-color: rgba(148, 163, 184, 0.16);
+}
+body.night .server-card:hover { background: rgba(51, 65, 85, 0.65); border-color: rgba(148, 163, 184, 0.28); }
+body.night .server-card__addr { color: #94A3B8; }
+body.night .server-card__btn { color: #E2E8F0; }
+body.night .console__msg--error { color: #F87171; }
+body.night .console__msg--success { color: #4ADE80; }
+
+/* 工具模态框内部：泛型深色化 + 重申语义色 + 结果区深色 + label 浅灰 */
+body.night .modal__body { color: #E2E8F0; }
+body.night .modal__body label { color: #94A3B8; }
+body.night .modal__body input,
+body.night .modal__body textarea,
+body.night .modal__body select {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: #E2E8F0;
+}
+body.night .modal__body input::placeholder,
+body.night .modal__body textarea::placeholder { color: #64748B; }
+body.night .modal__body input:focus,
+body.night .modal__body textarea:focus,
+body.night .modal__body select:focus { background: #1E293B; }
+body.night .modal__body button {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: #E2E8F0;
+}
+body.night .modal__body button:hover { background: rgba(51, 65, 85, 0.75); }
+
+/* 重申语义色：danger 红 / primary 紫（泛型 button 覆盖会吞掉它们） */
+body.night .modal__body .jt-btn.jt-btn-danger,
+body.night .modal__body .ocr-btn.ocr-btn-danger,
+body.night .modal__body .jt-btn-danger {
+    color: #F87171;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+body.night .modal__body .jt-btn.jt-btn-primary {
+    color: #C4B5FD;
+    background: rgba(167, 139, 250, 0.2);
+    border-color: rgba(167, 139, 250, 0.35);
+}
+
+/* 结果展示区（深色卡片）；二维码区保持白底以保可扫码 */
+body.night .modal__body .jt-output,
+body.night .modal__body .rx-result {
+    background: rgba(30, 41, 59, 0.4);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: #E2E8F0;
+}
+body.night .modal__body .rx-result mark { background: rgba(251, 146, 60, 0.35); color: #FED7AA; }
+body.night .modal__body .md-preview { color: #E2E8F0; }
+body.night .modal__body .md-preview h1,
+body.night .modal__body .md-preview h2,
+body.night .modal__body .md-preview h3 { color: #E2E8F0; border-bottom-color: rgba(148, 163, 184, 0.2); }
+body.night .modal__body .md-preview code { background: rgba(0, 0, 0, 0.35); }
+body.night .modal__body .md-preview pre { background: rgba(0, 0, 0, 0.3); }
+body.night .modal__body .md-preview blockquote { color: #94A3B8; }
+body.night .modal__body .md-preview th,
+body.night .modal__body .md-preview td { border-color: rgba(148, 163, 184, 0.2); }
+body.night .modal__body .md-preview th { background: rgba(148, 163, 184, 0.08); }
+body.night .modal__body .qr-canvas-wrap { background: #fff; }   /* ⚠️ 例外：二维码区保持白底 */
+body.night .petal-toast {
+    background: rgba(11, 16, 38, 0.9);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* ===== 新增控件 ===== */
+
+/* 星尘画布：画在 body 背景之上、正文内容之下（负 z-index），不拦截点击 */
+.starfield {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* 节日彩蛋层与飘落元素（层级在正文之上、反馈浮窗之下） */
+.festival-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 240;
+    pointer-events: none;
+    overflow: hidden;
+}
+.festival-fall {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    will-change: transform, left;
+    user-select: none;
+    pointer-events: none;
+    line-height: 1;
+}
+/* 无 WAAPI 老浏览器的降级下落动画（festival.js 兜底用） */
+@keyframes festivalFallCss {
+    0%   { opacity: 0; transform: translateY(-10vh) rotate(0deg) translateX(0); }
+    8%   { opacity: 1; }
+    30%  { transform: translateY(25vh) rotate(50deg) translateX(8px); }
+    60%  { transform: translateY(60vh) rotate(110deg) translateX(-10px); }
+    100% { opacity: 0.9; transform: translateY(110vh) rotate(180deg) translateX(4px); }
+}
+
+/* 生日当天专属提示：festival.js 检测到生日会给 body 挂 festival-birthday class，平时隐藏 */
+.about__birthday {
+    display: none;
+    margin-top: 14px;
+    padding: 9px 18px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #FFE8EF, #FFF3CC);
+    border: 1px solid rgba(244, 114, 182, 0.35);
+    color: #BE185D;
+    align-self: center;
+}
+body.festival-birthday .about__birthday { display: inline-block; }
+body.night .about__birthday {
+    background: linear-gradient(135deg, rgba(255, 112, 150, 0.22), rgba(255, 200, 90, 0.16));
+    border-color: rgba(251, 146, 210, 0.35);
+    color: #F9A8D4;
+}
+
+/* 主题切换按钮（沿用 navbar__link 胶囊样式） */
+.navbar__btn-theme {
+    border: none; background: transparent; cursor: pointer; font-family: inherit;
+    line-height: 1.2; font-size: 0.9em; opacity: 0.9;
+}
+.navbar__btn-theme:hover { opacity: 1; }
+
+/* 重置排序按钮（「关于」区低调胶囊，亮暗各一份） */
+.about__reset {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 18px;
+    border-radius: 100px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(255, 255, 255, 0.4);
+    color: #78716C;
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.about__reset:hover { background: rgba(255, 255, 255, 0.7); color: #1E293B; }
+body.night .about__reset {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: #94A3B8;
+}
+body.night .about__reset:hover { background: rgba(51, 65, 85, 0.7); color: #E2E8F0; }
+
+/* ===== 时间氛围组：时段问候 + 农历节气角 + 黄昏渐变 ===== */
+
+/* 时段问候（hero 每日一言上方，ambient.js 按小时填充，淡紫色小字） */
+.hero__greeting {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: #A78BFA;
+}
+body.night .hero__greeting { color: #C4B5FD; }
+
+/* 页脚农历节气角（lunar.js 填充） */
+.footer__lunar {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    color: #A8A29E;
+}
+body.night .footer__lunar { color: #64748B; }
+
+/* 黄昏渐变：主题切换瞬间 body 挂上此 class，后代背景/文字 0.35s 平滑过渡
+   （只保留 background-color + color：毛玻璃 backdrop-filter 元素多，过渡属性越少每帧重绘越轻；box-shadow/border-color 已去掉）
+   0.85s 后 JS 移除 class，日常 hover/focus 的颜色动画不受影响（transform 不参与，卡片入场/浮窗动画不破坏） */
+body.theme-transition,
+body.theme-transition * {
+    transition: background-color 0.35s ease, color 0.35s ease !important;
+}
+
+/* 光球容器有自己的淡入淡出时序，主题通配过渡规则不接管它（否则 opacity 过渡会被 color 过渡覆盖而瞬变）：
+   只过渡 opacity 一个属性，0.5s 延迟正好压住"先光球后背景"，0.8s 时长让光球柔和慢速浮现；
+   白天→黑夜：随背景同步快速淡出；黑夜→白天：等背景渐变完之后再慢慢淡入 */
+body.theme-transition.night #orbContainer,
+body.theme-transition.night #orbContainer * {
+    transition: opacity 0.35s ease !important;
+}
+body.theme-transition:not(.night) #orbContainer,
+body.theme-transition:not(.night) #orbContainer * {
+    transition: opacity 0.8s ease 0.5s !important;
+}

@@ -21,32 +21,69 @@ var tools = [
     { icon: '📐', name: '单位换算器', desc: '长度/重量/温度/面积/体积/速度', file: 'unit-convert.js', initFn: 'initUnitConvert' },
 ];
 
+// --- 常用工具置顶：localStorage 记录使用次数，用得多的自动排前面 ---
+var TOOLS_ORIGINAL = tools.slice();
+var TOOL_USES_KEY = 'tool_uses';
+
+function getToolKey(tool) { return tool.file || tool.url || tool.name; }
+
+function getToolUses() {
+    try {
+        var s = localStorage.getItem(TOOL_USES_KEY);
+        var o = s ? JSON.parse(s) : {};
+        return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+}
+
+function bumpToolUse(tool) {
+    try {
+        var o = getToolUses();
+        var k = getToolKey(tool);
+        o[k] = (o[k] || 0) + 1;
+        localStorage.setItem(TOOL_USES_KEY, JSON.stringify(o));
+    } catch (e) {}
+}
+
+function clearToolUses() {
+    try { localStorage.removeItem(TOOL_USES_KEY); } catch (e) {}
+}
+
+// 稳定降序排序（依赖 ES2019+ 的稳定 Array.sort），次数相同保持原顺序
+function sortToolsByUsage(list, uses) {
+    return list.slice().sort(function(a, b) {
+        return (uses[getToolKey(b)] || 0) - (uses[getToolKey(a)] || 0);
+    });
+}
+
 // 已加载的工具脚本
 var TOOL_LOADED = {};
 
 // --- 渲染卡片 ---
 var grid = document.getElementById('toolsGrid');
-if (grid) {
-    tools.forEach(function(tool, index) {
-        var card = document.createElement('div');
-        card.className = 'glass-card';
-        card.innerHTML =
-            '<span class="glass-card__icon">' + tool.icon + '</span>' +
-            '<h3 class="glass-card__title">' + tool.name + '</h3>' +
-            '<p class="glass-card__desc">' + tool.desc + '</p>';
 
-        card.addEventListener('click', function() {
-            if (tool.url) {
-                window.location.href = tool.url;
-                return;
-            }
-            openTool(tool);
-        });
+function buildCard(tool) {
+    var card = document.createElement('div');
+    card.className = 'glass-card';
+    card.innerHTML =
+        '<span class="glass-card__icon">' + tool.icon + '</span>' +
+        '<h3 class="glass-card__title">' + tool.name + '</h3>' +
+        '<p class="glass-card__desc">' + tool.desc + '</p>';
 
-        grid.appendChild(card);
+    card.addEventListener('click', function() {
+        bumpToolUse(tool);                      // 点击即记录使用次数（只写 localStorage，不实时重排）
+        if (tool.url) {
+            window.location.href = tool.url;
+            return;
+        }
+        openTool(tool);
     });
 
-    // 按真实渲染位置给卡片打行号（同一 offsetTop 为一行），并标记是否在首屏内；入场动画在进入视口时按行逐张计算
+    return card;
+}
+
+// 按真实渲染位置给卡片打行号（同一 offsetTop 为一行），并标记是否在首屏内；入场动画在进入视口时按行逐张计算
+function stampRows() {
+    if (!grid) return;
     var rowTop = null, rowIdx = -1, viewH = window.innerHeight;
     grid.querySelectorAll('.glass-card').forEach(function(card) {
         var top = card.offsetTop;
@@ -140,17 +177,37 @@ if (typeof IntersectionObserver !== 'undefined') {
             revealCards(batch);
         }
     }, { threshold: 0.1 });
+}
 
-    document.querySelectorAll('.glass-card').forEach(function(card) {
-        observer.observe(card);
+// 重渲染网格：按使用次数排序重建卡片（初始载入 / 点击重置时调用）
+function reRenderGrid(animate) {
+    if (!grid) return;
+    grid.innerHTML = '';
+    sortToolsByUsage(tools, getToolUses()).forEach(function(tool) {
+        grid.appendChild(buildCard(tool));
     });
-
-    if (!('IntersectionObserver' in window)) {
-        document.querySelectorAll('.glass-card').forEach(function(card) {
-            card.classList.add('visible');
+    stampRows();
+    grid.querySelectorAll('.glass-card').forEach(function(card) {
+        if (animate && observer) {
+            observer.observe(card);           // 走 IO→revealCards（初始载入行为不变）
+        } else {
+            card.classList.add('visible');     // 重置/排序后直接可见，不重跑入场动画
             card.style.transitionDelay = '';
-        });
-    }
+        }
+    });
+}
+reRenderGrid(true);
+
+// 重置排序：清空使用次数回到原始顺序（低调按钮在「关于」区）
+var resetSortBtn = document.getElementById('resetSort');
+if (resetSortBtn) {
+    resetSortBtn.addEventListener('click', function() {
+        clearToolUses();
+        reRenderGrid(false);
+        if (typeof showToast === 'function') {
+            showToast('已恢复默认排序');
+        }
+    });
 }
 
 // --- ✦ 神秘光灵系统 v3 — 不规则 Blob + 碰撞规避 ---
@@ -470,6 +527,78 @@ if (yearEl) {
     yearEl.textContent = '' + new Date().getFullYear();
 }
 
+// --- ✦ 星空夜幕模式：19:00 自动切夜 / 06:00 自动切日；手动切换当天锁定优先，次日重开重新按时间定 ---
+var THEME_KEY = 'theme_night';
+var THEME_MANUAL_KEY = 'theme_manual_date';
+
+function isNight() { return document.body && document.body.classList.contains('night'); }
+
+// 今天是否手动锁定过主题：是则返回偏好 '1'/'0'，否则 null（跨天自动解锁回到自动）
+function getManualPref() {
+    try {
+        var md = localStorage.getItem(THEME_MANUAL_KEY);
+        if (!md) return null;
+        var now = new Date();
+        var today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+        if (md !== today) {
+            localStorage.removeItem(THEME_MANUAL_KEY);   // 跨天解锁，回到自动
+            return null;
+        }
+        var v = localStorage.getItem(THEME_KEY);
+        return (v === '1' || v === '0') ? v : null;
+    } catch (e) { return null; }
+}
+
+// 按时间自动判定：19:00 - 次日 06:00 为夜间
+function isNightByClock() {
+    var h = new Date().getHours();
+    return (h >= 19 || h < 6);
+}
+
+// on: 是否夜间；manual: 是否用户手动切换（手动会锁定今天，当天不再被自动覆盖）
+function applyNight(on, manual) {
+    if (!document.body) return;
+    document.body.classList.toggle('night', on);
+    var btn = document.getElementById('btnTheme');
+    if (btn) {
+        btn.textContent = on ? '☀️' : '🌙';
+        btn.title = on ? '切换日间模式' : '切换夜间模式';
+    }
+    try {
+        localStorage.setItem(THEME_KEY, on ? '1' : '0');
+        if (manual) {
+            var now = new Date();
+            localStorage.setItem(THEME_MANUAL_KEY, now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate());
+        }
+    } catch (e) {}
+}
+
+// 黄昏渐变：切换瞬间挂 theme-transition class（CSS 让背景/文字 0.35s 平滑过渡），1.5s 后移除，不影响日常 hover 动画
+// （1.5s 需 ≥ 光球夜→昼淡入总时长 0.5s 延迟 + 0.8s 时长 = 1.3s，否则 class 提前移除会让光球瞬跳）
+function applyNightWithTransition(on) {
+    if (!document.body) { applyNight(on, true); return; }
+    document.body.classList.add('theme-transition');
+    applyNight(on, true);
+    setTimeout(function() {
+        if (document.body) document.body.classList.remove('theme-transition');
+    }, 1500);
+}
+
+var btnTheme = document.getElementById('btnTheme');
+if (btnTheme) {
+    btnTheme.addEventListener('click', function() {
+        applyNightWithTransition(!isNight());   // 手动切换 → 锁定今天
+    });
+}
+
+// 初始化：今天已手动锁定 → 恢复手动偏好；否则按当前时间自动定初始（不锁定，次日重新判定）
+var manualPref = getManualPref();
+if (manualPref !== null) {
+    applyNight(manualPref === '1', false);
+} else {
+    applyNight(isNightByClock(), false);
+}
+
 // --- 导航栏：平滑滚动 + 滚动高亮 ---
 (function() {
     var navbar = document.getElementById('navbar');
@@ -545,5 +674,16 @@ if (typeof module !== 'undefined' && module.exports) {
         isCollidingOrb: isCollidingOrb,
         findNonCollidingPosition: findNonCollidingPosition,
         removeOrbFromArray: removeOrbFromArray,
+        // 主题
+        isNight: isNight,
+        applyNight: applyNight,
+        getManualPref: getManualPref,
+        isNightByClock: isNightByClock,
+        // 工具置顶
+        getToolKey: getToolKey,
+        getToolUses: getToolUses,
+        bumpToolUse: bumpToolUse,
+        clearToolUses: clearToolUses,
+        sortToolsByUsage: sortToolsByUsage,
     };
 }
