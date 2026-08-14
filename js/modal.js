@@ -45,6 +45,7 @@ var ModalManager = (function() {
     var escHandler = null;
     var closeTimer = null;
     var scrollbarWidth = null;
+    var downOnBackdrop = false; // 拖选保护：记录 mousedown 起点是否在 backdrop 上
 
     function getScrollbarWidth() {
         if (scrollbarWidth !== null) return scrollbarWidth;
@@ -65,9 +66,13 @@ var ModalManager = (function() {
             close();
         });
 
-        // 点击 backdrop 关闭
+        // 点击 backdrop 关闭：仅当按下起点也在 backdrop 上才算「直点背景」。
+        // 否则在面板内拖选文本、拖到背景松开，合成 click 会落在 backdrop 上导致误关
+        overlay.addEventListener('mousedown', function(e) {
+            downOnBackdrop = (e.target === overlay);
+        });
         overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) {
+            if (e.target === overlay && downOnBackdrop) {
                 close();
             }
         });

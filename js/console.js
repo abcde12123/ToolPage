@@ -349,8 +349,12 @@
     });
   }
 
-  // 点击遮罩空白处关闭
+  // 点击遮罩空白处关闭：仅当按下起点也在遮罩上才算「直点背景」，否则拖选文本拖到遮罩松开会误关
+  var downOnBackdrop = false;
+  overlay.addEventListener('mousedown', function (e) {
+    downOnBackdrop = (e.target === overlay);
+  });
   overlay.addEventListener('click', function (e) {
-    if (e.target === overlay) close();
+    if (e.target === overlay && downOnBackdrop) close();
   });
 })();
