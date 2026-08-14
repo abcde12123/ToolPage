@@ -578,6 +578,20 @@ body.modal-open { overflow: hidden; }
     border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .ic-slider-val { font-size: 0.85rem; font-weight: 700; color: #7C3AED; min-width: 36px; }
+/* 滑条禁用态：选无损格式（PNG/ICO）时整体转红 + not-allowed，配下方小字注释说明原因 */
+.ic-slider.ic-slider-locked {
+    background: rgba(220,38,38,0.25); cursor: not-allowed; pointer-events: none;
+}
+.ic-slider.ic-slider-locked::-webkit-slider-thumb {
+    background: rgba(220,38,38,0.55); cursor: not-allowed; border-color: rgba(220,38,38,0.3);
+}
+.ic-slider-note {
+    flex-basis: 100%; font-size: 0.72rem; color: #DC2626;
+    font-weight: 500; letter-spacing: 0.01em;
+}
+body.night .ic-slider-note { color: #F87171; }
+body.night .ic-slider.ic-slider-locked { background: rgba(248,113,113,0.18); }
+body.night .ic-slider.ic-slider-locked::-webkit-slider-thumb { background: rgba(248,113,113,0.5); border-color: rgba(248,113,113,0.3); }
 .ic-options { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
 .ic-options label { font-size: 0.85rem; font-weight: 600; color: #57534E; }
 .ic-options select, .ic-options input[type=number] {

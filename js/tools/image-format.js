@@ -60,6 +60,7 @@ window.initImageFormat = function (container) {
                 '</select>' +
                 '<label>质量: <span class="ic-slider-val" id="ifQualityVal">0.90</span></label>' +
                 '<input class="ic-slider" id="ifQuality" type="range" min="0.1" max="1" step="0.05" value="0.9" />' +
+                '<span class="ic-slider-note" id="ifSliderNote" style="display:none;">当前格式为无损（PNG/ICO），无需质量设置</span>' +
                 '<button class="ic-btn ic-btn-primary" id="ifDownload">&#x2B07; 下载</button>' +
                 '<button class="ic-btn" id="ifReset">&#x1F504; 重置</button>' +
             '</div>' +
@@ -76,6 +77,7 @@ window.initImageFormat = function (container) {
     var formatSelect = document.getElementById('ifFormat');
     var qualitySlider = document.getElementById('ifQuality');
     var qualityVal = document.getElementById('ifQualityVal');
+    var sliderNote = document.getElementById('ifSliderNote');
     var downloadBtn = document.getElementById('ifDownload');
     var resetBtn = document.getElementById('ifReset');
 
@@ -241,7 +243,10 @@ window.initImageFormat = function (container) {
     // --- 滑块禁用状态：只随格式变化，绝不在拖动中途改动（否则拖到一半被锁死） ---
     function setSliderDisabled(v) {
         qualitySlider.disabled = v;
-        qualitySlider.title = v ? '当前格式为无损（PNG/ICO），无需质量设置' : '质量越高，文件越大';
+        // 禁用时：滑条变红 + 显示小字注释；恢复时：取消红色 + 隐藏注释
+        qualitySlider.classList.toggle('ic-slider-locked', v);
+        qualitySlider.title = v ? '' : '质量越高，文件越大';
+        sliderNote.style.display = v ? 'inline' : 'none';
     }
 
     // 初始格式为 PNG（无损）→ 滑块一开始就是禁用态（灰着是正常，不是卡死）
