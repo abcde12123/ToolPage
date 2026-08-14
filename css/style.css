@@ -653,6 +653,85 @@ body.night .bt-chk { color: #CBD5E1; }
 body.night .bt-status { color: #C4B5FD; }
 body.night .bt-sub { color: #64748B; }
 
+/* ===== 亲戚称呼计算器 (rk-) ===== */
+.rk-wrap { display: flex; flex-direction: column; gap: 10px; }
+.rk-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.35); border-radius: 100px; padding: 4px; width: fit-content; flex-wrap: wrap; }
+.rk-toggle-btn {
+    padding: 7px 14px; border-radius: 100px; border: none; background: transparent;
+    font-size: 0.82rem; font-weight: 600; color: #78716C; cursor: pointer; transition: all 0.2s;
+}
+.rk-toggle-btn.active { background: rgba(255,255,255,0.7); color: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.rk-toggle-btn:hover { color: #1E293B; }
+.rk-sex { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.8rem; color: #57534E; }
+.rk-seg {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.4); cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; color: #1E293B; user-select: none; transition: all 0.2s;
+}
+.rk-seg:has(input:checked) { background: rgba(167,139,250,0.3); border-color: rgba(167,139,250,0.5); color: #5B21B6; }
+.rk-seg input { margin: 0; accent-color: #7C3AED; }
+.rk-field-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rk-input {
+    flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 12px; box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.55);
+    color: #1E293B; font-size: 0.85rem; outline: none;
+}
+.rk-input:focus { border-color: rgba(167,139,250,0.5); }
+.rk-btn {
+    padding: 8px 16px; border-radius: 100px; border: 1px solid rgba(167,139,250,0.5);
+    background: rgba(167,139,250,0.35); color: #5B21B6; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rk-btn:hover { background: rgba(167,139,250,0.5); transform: translateY(-1px); }
+.rk-btn:active { transform: scale(0.95); }
+.rk-hint { font-size: 0.76rem; color: #A8A29E; }
+.rk-result { display: flex; flex-direction: column; gap: 8px; }
+.rk-card {
+    padding: 16px 18px; border-radius: 14px; background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.55); display: flex; flex-direction: column; gap: 6px;
+}
+.rk-answer { font-size: 1.25rem; font-weight: 700; color: #1E293B; word-break: break-all; line-height: 1.5; }
+.rk-answer-dim { font-size: 0.9rem; font-weight: 500; color: #A8A29E; }
+.rk-sub { font-size: 0.82rem; color: #78716C; }
+.rk-aliases { color: #7C3AED; font-weight: 600; }
+.rk-desc { font-size: 0.78rem; color: #78716C; line-height: 1.5; }
+.rk-err { font-size: 0.9rem; font-weight: 600; color: #DC2626; }
+.rk-note { font-size: 0.74rem; color: #A8A29E; line-height: 1.6; }
+.rk-quick-title { font-size: 0.78rem; font-weight: 600; color: #78716C; margin-top: 2px; }
+.rk-quick { display: flex; flex-direction: column; gap: 8px; }
+.rk-qgroup { display: flex; flex-direction: column; gap: 4px; }
+.rk-qtitle { font-size: 0.72rem; font-weight: 600; color: #A8A29E; letter-spacing: 1px; }
+.rk-qitems { display: flex; gap: 6px; flex-wrap: wrap; }
+.rk-chip {
+    padding: 5px 12px; border-radius: 100px; border: 1px solid rgba(167,139,250,0.25);
+    background: rgba(255,255,255,0.45); font-size: 0.78rem; font-weight: 500; color: #57534E;
+    cursor: pointer; transition: all 0.2s;
+}
+.rk-chip:hover { background: rgba(167,139,250,0.2); color: #6D28D9; transform: translateY(-1px); }
+/* 夜间 */
+body.night .rk-toggle-btn { color: #94A3B8; }
+body.night .rk-toggle-btn.active { background: rgba(51,65,85,0.8); color: #F1F5F9; box-shadow: none; }
+body.night .rk-toggle-btn:hover { color: #F1F5F9; }
+body.night .rk-sex { color: #CBD5E1; }
+body.night .rk-seg { border-color: rgba(255,255,255,0.1); background: rgba(30,41,59,0.5); color: #E2E8F0; }
+body.night .rk-seg:has(input:checked) { background: rgba(139,92,246,0.35); border-color: rgba(139,92,246,0.5); color: #C4B5FD; }
+body.night .rk-input { background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .rk-btn { background: rgba(139,92,246,0.35); border-color: rgba(139,92,246,0.5); color: #C4B5FD; }
+body.night .rk-btn:hover { background: rgba(139,92,246,0.5); color: #FFF; }
+body.night .rk-hint { color: #64748B; }
+body.night .rk-card { background: rgba(30,41,59,0.35); border-color: rgba(255,255,255,0.08); }
+body.night .rk-answer { color: #F1F5F9; }
+body.night .rk-answer-dim { color: #64748B; }
+body.night .rk-sub { color: #94A3B8; }
+body.night .rk-aliases { color: #C4B5FD; }
+body.night .rk-desc { color: #94A3B8; }
+body.night .rk-err { color: #F87171; }
+body.night .rk-note { color: #64748B; }
+body.night .rk-quick-title { color: #94A3B8; }
+body.night .rk-qtitle { color: #64748B; }
+body.night .rk-chip { border-color: rgba(139,92,246,0.2); background: rgba(30,41,59,0.45); color: #CBD5E1; }
+body.night .rk-chip:hover { background: rgba(139,92,246,0.25); color: #E9D5FF; }
+
 /* ===== 正则测试器 (rx-) ===== */
 .rx-container { display: flex; flex-direction: column; gap: 16px; }
 .rx-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }

@@ -10,6 +10,7 @@ var tools = [
     { icon: '📅', name: '日期计算器', desc: '日期差 / 加减推算 / 倒计时，附农历', file: 'date-calculator.js', initFn: 'initDateCalculator' },
     { icon: '🌐', name: 'IP 地址工具', desc: '本机/公网 IP 查询 + 子网计算 + 地址校验', file: 'ip-tool.js', initFn: 'initIpTool' },
     { icon: '📋', name: '文本批量处理', desc: '列表去重/排序/大小写/前后缀/替换/行号', file: 'text-batch.js', initFn: 'initTextBatch' },
+    { icon: '👨‍👩‍👧', name: '亲戚称呼计算器', desc: '关系链 → 称呼，含反向他叫我什么', file: 'kin-calc.js', initFn: 'initKinCalc' },
     { icon: '🕐', name: '时间戳转换', desc: '时间戳与日期格式互转', file: 'timestamp.js', initFn: 'initTimestamp' },
     { icon: '🧪', name: '正则测试器', desc: '在线测试正则表达式匹配结果', file: 'regex-tester.js', initFn: 'initRegexTester' },
     { icon: '🎨', name: '色值转换', desc: 'HEX / RGB / HSL 色值互转', file: 'color-converter.js', initFn: 'initColorConverter' },
@@ -123,7 +124,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=26';
+    script.src = '/js/tools/' + tool.file + '?v=27';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];
