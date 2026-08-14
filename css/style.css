@@ -732,6 +732,70 @@ body.night .rk-qtitle { color: #64748B; }
 body.night .rk-chip { border-color: rgba(139,92,246,0.2); background: rgba(30,41,59,0.45); color: #CBD5E1; }
 body.night .rk-chip:hover { background: rgba(139,92,246,0.25); color: #E9D5FF; }
 
+/* ===== 像素画制作器 (px-) ===== */
+.px-wrap { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.px-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.px-label { font-size: 0.78rem; font-weight: 600; color: #A8A29E; }
+.px-label-gap { margin-left: 8px; }
+.px-btn {
+    padding: 7px 13px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);
+    font-size: 0.82rem; font-weight: 600; color: #1E293B; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.px-btn:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
+.px-btn:active { transform: scale(0.95); }
+.px-btn.active { background: rgba(167,139,250,0.35); border-color: rgba(167,139,250,0.5); color: #5B21B6; }
+.px-btn-plain { background: transparent; border-color: transparent; color: #A8A29E; }
+.px-btn-plain:hover { background: transparent; color: #78716C; transform: none; }
+.px-btn-primary { background: rgba(167,139,250,0.35); border-color: rgba(167,139,250,0.5); color: #5B21B6; }
+.px-btn-primary:hover { background: rgba(167,139,250,0.5); }
+.px-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.px-swatch {
+    width: 26px; height: 26px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.8);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15); flex-shrink: 0;
+}
+.px-palette { display: flex; gap: 5px; flex-wrap: wrap; }
+.px-pal {
+    width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.6);
+    cursor: pointer; transition: transform 0.15s; padding: 0;
+}
+.px-pal:hover { transform: scale(1.18); }
+.px-colorpick {
+    width: 34px; height: 26px; padding: 0; border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 8px; background: transparent; cursor: pointer;
+}
+.px-grid-wrap { width: 100%; display: flex; justify-content: center; }
+.px-grid {
+    display: grid; gap: 0; aspect-ratio: 1;
+    background: rgba(255,255,255,0.25);
+    border-radius: 8px; overflow: hidden; user-select: none; touch-action: none;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+.px-cell {
+    aspect-ratio: 1; box-sizing: border-box;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); cursor: crosshair;
+}
+.px-cell:hover { box-shadow: inset 0 0 0 2px rgba(167,139,250,0.6); z-index: 1; }
+.px-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.px-status { font-size: 0.76rem; color: #A8A29E; }
+.px-note { font-size: 0.74rem; color: #A8A29E; line-height: 1.6; text-align: center; }
+/* 夜间 */
+body.night .px-btn { background: rgba(30,41,59,0.5); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .px-btn:hover { background: rgba(30,41,59,0.7); color: #FFF; }
+body.night .px-btn.active { background: rgba(139,92,246,0.35); border-color: rgba(139,92,246,0.5); color: #C4B5FD; }
+body.night .px-btn-plain { color: #64748B; }
+body.night .px-btn-plain:hover { color: #94A3B8; }
+body.night .px-btn-primary { background: rgba(139,92,246,0.35); border-color: rgba(139,92,246,0.5); color: #C4B5FD; }
+body.night .px-btn-primary:hover { background: rgba(139,92,246,0.5); color: #FFF; }
+body.night .px-swatch { border-color: rgba(255,255,255,0.15); }
+body.night .px-pal { border-color: rgba(255,255,255,0.15); }
+body.night .px-colorpick { border-color: rgba(255,255,255,0.15); }
+body.night .px-grid { background: rgba(30,41,59,0.35); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+body.night .px-cell { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+body.night .px-status { color: #64748B; }
+body.night .px-note { color: #64748B; }
+
 /* ===== 正则测试器 (rx-) ===== */
 .rx-container { display: flex; flex-direction: column; gap: 16px; }
 .rx-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
