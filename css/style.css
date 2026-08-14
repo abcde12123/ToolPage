@@ -606,6 +606,53 @@ body.night .ip-td-val { color: #F1F5F9; }
 body.night .ip-bin-label { color: #64748B; }
 body.night .ip-bin-host { color: #475569; }
 
+/* ===== 文本批量处理 (bt-) ===== */
+.bt-wrap { display: flex; flex-direction: column; gap: 10px; }
+.bt-input {
+    width: 100%; min-height: 110px; resize: vertical; box-sizing: border-box;
+    padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); color: #1E293B; font-size: 0.85rem;
+    font-family: Consolas, Menlo, monospace; line-height: 1.6; outline: none;
+}
+.bt-input:focus { border-color: rgba(167,139,250,0.5); }
+.bt-input-inline { width: auto; min-height: 0; padding: 8px 12px; flex: 1; }
+.bt-ops { display: flex; flex-direction: column; gap: 6px; }
+.bt-ops-label { font-size: 0.72rem; font-weight: 600; color: #A8A29E; letter-spacing: 1px; }
+.bt-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.bt-btn {
+    padding: 7px 13px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);
+    font-size: 0.82rem; font-weight: 600; color: #1E293B; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.bt-btn:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
+.bt-btn:active { transform: scale(0.95); }
+.bt-btn-primary { background: rgba(167,139,250,0.35); border-color: rgba(167,139,250,0.5); color: #5B21B6; }
+.bt-btn-primary:hover { background: rgba(167,139,250,0.5); }
+.bt-btn-plain { background: transparent; border-color: transparent; color: #A8A29E; }
+.bt-btn-plain:hover { background: transparent; color: #78716C; transform: none; }
+.bt-ext { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.45); }
+.bt-ext-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.bt-chk { font-size: 0.8rem; color: #57534E; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.bt-output-wrap { display: flex; flex-direction: column; gap: 6px; }
+.bt-output-head { display: flex; justify-content: space-between; align-items: center; }
+.bt-status { font-size: 0.78rem; font-weight: 600; color: #7C3AED; }
+.bt-sub { font-size: 0.75rem; color: #A8A29E; }
+.bt-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* 夜间 */
+body.night .bt-input { background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .bt-ops-label { color: #64748B; }
+body.night .bt-btn { background: rgba(30,41,59,0.5); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .bt-btn:hover { background: rgba(30,41,59,0.7); color: #FFF; }
+body.night .bt-btn-primary { background: rgba(139,92,246,0.35); border-color: rgba(139,92,246,0.5); color: #C4B5FD; }
+body.night .bt-btn-primary:hover { background: rgba(139,92,246,0.5); }
+body.night .bt-btn-plain { color: #64748B; }
+body.night .bt-btn-plain:hover { color: #94A3B8; }
+body.night .bt-ext { background: rgba(30,41,59,0.3); border-color: rgba(255,255,255,0.08); }
+body.night .bt-chk { color: #CBD5E1; }
+body.night .bt-status { color: #C4B5FD; }
+body.night .bt-sub { color: #64748B; }
+
 /* ===== 正则测试器 (rx-) ===== */
 .rx-container { display: flex; flex-direction: column; gap: 16px; }
 .rx-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
