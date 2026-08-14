@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="夏夜工具集 - 图片工坊：上传/裁剪/旋转翻转/调色/水印/压缩/格式转换/像素风，一条龙编辑导出，纯前端处理，数据不出浏览器。">
+    <title>图片工坊 - 夏夜工具集</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+    <link rel="stylesheet" href="/css/style.css?v=77">
+</head>
+<body>
+    <!-- 防白闪：与主站 index.html 逐字一致（当天手动锁定优先、否则按 19:00-06:00 判夜） -->
+    <script>try{
+      var now=new Date(),md=localStorage.getItem('theme_manual_date'),night=false;
+      var today=''+now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+      if(md===today){night=(localStorage.getItem('theme_night')==='1');}
+      else{var h=now.getHours();night=(h>=19||h<6);}
+      if(night){document.body.classList.add('night');}
+    }catch(e){}</script>
+    <div id="orbContainer" aria-hidden="true"></div>
+
+    <!-- 顶部栏 -->
+    <header class="iw-topbar">
+        <button type="button" class="iw-btn iw-btn-back" id="iwBack">← 返回工具集</button>
+        <h1 class="iw-title">🛠️ 图片工坊</h1>
+        <div class="iw-topbar-right">
+            <span class="iw-file-badge" id="iwFileBadge" hidden></span>
+            <button type="button" class="iw-btn iw-btn-theme" id="btnTheme" title="切换夜间模式">🌙</button>
+        </div>
+    </header>
+
+    <main class="iw-main">
+        <!-- 左：工具栏 + 当前工具面板 -->
+        <aside class="iw-side">
+            <nav class="iw-tools">
+                <button type="button" class="iw-tool" data-tool="upload">📤 上传</button>
+                <button type="button" class="iw-tool" data-tool="crop">✂️ 裁剪</button>
+                <button type="button" class="iw-tool" data-tool="rotate">🔄 旋转/翻转</button>
+                <button type="button" class="iw-tool" data-tool="color">🎨 调色</button>
+                <button type="button" class="iw-tool" data-tool="watermark">💧 水印</button>
+                <button type="button" class="iw-tool" data-tool="compress">🗜️ 压缩</button>
+                <button type="button" class="iw-tool" data-tool="format">🔁 格式转换</button>
+                <button type="button" class="iw-tool" data-tool="pixel">👾 像素风</button>
+            </nav>
+            <div class="iw-panel" id="iwPanel"></div>
+        </aside>
+
+        <!-- 中：画布预览 -->
+        <section class="iw-stage">
+            <div class="iw-dropzone" id="iwDropzone">
+                <div class="iw-icon">🖼️</div>
+                <p>拖拽图片到此处，或点击选择文件</p>
+                <p class="iw-sub">JPG / PNG / WebP / GIF / BMP / SVG · 最大 20MB</p>
+            </div>
+            <input type="file" id="iwFile" accept="image/*" hidden>
+            <div class="iw-canvas-wrap" id="iwCanvasWrap" hidden>
+                <canvas id="iwCanvas"></canvas>
+                <div class="iw-crop-overlay" id="iwCropOverlay" hidden></div>
+            </div>
+            <div class="iw-empty-tip" id="iwEmptyTip" hidden>选择左侧工具开始编辑</div>
+        </section>
+
+        <!-- 右：导出设置 -->
+        <aside class="iw-export">
+            <h2 class="iw-export-title">导出</h2>
+            <label class="iw-field">格式
+                <select id="iwExportFormat">
+                    <option value="image/png">PNG（无损）</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/webp">WebP</option>
+                    <option value="image/avif" id="iwFmtAvif">AVIF</option>
+                    <option value="image/x-icon">ICO（≤256px）</option>
+                </select>
+            </label>
+            <label class="iw-field">质量
+                <input type="range" class="ic-slider" id="iwQuality" min="0.1" max="1" step="0.05" value="0.9">
+            </label>
+            <label class="iw-field">最大宽度
+                <input type="number" class="iw-num" id="iwMaxWidth" value="1920" min="100" max="8000">
+            </label>
+            <p class="iw-export-note" id="iwExportNote"></p>
+            <div class="iw-size-compare" id="iwSizeCompare" hidden>
+                <span>原: <b id="iwSizeBefore"></b></span>
+                <span class="iw-size-arrow">→</span>
+                <span>后: <b id="iwSizeAfter"></b></span>
+                <span id="iwSizeDelta"></span>
+            </div>
+            <button type="button" class="iw-btn iw-btn-primary iw-export-btn" id="iwExport" disabled>⬇ 导出</button>
+        </aside>
+    </main>
+
+    <!-- 底部状态栏 -->
+    <footer class="iw-statusbar">
+        <span id="iwStatus">未上传图片</span>
+        <span class="iw-statusbar-spacer"></span>
+        <button type="button" class="iw-btn iw-btn-mini" id="iwUndo" title="撤销上一步编辑">↩ 撤销</button>
+        <button type="button" class="iw-btn iw-btn-mini" id="iwRedo" title="重做">↪ 重做</button>
+        <button type="button" class="iw-btn iw-btn-mini" id="iwReset" title="清空并回到上传">🔄 重置</button>
+    </footer>
+
+    <script src="/js/image-workshop.js?v=5"></script>
+</body>
+</html>

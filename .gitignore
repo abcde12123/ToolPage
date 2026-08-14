@@ -14,3 +14,7 @@ desktop.ini
 # 本地临时文件
 *.log
 .tmp/
+
+# 图片工坊本地测试夹具（不入库、不部署）
+image-workshop/test-fixture.png
+image-workshop/test-large.jpg

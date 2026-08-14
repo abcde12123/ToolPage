@@ -16,8 +16,7 @@ var tools = [
     { icon: '🧪', name: '正则测试器', desc: '在线测试正则表达式匹配结果', file: 'regex-tester.js', initFn: 'initRegexTester' },
     { icon: '🎨', name: '色值转换', desc: 'HEX / RGB / HSL 色值互转', file: 'color-converter.js', initFn: 'initColorConverter' },
     { icon: '📱', name: '二维码生成', desc: '将文本或链接转换成二维码图片', file: 'qrcode.js', initFn: 'initQRCode' },
-    { icon: '🖼️', name: '图片压缩', desc: '智能压缩图片，保持清晰度的同时缩小体积', file: 'image-compress.js', initFn: 'initImageCompress' },
-    { icon: '🔁', name: '图片格式转换', desc: 'PNG / JPEG / WebP / AVIF / ICO 互转，支持 SVG 转位图', file: 'image-format.js', initFn: 'initImageFormat' },
+    { icon: '🛠️', name: '图片工坊', desc: '上传/裁剪/旋转翻转/调色/水印/压缩/格式转换/像素风，一条龙导出', url: '/image-workshop/' },
     { icon: '📄', name: 'PDF 工具箱', desc: '合并多个 PDF / 转图片 / 优化体积，首次打开会加载引擎', file: 'pdf-tools.js', initFn: 'initPdfTools' },
     { icon: '📝', name: '文字识别', desc: 'OCR 识别图片中的文字，快速提取', file: 'ocr.js', initFn: 'initOCR' },
     { icon: '📝', name: 'Markdown 编辑器', desc: '实时预览与导出 HTML', file: 'markdown.js', initFn: 'initMarkdown' },
@@ -125,7 +124,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=28';
+    script.src = '/js/tools/' + tool.file + '?v=29';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];
