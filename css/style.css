@@ -45,6 +45,18 @@ body {
     background: rgba(255, 250, 247, 0.7);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    /* 底边柔化：淡投影 + 伪元素羽化渐变（见下方 ::after） */
+    box-shadow: 0 10px 30px -18px rgba(120, 87, 76, 0.35);
+}
+/* 底部羽化：毛玻璃条下缘渐隐到透明，白天用米白落点、夜晚用深蓝（避免生硬切边） */
+.navbar::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: -24px;
+    height: 34px;
+    background: linear-gradient(to bottom, rgba(255, 250, 247, 0.45), rgba(255, 250, 247, 0));
+    pointer-events: none;
 }
 .navbar .container { display:flex; align-items:center; justify-content:space-between; }
 .navbar__brand {
@@ -1366,6 +1378,10 @@ body.night #orbContainer {
 body.night .navbar {
     background: rgba(11, 16, 38, 0.7);
     border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.55);
+}
+body.night .navbar::after {
+    background: linear-gradient(to bottom, rgba(11, 16, 38, 0.45), rgba(11, 16, 38, 0));
 }
 body.night .navbar__brand { color: #E2E8F0; }
 body.night .navbar__link { color: #94A3B8; }
