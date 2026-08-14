@@ -12,6 +12,7 @@ var tools = [
     { icon: '📱', name: '二维码生成', desc: '将文本或链接转换成二维码图片', file: 'qrcode.js', initFn: 'initQRCode' },
     { icon: '🖼️', name: '图片压缩', desc: '智能压缩图片，保持清晰度的同时缩小体积', file: 'image-compress.js', initFn: 'initImageCompress' },
     { icon: '🔁', name: '图片格式转换', desc: 'PNG / JPEG / WebP / AVIF / ICO 互转，支持 SVG 转位图', file: 'image-format.js', initFn: 'initImageFormat' },
+    { icon: '📄', name: 'PDF 工具箱', desc: '合并多个 PDF / 转图片 / 优化体积，首次打开会加载引擎', file: 'pdf-tools.js', initFn: 'initPdfTools' },
     { icon: '📝', name: '文字识别', desc: 'OCR 识别图片中的文字，快速提取', file: 'ocr.js', initFn: 'initOCR' },
     { icon: '📝', name: 'Markdown 编辑器', desc: '实时预览与导出 HTML', file: 'markdown.js', initFn: 'initMarkdown' },
     { icon: '🔐', name: '密码生成器', desc: '安全随机密码，可配置复杂度', file: 'password.js', initFn: 'initPassword' },
@@ -118,7 +119,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=15';
+    script.src = '/js/tools/' + tool.file + '?v=16';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];
