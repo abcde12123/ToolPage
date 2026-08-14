@@ -8,6 +8,7 @@ var tools = [
     { icon: '🔤', name: 'Base64 编解码', desc: '文本与 Base64 互转', file: 'base64.js', initFn: 'initBase64' },
     { icon: '📊', name: '文字统计', desc: '字数/词频/阅读时长一键统计', file: 'text-stats.js', initFn: 'initTextStats' },
     { icon: '📅', name: '日期计算器', desc: '日期差 / 加减推算 / 倒计时，附农历', file: 'date-calculator.js', initFn: 'initDateCalculator' },
+    { icon: '🌐', name: 'IP 地址工具', desc: '本机/公网 IP 查询 + 子网计算 + 地址校验', file: 'ip-tool.js', initFn: 'initIpTool' },
     { icon: '🕐', name: '时间戳转换', desc: '时间戳与日期格式互转', file: 'timestamp.js', initFn: 'initTimestamp' },
     { icon: '🧪', name: '正则测试器', desc: '在线测试正则表达式匹配结果', file: 'regex-tester.js', initFn: 'initRegexTester' },
     { icon: '🎨', name: '色值转换', desc: 'HEX / RGB / HSL 色值互转', file: 'color-converter.js', initFn: 'initColorConverter' },
@@ -121,7 +122,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=22';
+    script.src = '/js/tools/' + tool.file + '?v=25';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];
