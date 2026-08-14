@@ -50,19 +50,26 @@ window.initImageFormat = function (container) {
             '</div>' +
 
             '<div class="ic-options" id="ifOptions" style="display:none;">' +
-                '<label for="ifFormat">转为:</label>' +
-                '<select id="ifFormat">' +
-                    '<option value="image/png">PNG（无损）</option>' +
-                    '<option value="image/jpeg">JPEG</option>' +
-                    '<option value="image/webp">WebP</option>' +
-                    '<option value="image/avif" id="ifFormatAvif">AVIF</option>' +
-                    '<option value="image/x-icon">ICO（图标，最大 256px）</option>' +
-                '</select>' +
-                '<label>质量: <span class="ic-slider-val" id="ifQualityVal">0.90</span></label>' +
-                '<input class="ic-slider" id="ifQuality" type="range" min="0.1" max="1" step="0.05" value="0.9" />' +
-                '<span class="ic-slider-note" id="ifSliderNote" style="display:none;">当前格式为无损（PNG/ICO），无需质量设置</span>' +
-                '<button class="ic-btn ic-btn-primary" id="ifDownload">&#x2B07; 下载</button>' +
-                '<button class="ic-btn" id="ifReset">&#x1F504; 重置</button>' +
+                '<div class="ic-opt-row">' +
+                    '<label for="ifFormat">转为:</label>' +
+                    '<select id="ifFormat">' +
+                        '<option value="image/png">PNG（无损）</option>' +
+                        '<option value="image/jpeg">JPEG</option>' +
+                        '<option value="image/webp">WebP</option>' +
+                        '<option value="image/avif" id="ifFormatAvif">AVIF</option>' +
+                        '<option value="image/x-icon">ICO（图标，最大 256px）</option>' +
+                    '</select>' +
+                    '<div class="ic-opt-spacer"></div>' +
+                    '<button class="ic-btn ic-btn-primary" id="ifDownload">&#x2B07; 下载</button>' +
+                    '<button class="ic-btn" id="ifReset">&#x1F504; 重置</button>' +
+                '</div>' +
+                '<div class="ic-opt-row">' +
+                    '<label>质量: <span class="ic-slider-val" id="ifQualityVal">0.90</span></label>' +
+                    '<input class="ic-slider" id="ifQuality" type="range" min="0.1" max="1" step="0.05" value="0.9" />' +
+                '</div>' +
+                '<div class="ic-slider-note-row">' +
+                    '<span class="ic-slider-note" id="ifSliderNote">当前格式为无损（PNG/ICO），无需质量设置</span>' +
+                '</div>' +
             '</div>' +
         '</div>';
 
@@ -246,9 +253,10 @@ window.initImageFormat = function (container) {
     function setSliderDisabled(v) {
         qualitySlider.disabled = v;
         // 禁用时：滑条变红 + 显示小字注释；恢复时：取消红色 + 隐藏注释
+        // 注释用 visibility 切换而非 display：隐藏时仍占一行，选项区布局高度始终统一
         qualitySlider.classList.toggle('ic-slider-locked', v);
         qualitySlider.title = v ? '' : '质量越高，文件越大';
-        sliderNote.style.display = v ? 'inline' : 'none';
+        sliderNote.style.visibility = v ? 'visible' : 'hidden';
     }
 
     // 初始格式为 PNG（无损）→ 滑块一开始就是禁用态（灰着是正常，不是卡死）

@@ -585,9 +585,17 @@ body.modal-open { overflow: hidden; }
 .ic-slider.ic-slider-locked::-webkit-slider-thumb {
     background: rgba(220,38,38,0.55); cursor: not-allowed; border-color: rgba(220,38,38,0.3);
 }
+/* 图片格式转换：选项区三行布局 —— 第一行「转为 + 下载/重置」，第二行「质量条」，第三行固定提示位 */
+.ic-opt-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex-basis: 100%; }
+.ic-opt-spacer { flex: 1; }
+.ic-slider-note-row {
+    flex-basis: 100%; min-height: 1.15em; line-height: 1.15em;
+    font-size: 0.72rem; box-sizing: border-box;
+}
 .ic-slider-note {
-    flex-basis: 100%; font-size: 0.72rem; color: #DC2626;
+    font-size: 0.72rem; color: #DC2626;
     font-weight: 500; letter-spacing: 0.01em;
+    visibility: hidden; /* 默认隐藏；隐藏时仍占一行，不同格式下选项区高度统一 */
 }
 body.night .ic-slider-note { color: #F87171; }
 body.night .ic-slider.ic-slider-locked { background: rgba(248,113,113,0.18); }
