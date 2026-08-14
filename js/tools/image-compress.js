@@ -118,6 +118,7 @@ window.initImageCompress = function(container) {
             previewRow.style.display = 'flex';
             controls.style.display = 'flex';
             options.style.display = 'flex';
+            dropzone.style.display = 'none'; // 选图成功后收起拖拽框，界面更干净
         };
         reader.readAsDataURL(file);
     }
@@ -208,6 +209,7 @@ window.initImageCompress = function(container) {
         previewRow.style.display = 'none';
         controls.style.display = 'none';
         options.style.display = 'none';
+        dropzone.style.display = ''; // 重置后恢复拖拽框
         fileInput.value = '';
         qualitySlider.value = '0.7';
         qualityVal.textContent = '0.7';
