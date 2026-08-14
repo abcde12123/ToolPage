@@ -1673,3 +1673,66 @@ body.theme-transition:not(.night) #orbContainer,
 body.theme-transition:not(.night) #orbContainer * {
     transition: opacity 0.8s ease 0.5s !important;
 }
+
+/* ===== 微光交互（v63 新增）===== */
+
+/* 选中文字：星空紫（白天深紫底 / 夜晚浅紫底） */
+::selection { background: rgba(167, 139, 250, 0.30); color: #4C1D95; }
+body.night ::selection { background: rgba(196, 181, 253, 0.25); color: #EDE9FE; }
+
+/* 阳光光斑：白天 3 道柔光缓缓飘移（纯 CSS keyframes；夜晚 display:none 交给 starfield 的星空） */
+.sunbeam-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.sunbeam {
+    position: absolute;
+    top: -18%;
+    height: 135vh;
+    width: 26vw;
+    transform-origin: top center;
+    opacity: 0;
+    background: linear-gradient(90deg, rgba(255, 238, 190, 0) 0%, rgba(255, 238, 190, 0.14) 50%, rgba(255, 238, 190, 0) 100%);
+    filter: blur(22px);
+}
+.sunbeam--1 { left: 6%;  animation: sunbeamDrift1 24s ease-in-out infinite; }
+.sunbeam--2 { left: 40%; width: 20vw; animation: sunbeamDrift2 31s ease-in-out infinite 3s; }
+.sunbeam--3 { left: 68%; width: 30vw; animation: sunbeamDrift3 27s ease-in-out infinite 8s; }
+@keyframes sunbeamDrift1 {
+    0%   { transform: rotate(-5deg) translateX(-20px); opacity: 0; }
+    10%  { opacity: 0.9; }
+    45%  { opacity: 0.45; }
+    60%  { opacity: 0.75; }
+    90%  { opacity: 0; }
+    100% { transform: rotate(7deg) translateX(40px); opacity: 0; }
+}
+@keyframes sunbeamDrift2 {
+    0%   { transform: rotate(4deg) translateX(15px); opacity: 0; }
+    8%   { opacity: 0.8; }
+    40%  { opacity: 0.4; }
+    55%  { opacity: 0.7; }
+    88%  { opacity: 0; }
+    100% { transform: rotate(-6deg) translateX(-35px); opacity: 0; }
+}
+@keyframes sunbeamDrift3 {
+    0%   { transform: rotate(6deg) translateX(-10px); opacity: 0; }
+    12%  { opacity: 0.85; }
+    50%  { opacity: 0.5; }
+    65%  { opacity: 0.7; }
+    92%  { opacity: 0; }
+    100% { transform: rotate(-7deg) translateX(30px); opacity: 0; }
+}
+body.night .sunbeam-layer { display: none; }
+
+/* 卡片光标微光跟随（--gx/--gy 由 micro-glow.js 喂，跟随鼠标的柔光；::after 画在卡片内容之上，alpha 低不会糊字） */
+.glass-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(150px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.25), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+.glass-card:hover::after { opacity: 1; }
+body.night .glass-card::after {
+    background: radial-gradient(150px circle at var(--gx, 50%) var(--gy, 50%), rgba(165, 180, 252, 0.14), transparent 70%);
+}
