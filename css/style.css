@@ -590,6 +590,11 @@ body.modal-open { overflow: hidden; }
 .ic-opt-spacer { flex: 1; }
 /* 格式下拉框加宽到能完整显示最长选项（「ICO（图标，最大 256px）」文本约 160px + 内边距 24px + 箭头） */
 #ifFormat { width: 200px; }
+/* 质量手动输入框：可输 ≤1 任意数（含负数 → 彩蛋），故不加 min/max 属性（浏览器标红碍眼），由 JS 钳制 */
+#ifQualityInput {
+    width: 64px; padding: 6px 8px; text-align: center;
+    font-variant-numeric: tabular-nums;
+}
 .ic-slider-note-row {
     flex-basis: 100%; min-height: 1.15em; line-height: 1.15em;
     font-size: 0.72rem; box-sizing: border-box;
@@ -602,6 +607,10 @@ body.modal-open { overflow: hidden; }
 body.night .ic-slider-note { color: #F87171; }
 body.night .ic-slider.ic-slider-locked { background: rgba(248,113,113,0.18); }
 body.night .ic-slider.ic-slider-locked::-webkit-slider-thumb { background: rgba(248,113,113,0.5); border-color: rgba(248,113,113,0.3); }
+/* 夜间：select / 质量输入框转深色底（半透明白在深色面板上不够清晰） */
+body.night .ic-options select, body.night .ic-options input[type=number] {
+    background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.15); color: #E2E8F0;
+}
 .ic-options { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
 .ic-options label { font-size: 0.85rem; font-weight: 600; color: #57534E; }
 .ic-options select, .ic-options input[type=number] {

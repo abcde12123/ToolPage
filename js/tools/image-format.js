@@ -64,7 +64,8 @@ window.initImageFormat = function (container) {
                     '<button class="ic-btn" id="ifReset">&#x1F504; 重置</button>' +
                 '</div>' +
                 '<div class="ic-opt-row">' +
-                    '<label>质量: <span class="ic-slider-val" id="ifQualityVal">0.90</span></label>' +
+                    '<label>质量:</label>' +
+                    '<input class="ic-quality-input" id="ifQualityInput" type="number" step="0.05" value="0.9" title="可手动输入 0.1~1；输负数触发彩蛋" />' +
                     '<input class="ic-slider" id="ifQuality" type="range" min="0.1" max="1" step="0.05" value="0.9" />' +
                 '</div>' +
                 '<div class="ic-slider-note-row">' +
@@ -83,7 +84,7 @@ window.initImageFormat = function (container) {
     var options = document.getElementById('ifOptions');
     var formatSelect = document.getElementById('ifFormat');
     var qualitySlider = document.getElementById('ifQuality');
-    var qualityVal = document.getElementById('ifQualityVal');
+    var qualityInput = document.getElementById('ifQualityInput');
     var sliderNote = document.getElementById('ifSliderNote');
     var downloadBtn = document.getElementById('ifDownload');
     var resetBtn = document.getElementById('ifReset');
@@ -146,7 +147,11 @@ window.initImageFormat = function (container) {
         var myVer = ++convertVersion;
         var format = formatSelect.value; // 调用时锁定格式，避免 onload 时读到已切换的新格式
         var isLossless = (format === 'image/png' || format === 'image/x-icon');
-        var quality = isLossless ? undefined : parseFloat(qualitySlider.value);
+        var qRaw = parseFloat(qualityInput.value);   // 手动输入值（可为负）
+        var isGlitch = !isNaN(qRaw) && qRaw < 0;     // 负数 = 彩蛋模式
+        var quality = isGlitch ? 0.95
+            : (isLossless ? undefined : Math.min(1, Math.max(0.1, isNaN(qRaw) ? 0.9 : qRaw)));
+        var glitchIntensity = isGlitch ? Math.min(1, Math.abs(qRaw)) : 0;
         var isCurrent = function () { return myVer === convertVersion; };
 
         var img = new Image();
@@ -175,6 +180,11 @@ window.initImageFormat = function (container) {
                 ctx.fillRect(0, 0, outW, outH);
             }
             ctx.drawImage(img, 0, 0, outW, outH);
+
+            // 彩蛋：负数质量 → 像素级「炸裂的糊」（撕裂 + 马赛克 + 彩色噪点），强度随 |负值| 增大
+            if (isGlitch) {
+                applyGlitch(ctx, outW, outH, glitchIntensity);
+            }
 
             if (format === 'image/x-icon') {
                 // 先出 PNG 再封装 ICO
@@ -244,23 +254,40 @@ window.initImageFormat = function (container) {
         dropzone.style.display = ''; // 重置后恢复拖拽框
         fileInput.value = '';
         qualitySlider.value = '0.9';
-        qualityVal.textContent = '0.90';
+        qualityInput.value = '0.9';
         formatSelect.value = 'image/png';
-        setSliderDisabled(true);
+        updateSliderState();
     }
 
-    // --- 滑块禁用状态：只随格式变化，绝不在拖动中途改动（否则拖到一半被锁死） ---
-    function setSliderDisabled(v) {
-        qualitySlider.disabled = v;
-        // 禁用时：滑条变红 + 显示小字注释；恢复时：取消红色 + 隐藏注释
-        // 注释用 visibility 切换而非 display：隐藏时仍占一行，选项区布局高度始终统一
-        qualitySlider.classList.toggle('ic-slider-locked', v);
-        qualitySlider.title = v ? '' : '质量越高，文件越大';
-        sliderNote.style.visibility = v ? 'visible' : 'hidden';
+    // --- 滑块/提示状态：随「格式 + 手动输入值」三态联动（无损 / 有损 / 彩蛋负值） ---
+    function currentMode() {
+        var v = parseFloat(qualityInput.value);
+        if (!isNaN(v) && v < 0) return 'glitch';
+        return (formatSelect.value === 'image/png' || formatSelect.value === 'image/x-icon') ? 'lossless' : 'lossy';
+    }
+
+    function updateSliderState() {
+        var mode = currentMode();
+        // 滑块只由格式决定是否禁用：无损永远锁（正常质量无意义）；彩蛋只走输入框。
+        // 注意：若在无损格式 + 彩蛋时放行滑块，拖动会把输入框改回正数、滑块又在拖动中被锁死（旧 bug 重演）
+        var isLosslessFormat = (formatSelect.value === 'image/png' || formatSelect.value === 'image/x-icon');
+        qualitySlider.disabled = isLosslessFormat;
+        qualitySlider.classList.toggle('ic-slider-locked', isLosslessFormat);
+        qualitySlider.title = isLosslessFormat ? '' : '质量越高，文件越大';
+        // 提示小字用 visibility 切换而非 display：隐藏时仍占一行，选项区布局高度始终统一
+        if (mode === 'glitch') {
+            sliderNote.style.visibility = 'visible';
+            sliderNote.textContent = '🎉 彩蛋：炸裂的糊 -' + Math.abs(parseFloat(qualityInput.value)).toFixed(2) + '（输入 0.1~1 恢复）';
+        } else if (mode === 'lossless') {
+            sliderNote.style.visibility = 'visible';
+            sliderNote.textContent = '当前格式为无损（PNG/ICO），无需质量设置';
+        } else {
+            sliderNote.style.visibility = 'hidden';
+        }
     }
 
     // 初始格式为 PNG（无损）→ 滑块一开始就是禁用态（灰着是正常，不是卡死）
-    setSliderDisabled(true);
+    updateSliderState();
 
     // --- 转换调度：rAF 节流（拖动时每帧最多一次，防大图转换风暴），
     //     加定时器兜底：无头/后台标签页 rAF 可能不触发，保证最终值一定被转换 ---
@@ -279,13 +306,33 @@ window.initImageFormat = function (container) {
 
     // --- 事件绑定 ---
     qualitySlider.addEventListener('input', function () {
-        qualityVal.textContent = parseFloat(qualitySlider.value).toFixed(2);
+        qualityInput.value = qualitySlider.value; // 滑块只给正常值 0.1~1，实时回填输入框
+        updateSliderState();
         if (originalDataUrl) scheduleConvert();
     });
 
+    // 手动输入框：可输 ≤1 任意数（含负数 → 彩蛋）；与滑块双向联动
+    qualityInput.addEventListener('input', function () {
+        var v = parseFloat(qualityInput.value);
+        if (!isNaN(v) && v >= 0.1 && v <= 1) qualitySlider.value = v;
+        updateSliderState();
+        if (originalDataUrl) scheduleConvert();
+    });
+    qualityInput.addEventListener('change', function () {
+        var v = parseFloat(qualityInput.value);
+        if (isNaN(v)) {
+            qualityInput.value = qualitySlider.value; // 空/非法输入回填当前滑块值
+        } else if (v >= 0) {
+            var clamped = Math.min(1, Math.max(0.1, v)); // 正常值钳制到滑块范围
+            qualityInput.value = String(clamped);
+            qualitySlider.value = clamped;
+        } // 负值保留原样（彩蛋）
+        updateSliderState();
+        if (originalDataUrl) convert();
+    });
+
     formatSelect.addEventListener('change', function () {
-        var lossless = (formatSelect.value === 'image/png' || formatSelect.value === 'image/x-icon');
-        setSliderDisabled(lossless);
+        updateSliderState();
         if (originalDataUrl) convert();
     });
 
@@ -325,5 +372,67 @@ window.initImageFormat = function (container) {
             cb(new Blob([out], { type: 'image/x-icon' }));
         };
         reader.readAsArrayBuffer(pngBlob);
+    }
+
+    // --- 彩蛋：像素级「炸裂的糊」 ---
+    // 三件套叠加：①马赛克糊（分块取中心色填充）→ ②撕裂（横向条带整体错位）→ ③彩色噪点
+    // 强度 t = min(1, |负质量|)，-1 即封顶的满格炸裂
+    function applyGlitch(ctx, w, h, t) {
+        if (!w || !h) return;
+        var imgData = ctx.getImageData(0, 0, w, h);
+        var d = imgData.data;
+        var n = d.length;
+
+        // 1. 马赛克糊：块越大越糊（4px → 20px）
+        var block = Math.max(2, Math.round(4 + t * 16));
+        for (var by = 0; by < h; by += block) {
+            for (var bx = 0; bx < w; bx += block) {
+                var cx = Math.min(bx + (block >> 1), w - 1);
+                var cy = Math.min(by + (block >> 1), h - 1);
+                var ci = (cy * w + cx) * 4;
+                var r = d[ci], g = d[ci + 1], b = d[ci + 2], a = d[ci + 3];
+                var yEnd = Math.min(by + block, h);
+                var xEnd = Math.min(bx + block, w);
+                for (var yy = by; yy < yEnd; yy++) {
+                    var row = yy * w;
+                    for (var xx = bx; xx < xEnd; xx++) {
+                        var i = (row + xx) * 4;
+                        d[i] = r; d[i + 1] = g; d[i + 2] = b; d[i + 3] = a;
+                    }
+                }
+            }
+        }
+
+        // 2. 撕裂：横向条带整体随机平移（最大 ±40% 宽），条带越细碎越炸
+        var strip = Math.max(1, Math.round(2 + t * 12));
+        var rowCount = Math.ceil(h / strip);
+        var shifts = new Array(rowCount);
+        var maxShift = Math.max(1, Math.round(w * t * 0.4));
+        for (var s = 0; s < rowCount; s++) {
+            shifts[s] = Math.round((Math.random() * 2 - 1) * maxShift);
+        }
+        var moved = new Uint8ClampedArray(d);
+        for (var y = 0; y < h; y++) {
+            var shift = shifts[Math.floor(y / strip)];
+            if (shift === 0) continue;
+            var srcRow = y * w * 4;
+            for (var x = 0; x < w; x++) {
+                var si = srcRow + ((x - shift + w) % w) * 4;
+                var di = srcRow + x * 4;
+                moved[di] = d[si]; moved[di + 1] = d[si + 1]; moved[di + 2] = d[si + 2]; moved[di + 3] = d[si + 3];
+            }
+        }
+
+        // 3. 彩色噪点：随机像素撒 RGB 雪花
+        var density = t * 0.07;
+        for (var i = 0; i < n; i += 4) {
+            if (Math.random() < density) {
+                moved[i] = Math.random() * 255 | 0;
+                moved[i + 1] = Math.random() * 255 | 0;
+                moved[i + 2] = Math.random() * 255 | 0;
+            }
+        }
+
+        ctx.putImageData(new ImageData(moved, w, h), 0, 0);
     }
 };
