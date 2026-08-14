@@ -410,6 +410,75 @@ body.modal-open { overflow: hidden; }
 .ts-btn:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
 .ts-btn:active { transform: scale(0.95); }
 
+/* ===== 文字统计 (st-) ===== */
+.st-container { display: flex; flex-direction: column; gap: 14px; }
+.st-textarea {
+    width: 100%; min-height: 200px; padding: 14px 16px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.88rem;
+    background: rgba(255,255,255,0.5); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.7); border-radius: 12px;
+    color: #1E293B; resize: vertical; outline: none; line-height: 1.6;
+}
+.st-textarea:focus { border-color: rgba(167,139,250,0.5); }
+.st-textarea::placeholder { color: #A8A29E; }
+.st-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.st-btn {
+    padding: 8px 18px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);
+    font-size: 0.85rem; font-weight: 600; color: #1E293B; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.st-btn:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
+.st-btn:active { transform: scale(0.95); }
+.st-btn.st-btn-danger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #DC2626; }
+.st-btn.st-btn-danger:hover { background: rgba(239,68,68,0.2); }
+.st-note { font-size: 0.78rem; color: #A8A29E; }
+.st-spacer { flex: 1; }
+.st-topn { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #57534E; white-space: nowrap; }
+.st-topn select {
+    padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.6); color: #1E293B; font-size: 0.85rem; outline: none;
+}
+.st-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.st-stat {
+    flex: 1 1 150px; min-width: 130px; padding: 12px 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.5);
+    display: flex; flex-direction: column; gap: 4px;
+}
+.st-stat label { font-size: 0.78rem; font-weight: 600; color: #78716C; }
+.st-stat b {
+    font-size: 1.35rem; font-family: 'SF Mono', 'Fira Code', monospace; font-weight: 700; color: #1E293B;
+}
+.st-freq { display: flex; flex-direction: column; gap: 8px; }
+.st-freq-head { display: flex; align-items: baseline; gap: 10px; font-size: 0.88rem; font-weight: 700; color: #1E293B; flex-wrap: wrap; }
+.st-freq-tip { font-size: 0.75rem; font-weight: 400; color: #A8A29E; }
+.st-freq-list { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.st-empty { text-align: center; padding: 24px 0; color: #A8A29E; font-size: 0.85rem; }
+.st-freq-row { display: flex; align-items: center; gap: 10px; }
+.st-freq-word { flex: 0 0 90px; font-size: 0.85rem; font-weight: 600; color: #1E293B; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-freq-track { flex: 1; height: 18px; border-radius: 9px; background: rgba(255,255,255,0.35); overflow: hidden; }
+.st-freq-bar { height: 100%; border-radius: 9px; background: linear-gradient(90deg, rgba(167,139,250,0.6), rgba(96,165,250,0.6)); min-width: 2px; transition: width 0.3s ease; }
+.st-freq-count { flex: 0 0 34px; font-size: 0.8rem; font-family: 'SF Mono', monospace; color: #78716C; }
+/* 夜间 */
+body.night .st-textarea { background: rgba(30,41,59,0.4); border-color: rgba(255,255,255,0.08); color: #E2E8F0; }
+body.night .st-textarea::placeholder { color: #64748B; }
+body.night .st-btn { background: rgba(30,41,59,0.5); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .st-btn:hover { background: rgba(30,41,59,0.7); color: #FFF; }
+body.night .st-btn.st-btn-danger { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); color: #FCA5A5; }
+body.night .st-btn.st-btn-danger:hover { background: rgba(239,68,68,0.25); }
+body.night .st-note { color: #64748B; }
+body.night .st-topn { color: #CBD5E1; }
+body.night .st-topn select { background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .st-stat { background: rgba(30,41,59,0.35); border-color: rgba(255,255,255,0.08); }
+body.night .st-stat label { color: #94A3B8; }
+body.night .st-stat b { color: #F1F5F9; }
+body.night .st-freq-head { color: #F1F5F9; }
+body.night .st-freq-tip { color: #64748B; }
+body.night .st-freq-word { color: #F1F5F9; }
+body.night .st-freq-track { background: rgba(255,255,255,0.08); }
+body.night .st-freq-count { color: #94A3B8; }
+body.night .st-empty { color: #64748B; }
+
 /* ===== 正则测试器 (rx-) ===== */
 .rx-container { display: flex; flex-direction: column; gap: 16px; }
 .rx-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
