@@ -479,6 +479,53 @@ body.night .st-freq-track { background: rgba(255,255,255,0.08); }
 body.night .st-freq-count { color: #94A3B8; }
 body.night .st-empty { color: #64748B; }
 
+/* ===== 日期计算器 (dc-) ===== */
+.dc-container { display: flex; flex-direction: column; gap: 16px; }
+.dc-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.35); border-radius: 100px; padding: 4px; width: fit-content; flex-wrap: wrap; }
+.dc-toggle-btn {
+    padding: 6px 18px; border-radius: 100px; border: none;
+    background: transparent; font-size: 0.85rem; font-weight: 600; color: #78716C; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dc-toggle-btn.active { background: rgba(255,255,255,0.7); color: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.dc-toggle-btn:hover { color: #1E293B; }
+.dc-field-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dc-field-row label { font-size: 0.82rem; font-weight: 600; color: #57534E; white-space: nowrap; }
+.dc-input {
+    padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); color: #1E293B; font-size: 0.88rem; outline: none;
+}
+.dc-input:focus { border-color: rgba(167,139,250,0.5); }
+.dc-input-num { width: 90px; }
+.dc-btn {
+    padding: 8px 16px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);
+    font-size: 0.85rem; font-weight: 600; color: #1E293B; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dc-btn:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
+.dc-btn:active { transform: scale(0.95); }
+.dc-hint { font-size: 0.78rem; color: #A8A29E; }
+.dc-result {
+    display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 12px;
+    background: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.5);
+}
+.dc-big { font-size: 1.25rem; font-weight: 700; color: #1E293B; }
+.dc-lunar { font-size: 0.82rem; color: #78716C; }
+.dc-copy-row { display: flex; justify-content: flex-end; }
+/* 夜间 */
+body.night .dc-toggle-btn { color: #94A3B8; }
+body.night .dc-toggle-btn.active { background: rgba(51,65,85,0.8); color: #F1F5F9; box-shadow: none; }
+body.night .dc-toggle-btn:hover { color: #F1F5F9; }
+body.night .dc-field-row label { color: #CBD5E1; }
+body.night .dc-input { background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .dc-btn { background: rgba(30,41,59,0.5); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+body.night .dc-btn:hover { background: rgba(30,41,59,0.7); color: #FFF; }
+body.night .dc-hint { color: #64748B; }
+body.night .dc-result { background: rgba(30,41,59,0.35); border-color: rgba(255,255,255,0.08); }
+body.night .dc-big { color: #F1F5F9; }
+body.night .dc-lunar { color: #94A3B8; }
+
 /* ===== 正则测试器 (rx-) ===== */
 .rx-container { display: flex; flex-direction: column; gap: 16px; }
 .rx-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
