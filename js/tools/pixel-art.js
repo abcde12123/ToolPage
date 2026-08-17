@@ -24,8 +24,10 @@ window.initPixelArt = function(container) {
                 '<button class="px-btn active" id="pxToolPen">&#x270F;&#xFE0F; 铅笔</button>' +
                 '<button class="px-btn" id="pxToolEraser">&#x29A1; 橡皮</button>' +
                 '<span class="px-label px-label-gap">尺寸</span>' +
+                '<input type="number" class="px-size-input" id="pxSizeInput" min="8" max="64" value="16" title="8-64" />' +
                 '<button class="px-btn active" id="pxSize16">16</button>' +
                 '<button class="px-btn" id="pxSize32">32</button>' +
+                '<button class="px-btn" id="pxSize48">48</button>' +
                 '<button class="px-btn px-btn-plain" id="pxUndo">&#x21A9;&#xFE0F; 撤销</button>' +
                 '<button class="px-btn px-btn-plain" id="pxClear">&#x1F5D1;&#xFE0F; 清空</button>' +
             '</div>' +
@@ -157,9 +159,13 @@ window.initPixelArt = function(container) {
     penBtn.addEventListener('click', function() { setTool('pen'); });
     eraserBtn.addEventListener('click', function() { setTool('eraser'); });
 
+    var sizeInput = document.getElementById('pxSizeInput');
     var size16 = document.getElementById('pxSize16');
     var size32 = document.getElementById('pxSize32');
+    var size48 = document.getElementById('pxSize48');
+
     function setSize(n) {
+        n = Math.max(8, Math.min(64, parseInt(n) || 16)); // 限制 8-64
         SIZE = n;
         cellPx = GRID_W / n;
         gridEl.style.gridTemplateColumns = 'repeat(' + n + ',1fr)';
@@ -167,11 +173,26 @@ window.initPixelArt = function(container) {
         initCells();
         renderGrid();
         updateStatus();
+
+        // 更新输入框和按钮状态
+        sizeInput.value = n;
         size16.classList.toggle('active', n === 16);
         size32.classList.toggle('active', n === 32);
+        size48.classList.toggle('active', n === 48);
     }
+
+    // 输入框变化时应用尺寸
+    sizeInput.addEventListener('change', function() {
+        var n = parseInt(this.value);
+        if (n >= 8 && n <= 64) setSize(n);
+        else { this.value = SIZE; showToast('尺寸范围 8-64'); }
+    });
+    sizeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') this.blur(); // 回车应用
+    });
     size16.addEventListener('click', function() { setSize(16); });
     size32.addEventListener('click', function() { setSize(32); });
+    size48.addEventListener('click', function() { setSize(48); });
 
     document.getElementById('pxUndo').addEventListener('click', function() {
         if (!history.length) { showToast('没有可撤销的笔触'); return; }
