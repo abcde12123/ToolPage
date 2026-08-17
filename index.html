@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=77">
+    <link rel="stylesheet" href="/css/style.css?v=81">
 </head>
 <body>
     <!-- 防白闪：当天手动锁定优先、否则按时间(19:00-06:00=夜)在样式就位前把 .night 挂到 body，避免先渲染米白底再跳黑 -->
@@ -222,12 +222,45 @@
                     </div>
                 </div>
             </section>
+
+            <!-- 工具管理 -->
+            <section class="console__section">
+                <h4 class="console__section-title">&#x1F6E0; 工具管理</h4>
+                <div class="console__grid console__grid--single">
+                    <button type="button" class="console-card" id="consoleCardToolOrder">
+                        <span class="console-card__icon">&#x1F4CB;</span>
+                        <span class="console-card__name">调整工具顺序</span>
+                        <span class="console-card__desc">拖动调整主页工具卡片的默认排列顺序</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 工具顺序调整弹窗 -->
+    <div id="toolOrderModal" class="tool-order-modal" style="display:none;">
+        <div class="tool-order-panel">
+            <button type="button" class="tool-order__close" id="toolOrderClose" aria-label="关闭">&#10005;</button>
+            <div class="tool-order__head">
+                <span class="tool-order__icon">&#x1F6E0;</span>
+                <h3 class="tool-order__title">调整工具顺序</h3>
+                <p class="tool-order__subtitle">拖动工具卡片调整主页默认排列顺序</p>
+            </div>
+            <div class="tool-order__list" id="toolOrderList"></div>
+            <div class="tool-order__actions">
+                <button type="button" class="tool-order__btn tool-order__btn--secondary" id="toolOrderReset">恢复默认顺序</button>
+                <div class="tool-order__actions-right">
+                    <button type="button" class="tool-order__btn tool-order__btn--cancel" id="toolOrderCancel">取消</button>
+                    <button type="button" class="tool-order__btn tool-order__btn--primary" id="toolOrderSave">保存</button>
+                </div>
+            </div>
+            <div class="tool-order__msg" id="toolOrderMsg" hidden></div>
         </div>
     </div>
 
     <script src="/js/modal.js?v=41"></script>
-    <script src="/js/console.js?v=42"></script>
-    <script src="/js/main.js?v=72"></script>
+    <script src="/js/console.js?v=54"></script>
+    <script src="/js/main.js?v=73"></script>
     <script src="/js/micro-glow.js?v=1"></script>
     <script src="/js/starfield.js?v=7"></script>
     <script src="/js/festival.js?v=5"></script>
