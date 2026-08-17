@@ -89,10 +89,11 @@ window.initPixelArt = function(container) {
     // --- 渲染网格 ---
     function renderGrid() {
         var html = '';
+        var emptyBg = document.body.classList.contains('night') ? 'rgba(30,41,59,0.35)' : 'rgba(255,255,255,0.25)';
         for (var i = 0; i < SIZE; i++) {
             for (var j = 0; j < SIZE; j++) {
                 var c = cells[i][j];
-                html += '<div class="px-cell" data-i="' + i + '" data-j="' + j + '" style="background:' + (c || 'transparent') + ';"></div>';
+                html += '<div class="px-cell" data-i="' + i + '" data-j="' + j + '" style="background:' + (c || emptyBg) + ';"></div>';
             }
         }
         gridEl.innerHTML = html;
@@ -104,7 +105,10 @@ window.initPixelArt = function(container) {
         if (cells[i][j] === val) return;
         cells[i][j] = val;
         var cell = gridEl.querySelector('.px-cell[data-i="' + i + '"][data-j="' + j + '"]');
-        if (cell) cell.style.background = val || 'transparent';
+        if (cell) {
+            var emptyBg = document.body.classList.contains('night') ? 'rgba(30,41,59,0.35)' : 'rgba(255,255,255,0.25)';
+            cell.style.background = val || emptyBg;
+        }
         lastPainted = i + ',' + j;
     }
     function cellFromEvent(e) {
