@@ -49,10 +49,10 @@ window.initPixelArt = function(container) {
                 '<button class="px-btn px-btn-mini" id="pxColor8">8</button>' +
                 '<button class="px-btn px-btn-mini active" id="pxColor16">16</button>' +
                 '<button class="px-btn px-btn-mini" id="pxColor32">32</button>' +
-                '<button class="px-btn px-btn-primary" id="pxExport">&#x2B07; 导出 PNG（×' + EXPORT_SCALE + '）</button>' +
+                '<button class="px-btn px-btn-primary" id="pxExport">&#x2B07; 导出 PNG</button>' +
                 '<span class="px-status" id="pxStatus">' + SIZE + '×' + SIZE + ' · 空白画布</span>' +
             '</div>' +
-            '<div class="px-note">左键拖动画/擦，右键可擦除；切尺寸会清空画布；导入图片会自适应画布尺寸；导出为透明背景 PNG，每格放大 ' + EXPORT_SCALE + ' 倍。</div>' +
+            '<div class="px-note">左键拖动画/擦，右键可擦除；切尺寸会清空画布；导入图片会自适应画布尺寸；导出为透明背景 PNG，尺寸为画布的 ' + EXPORT_SCALE + ' 倍。</div>' +
             '<input type="file" id="pxFileInput" accept="image/*" style="display:none;" />' +
         '</div>';
 
@@ -175,6 +175,19 @@ window.initPixelArt = function(container) {
 
     function setSize(n) {
         n = Math.max(8, Math.min(64, parseInt(n) || 16)); // 限制 8-64
+
+        // 如果当前有内容且不是导入的图片，需要确认
+        var hasContent = filledCount() > 0;
+        var hasImportedImage = importedImage !== null;
+
+        if (hasContent && !hasImportedImage && n !== SIZE) {
+            if (!confirm('当前画布有内容，切换尺寸会清空画布，确认继续吗？')) {
+                // 用户取消，恢复输入框的值
+                sizeInput.value = SIZE;
+                return;
+            }
+        }
+
         SIZE = n;
         cellPx = GRID_W / n;
         gridEl.style.gridTemplateColumns = 'repeat(' + n + ',1fr)';
