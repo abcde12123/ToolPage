@@ -41,10 +41,14 @@ window.initPixelArt = function(container) {
                 '<div class="px-grid" id="pxGrid" style="width:' + GRID_W + 'px;grid-template-columns:repeat(' + SIZE + ',1fr);"></div>' +
             '</div>' +
             '<div class="px-actions">' +
+                '<button class="px-btn px-btn-secondary" id="pxImport">&#x1F4C2; 导入图片</button>' +
+                '<label class="px-checkbox"><input type="checkbox" id="pxSimplify" checked /><span>色彩简化</span></label>' +
+                '<select class="px-select" id="pxColorCount" title="简化后的颜色数"><option value="4">4色</option><option value="8">8色</option><option value="16" selected>16色</option><option value="32">32色</option></select>' +
                 '<button class="px-btn px-btn-primary" id="pxExport">&#x2B07; 导出 PNG（×' + EXPORT_SCALE + '）</button>' +
                 '<span class="px-status" id="pxStatus">' + SIZE + '×' + SIZE + ' · 空白画布</span>' +
             '</div>' +
-            '<div class="px-note">左键拖动画/擦，右键可擦除；切尺寸会清空画布；导出为透明背景 PNG，每格放大 ' + EXPORT_SCALE + ' 倍。</div>' +
+            '<div class="px-note">左键拖动画/擦，右键可擦除；切尺寸会清空画布；导入图片会自适应画布尺寸；导出为透明背景 PNG，每格放大 ' + EXPORT_SCALE + ' 倍。</div>' +
+            '<input type="file" id="pxFileInput" accept="image/*" style="display:none;" />' +
         '</div>';
 
     var gridEl = document.getElementById('pxGrid');
@@ -232,6 +236,151 @@ window.initPixelArt = function(container) {
         setTool('pen');
     });
     setColor(color);
+
+    // --- 导入图片转像素画 ---
+    var fileInput = document.getElementById('pxFileInput');
+    var simplifyCheck = document.getElementById('pxSimplify');
+    var colorCountSelect = document.getElementById('pxColorCount');
+
+    // 色彩量化（K-means 聚类简化颜色）
+    function quantizeColors(pixels, k) {
+        // 随机选择 k 个初始中心点
+        var centroids = [];
+        for (var i = 0; i < k; i++) {
+            var idx = Math.floor(Math.random() * pixels.length);
+            centroids.push(pixels[idx].slice());
+        }
+
+        // 迭代优化（最多 10 轮）
+        for (var iter = 0; iter < 10; iter++) {
+            var clusters = [];
+            for (var c = 0; c < k; c++) clusters.push([]);
+
+            // 分配像素到最近的中心
+            for (var p = 0; p < pixels.length; p++) {
+                var px = pixels[p];
+                var minDist = Infinity, minIdx = 0;
+                for (var c = 0; c < k; c++) {
+                    var dist = Math.pow(px[0] - centroids[c][0], 2) +
+                               Math.pow(px[1] - centroids[c][1], 2) +
+                               Math.pow(px[2] - centroids[c][2], 2);
+                    if (dist < minDist) { minDist = dist; minIdx = c; }
+                }
+                clusters[minIdx].push(px);
+            }
+
+            // 更新中心点
+            for (var c = 0; c < k; c++) {
+                if (clusters[c].length === 0) continue;
+                var sumR = 0, sumG = 0, sumB = 0;
+                for (var i = 0; i < clusters[c].length; i++) {
+                    sumR += clusters[c][i][0];
+                    sumG += clusters[c][i][1];
+                    sumB += clusters[c][i][2];
+                }
+                var n = clusters[c].length;
+                centroids[c] = [Math.round(sumR / n), Math.round(sumG / n), Math.round(sumB / n)];
+            }
+        }
+
+        // 将每个像素映射到最近的中心颜色
+        var result = [];
+        for (var p = 0; p < pixels.length; p++) {
+            var px = pixels[p];
+            var minDist = Infinity, nearest = centroids[0];
+            for (var c = 0; c < k; c++) {
+                var dist = Math.pow(px[0] - centroids[c][0], 2) +
+                           Math.pow(px[1] - centroids[c][1], 2) +
+                           Math.pow(px[2] - centroids[c][2], 2);
+                if (dist < minDist) { minDist = dist; nearest = centroids[c]; }
+            }
+            result.push(nearest);
+        }
+        return result;
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(function(x) {
+            var hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+
+    document.getElementById('pxImport').addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+
+        var img = new Image();
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+            img.onload = function() {
+                // 绘制到临时 canvas 并缩放到 SIZE×SIZE
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = SIZE;
+                tempCanvas.height = SIZE;
+                var tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(img, 0, 0, SIZE, SIZE);
+
+                // 读取像素数据
+                var imageData = tempCtx.getImageData(0, 0, SIZE, SIZE);
+                var data = imageData.data;
+                var pixels = [];
+
+                for (var i = 0; i < SIZE; i++) {
+                    for (var j = 0; j < SIZE; j++) {
+                        var idx = (i * SIZE + j) * 4;
+                        var r = data[idx];
+                        var g = data[idx + 1];
+                        var b = data[idx + 2];
+                        var a = data[idx + 3];
+                        pixels.push([r, g, b, a]);
+                    }
+                }
+
+                // 如果启用色彩简化，进行量化
+                if (simplifyCheck.checked) {
+                    var colorCount = parseInt(colorCountSelect.value);
+                    // 只对不透明像素进行量化
+                    var opaquePixels = pixels.filter(function(p) { return p[3] > 128; }).map(function(p) { return [p[0], p[1], p[2]]; });
+                    if (opaquePixels.length > 0) {
+                        var quantized = quantizeColors(opaquePixels, colorCount);
+                        var qIdx = 0;
+                        for (var i = 0; i < pixels.length; i++) {
+                            if (pixels[i][3] > 128) {
+                                var q = quantized[qIdx++];
+                                pixels[i] = [q[0], q[1], q[2], 255];
+                            }
+                        }
+                    }
+                }
+
+                // 填充到画布
+                history.push(snapshot());
+                if (history.length > 20) history.shift();
+
+                for (var i = 0; i < SIZE; i++) {
+                    for (var j = 0; j < SIZE; j++) {
+                        var px = pixels[i * SIZE + j];
+                        if (px[3] > 128) { // 半透明以上才填充
+                            cells[i][j] = rgbToHex(px[0], px[1], px[2]);
+                        } else {
+                            cells[i][j] = null; // 透明部分留空
+                        }
+                    }
+                }
+
+                renderAll();
+                showToast('已导入图片' + (simplifyCheck.checked ? '（' + colorCountSelect.value + '色简化）' : ''));
+            };
+            img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+        fileInput.value = ''; // 清空以便重复导入同一文件
+    });
 
     // --- 导出 PNG ---
     document.getElementById('pxExport').addEventListener('click', function() {
