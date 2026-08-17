@@ -44,7 +44,11 @@ window.initPixelArt = function(container) {
             '<div class="px-actions">' +
                 '<button class="px-btn px-btn-secondary" id="pxImport">&#x1F4C2; 导入图片</button>' +
                 '<label class="px-checkbox"><input type="checkbox" id="pxSimplify" checked /><span>色彩简化</span></label>' +
-                '<select class="px-select" id="pxColorCount" title="简化后的颜色数"><option value="4">4色</option><option value="8">8色</option><option value="16" selected>16色</option><option value="32">32色</option></select>' +
+                '<input type="number" class="px-color-input" id="pxColorCount" min="2" max="256" value="16" title="颜色数 2-256" />' +
+                '<button class="px-btn px-btn-mini" id="pxColor4">4</button>' +
+                '<button class="px-btn px-btn-mini" id="pxColor8">8</button>' +
+                '<button class="px-btn px-btn-mini active" id="pxColor16">16</button>' +
+                '<button class="px-btn px-btn-mini" id="pxColor32">32</button>' +
                 '<button class="px-btn px-btn-primary" id="pxExport">&#x2B07; 导出 PNG（×' + EXPORT_SCALE + '）</button>' +
                 '<span class="px-status" id="pxStatus">' + SIZE + '×' + SIZE + ' · 空白画布</span>' +
             '</div>' +
@@ -243,7 +247,7 @@ window.initPixelArt = function(container) {
     // --- 导入图片转像素画 ---
     var fileInput = document.getElementById('pxFileInput');
     var simplifyCheck = document.getElementById('pxSimplify');
-    var colorCountSelect = document.getElementById('pxColorCount');
+    var colorCountInput = document.getElementById('pxColorCount');
 
     // 色彩量化（K-means 聚类简化颜色）
     function quantizeColors(pixels, k) {
@@ -390,7 +394,7 @@ window.initPixelArt = function(container) {
 
                 // 处理并显示
                 processImportedImage();
-                showToast('已导入图片' + (simplifyCheck.checked ? '（' + colorCountSelect.value + '色简化）' : ''));
+                showToast('已导入图片' + (simplifyCheck.checked ? '（' + colorCountInput.value + '色简化）' : ''));
             };
             img.src = evt.target.result;
         };
@@ -398,18 +402,54 @@ window.initPixelArt = function(container) {
         fileInput.value = ''; // 清空以便重复导入同一文件
     });
 
+    // 色彩数快捷按钮
+    var colorCountInput = document.getElementById('pxColorCount');
+    var color4Btn = document.getElementById('pxColor4');
+    var color8Btn = document.getElementById('pxColor8');
+    var color16Btn = document.getElementById('pxColor16');
+    var color32Btn = document.getElementById('pxColor32');
+
+    function setColorCount(n) {
+        n = Math.max(2, Math.min(256, parseInt(n) || 16));
+        colorCountInput.value = n;
+
+        // 更新按钮状态
+        color4Btn.classList.toggle('active', n === 4);
+        color8Btn.classList.toggle('active', n === 8);
+        color16Btn.classList.toggle('active', n === 16);
+        color32Btn.classList.toggle('active', n === 32);
+
+        // 如果有导入的图片且启用简化，立即刷新
+        if (importedImage && simplifyCheck.checked) {
+            processImportedImage();
+            showToast('已切换为 ' + n + ' 色简化');
+        }
+    }
+
+    color4Btn.addEventListener('click', function() { setColorCount(4); });
+    color8Btn.addEventListener('click', function() { setColorCount(8); });
+    color16Btn.addEventListener('click', function() { setColorCount(16); });
+    color32Btn.addEventListener('click', function() { setColorCount(32); });
+
+    colorCountInput.addEventListener('change', function() {
+        var n = parseInt(this.value);
+        if (n >= 2 && n <= 256) {
+            setColorCount(n);
+        } else {
+            this.value = colorCountInput.value;
+            showToast('颜色数范围 2-256');
+        }
+    });
+
+    colorCountInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') this.blur();
+    });
+
     // 色彩简化选项变化时重新处理
     simplifyCheck.addEventListener('change', function() {
         if (importedImage) {
             processImportedImage();
-            showToast(this.checked ? '已启用色彩简化（' + colorCountSelect.value + '色）' : '已关闭色彩简化');
-        }
-    });
-
-    colorCountSelect.addEventListener('change', function() {
-        if (importedImage && simplifyCheck.checked) {
-            processImportedImage();
-            showToast('已切换为 ' + this.value + ' 色简化');
+            showToast(this.checked ? '已启用色彩简化（' + colorCountInput.value + '色）' : '已关闭色彩简化');
         }
     });
 
