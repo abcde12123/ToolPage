@@ -173,6 +173,9 @@
     var sizeBefore = document.getElementById('iwSizeBefore');
     var sizeAfter = document.getElementById('iwSizeAfter');
     var sizeDelta = document.getElementById('iwSizeDelta');
+    var exportPreview = document.getElementById('iwExportPreview');
+    var exportPreviewImg = document.getElementById('iwExportPreviewImg');
+    var exportPreviewInfo = document.getElementById('iwExportPreviewInfo');
     var panelEl = document.getElementById('iwPanel');
     var toolBtns = document.querySelectorAll('.iw-tool');
 
@@ -497,6 +500,15 @@
             sizeDelta.textContent = '(' + sign + delta.toFixed(1) + '%)';
             sizeDelta.className = delta <= 0 ? 'iw-size-delta iw-size-delta-good' : 'iw-size-delta iw-size-delta-bad';
             sizeCompare.hidden = false;
+
+            // 更新导出质量预览图
+            var previewUrl = URL.createObjectURL(res.blob);
+            if (exportPreviewImg.dataset.url) URL.revokeObjectURL(exportPreviewImg.dataset.url);
+            exportPreviewImg.dataset.url = previewUrl;
+            exportPreviewImg.innerHTML = '<img src="' + previewUrl + '" alt="质量预览">';
+            exportPreviewInfo.textContent = formatFileSize(res.blob.size) + ' · ' + res.w + '×' + res.h + ' · 质量 ' + (state.export.quality * 100).toFixed(0) + '%';
+            exportPreview.hidden = false;
+
             updateLivePanel(res, orig);
         });
     }
@@ -1002,6 +1014,8 @@
     }
 
     // ---------- 调色 ----------
+    var colorAdjustBase = null;  // 调色起始快照（避免累积bug）
+
     function clamp8(v) { return v < 0 ? 0 : (v > 255 ? 255 : v); }
 
     function applyColorAdjust(canvas, b, c, s) {
@@ -1041,8 +1055,9 @@
             colorScheduled = false;
             if (!state.workingCanvas) return;
             var v = colorValues();
-            // 降采样副本上实时预览（大图性能关键）
-            var small = renderScaled(state.workingCanvas, 1024);
+            // 从快照计算，避免累积bug
+            var base = colorAdjustBase || state.workingCanvas;
+            var small = renderScaled(base, 1024);
             var adj = applyColorAdjust(small, v.b, v.c, v.s);
             canvasEl.width = adj.width; canvasEl.height = adj.height;
             canvasEl.getContext('2d').drawImage(adj, 0, 0);
@@ -1055,12 +1070,21 @@
         colorScheduled = false;   // 丢弃未触发的预览任务，避免在已提交画布上二次叠加显示（曾踩坑）
         if (!state.workingCanvas) return;
         var v = colorValues();
-        if (v.b === 0 && v.c === 0 && v.s === 0) { afterCanvasChange(); return; }
-        commitWorkingCanvas(applyColorAdjust(state.workingCanvas, v.b, v.c, v.s));
+        if (v.b === 0 && v.c === 0 && v.s === 0) {
+            colorAdjustBase = null;  // 重置快照
+            afterCanvasChange();
+            return;
+        }
+        // 从快照计算，避免累积bug
+        var base = colorAdjustBase || state.workingCanvas;
+        commitWorkingCanvas(applyColorAdjust(base, v.b, v.c, v.s));
         showToast('已应用调色');
     }
 
     function bindColorPanel() {
+        // 保存调色起始快照，避免累积bug
+        colorAdjustBase = state.workingCanvas;
+
         var sliders = [['iwColorB', 'iwColorBVal'], ['iwColorC', 'iwColorCVal'], ['iwColorS', 'iwColorSVal']];
         for (var i = 0; i < sliders.length; i++) {
             (function (sid, vid) {
@@ -1074,12 +1098,16 @@
             })(sliders[i][0], sliders[i][1]);
         }
         document.getElementById('iwColorReset').addEventListener('click', function () {
+            colorScheduled = false;  // 取消排队的预览任务
             var sets = [['iwColorB', 'iwColorBVal'], ['iwColorC', 'iwColorCVal'], ['iwColorS', 'iwColorSVal']];
             for (var j = 0; j < sets.length; j++) {
                 document.getElementById(sets[j][0]).value = '0';
                 document.getElementById(sets[j][1]).textContent = '0';
             }
+            // 重新触发预览，此时所有值都是0，会从快照或workingCanvas显示原始状态
             scheduleColorPreview();
+            // 同时更新导出质量预览
+            scheduleExportEstimate();
         });
     }
 
@@ -1407,6 +1435,11 @@
         dropzone.style.display = '';
         statusEl.textContent = '未上传图片';
         sizeCompare.hidden = true;
+        exportPreview.hidden = true;
+        if (exportPreviewImg.dataset.url) {
+            URL.revokeObjectURL(exportPreviewImg.dataset.url);
+            delete exportPreviewImg.dataset.url;
+        }
         exportBtn.disabled = true;
         liveRefs = {};
         syncHistoryButtons();

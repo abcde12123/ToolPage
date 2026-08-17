@@ -1,7 +1,7 @@
 // 夏夜工具集 - 交互逻辑
 
-// --- 工具卡片数据 ---
-var tools = [
+// --- 工具卡片数据（默认顺序） ---
+var TOOLS_DEFAULT = [
     { icon: '🤖', name: 'AI 聊天', desc: '智能 AI 对话助手，随时提问', url: '/ai/' },
     { icon: '📥', name: '文件下载', desc: '访问工具文件下载区', url: '/downloads-public/' },
     { icon: '{}', name: 'JSON 格式化', desc: '格式化、校验、压缩 JSON 数据', file: 'json-formatter.js', initFn: 'initJSONFormatter' },
@@ -28,8 +28,11 @@ var tools = [
     { icon: '📐', name: '单位换算器', desc: '长度/重量/温度/面积/体积/速度', file: 'unit-convert.js', initFn: 'initUnitConvert' },
 ];
 
+// 工具列表（会被管理员设置的顺序覆盖）
+var tools = TOOLS_DEFAULT.slice();
+var TOOLS_ORIGINAL = TOOLS_DEFAULT.slice();
+
 // --- 常用工具置顶：localStorage 记录使用次数，用得多的自动排前面 ---
-var TOOLS_ORIGINAL = tools.slice();
 var TOOL_USES_KEY = 'tool_uses';
 
 function getToolKey(tool) { return tool.file || tool.url || tool.name; }
@@ -124,7 +127,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=38';
+    script.src = '/js/tools/' + tool.file + '?v=40';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];
@@ -203,7 +206,45 @@ function reRenderGrid(animate) {
         }
     });
 }
-reRenderGrid(true);
+
+// 从服务器加载管理员设置的工具顺序
+function loadAdminToolOrder() {
+    return fetch('/downloads/api/tool-order', { cache: 'no-store' })
+        .then(function(resp) {
+            if (resp.status === 404) return null;  // 没有自定义顺序
+            if (!resp.ok) throw new Error('加载失败');
+            return resp.json();
+        })
+        .then(function(data) {
+            if (!data || !Array.isArray(data.order)) return;
+            // data.order 是工具 key 数组，重排 tools
+            var keyMap = {};
+            for (var i = 0; i < TOOLS_DEFAULT.length; i++) {
+                keyMap[getToolKey(TOOLS_DEFAULT[i])] = TOOLS_DEFAULT[i];
+            }
+            var reordered = [];
+            for (var i = 0; i < data.order.length; i++) {
+                var tool = keyMap[data.order[i]];
+                if (tool) reordered.push(tool);
+            }
+            // 补上可能新增的工具（不在 order 里的）
+            for (var i = 0; i < TOOLS_DEFAULT.length; i++) {
+                if (reordered.indexOf(TOOLS_DEFAULT[i]) === -1) {
+                    reordered.push(TOOLS_DEFAULT[i]);
+                }
+            }
+            tools = reordered;
+            TOOLS_ORIGINAL = reordered.slice();
+        })
+        .catch(function() {
+            // 加载失败，使用默认顺序
+        });
+}
+
+// 启动：先加载管理员顺序，再渲染
+loadAdminToolOrder().then(function() {
+    reRenderGrid(true);
+});
 
 // 重置排序：清空使用次数回到原始顺序（低调按钮在「关于」区）
 var resetSortBtn = document.getElementById('resetSort');
