@@ -179,7 +179,10 @@ window.initPixelArt = function(container) {
         cellPx = GRID_W / n;
         gridEl.style.gridTemplateColumns = 'repeat(' + n + ',1fr)';
         history = [];
-        importedImage = null; // 清空导入的图片缓存
+
+        // 保存导入图片的引用
+        var hadImage = importedImage !== null;
+
         initCells();
         renderGrid();
         updateStatus();
@@ -189,6 +192,12 @@ window.initPixelArt = function(container) {
         size16.classList.toggle('active', n === 16);
         size32.classList.toggle('active', n === 32);
         size48.classList.toggle('active', n === 48);
+
+        // 如果之前有导入的图片，重新处理到新尺寸
+        if (hadImage) {
+            processImportedImage();
+            showToast('已切换到 ' + n + '×' + n + '，图片已重新适配');
+        }
     }
 
     // 输入框变化时应用尺寸
