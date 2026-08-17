@@ -16,6 +16,7 @@ window.initPixelArt = function(container) {
     var history = [];       // 撤销栈（每次笔触结束快照一次）
     var drawing = false;
     var lastPainted = null; // 本次笔触最后画的格，避免同格重复计数
+    var importedImage = null; // 缓存导入的原始图片，用于实时调整色彩简化
 
     container.innerHTML =
         '<div class="px-wrap">' +
@@ -174,6 +175,7 @@ window.initPixelArt = function(container) {
         cellPx = GRID_W / n;
         gridEl.style.gridTemplateColumns = 'repeat(' + n + ',1fr)';
         history = [];
+        importedImage = null; // 清空导入的图片缓存
         initCells();
         renderGrid();
         updateStatus();
@@ -207,6 +209,7 @@ window.initPixelArt = function(container) {
     document.getElementById('pxClear').addEventListener('click', function() {
         if (!filledCount()) { showToast('画布本来就是空的'); return; }
         history.push(snapshot());
+        importedImage = null; // 清空导入的图片缓存
         initCells();
         renderGrid();
         updateStatus();
@@ -306,6 +309,66 @@ window.initPixelArt = function(container) {
         }).join('');
     }
 
+    // 处理导入的图片数据到画布
+    function processImportedImage() {
+        if (!importedImage) return;
+
+        var img = importedImage;
+        // 绘制到临时 canvas 并缩放到 SIZE×SIZE
+        var tempCanvas = document.createElement('canvas');
+        tempCanvas.width = SIZE;
+        tempCanvas.height = SIZE;
+        var tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(img, 0, 0, SIZE, SIZE);
+
+        // 读取像素数据
+        var imageData = tempCtx.getImageData(0, 0, SIZE, SIZE);
+        var data = imageData.data;
+        var pixels = [];
+
+        for (var i = 0; i < SIZE; i++) {
+            for (var j = 0; j < SIZE; j++) {
+                var idx = (i * SIZE + j) * 4;
+                var r = data[idx];
+                var g = data[idx + 1];
+                var b = data[idx + 2];
+                var a = data[idx + 3];
+                pixels.push([r, g, b, a]);
+            }
+        }
+
+        // 如果启用色彩简化，进行量化
+        if (simplifyCheck.checked) {
+            var colorCount = parseInt(colorCountSelect.value);
+            // 只对不透明像素进行量化
+            var opaquePixels = pixels.filter(function(p) { return p[3] > 128; }).map(function(p) { return [p[0], p[1], p[2]]; });
+            if (opaquePixels.length > 0) {
+                var quantized = quantizeColors(opaquePixels, colorCount);
+                var qIdx = 0;
+                for (var i = 0; i < pixels.length; i++) {
+                    if (pixels[i][3] > 128) {
+                        var q = quantized[qIdx++];
+                        pixels[i] = [q[0], q[1], q[2], 255];
+                    }
+                }
+            }
+        }
+
+        // 填充到画布
+        for (var i = 0; i < SIZE; i++) {
+            for (var j = 0; j < SIZE; j++) {
+                var px = pixels[i * SIZE + j];
+                if (px[3] > 128) { // 半透明以上才填充
+                    cells[i][j] = rgbToHex(px[0], px[1], px[2]);
+                } else {
+                    cells[i][j] = null; // 透明部分留空
+                }
+            }
+        }
+
+        renderAll();
+    }
+
     document.getElementById('pxImport').addEventListener('click', function() {
         fileInput.click();
     });
@@ -318,68 +381,36 @@ window.initPixelArt = function(container) {
         var reader = new FileReader();
         reader.onload = function(evt) {
             img.onload = function() {
-                // 绘制到临时 canvas 并缩放到 SIZE×SIZE
-                var tempCanvas = document.createElement('canvas');
-                tempCanvas.width = SIZE;
-                tempCanvas.height = SIZE;
-                var tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(img, 0, 0, SIZE, SIZE);
+                // 缓存原始图片
+                importedImage = img;
 
-                // 读取像素数据
-                var imageData = tempCtx.getImageData(0, 0, SIZE, SIZE);
-                var data = imageData.data;
-                var pixels = [];
-
-                for (var i = 0; i < SIZE; i++) {
-                    for (var j = 0; j < SIZE; j++) {
-                        var idx = (i * SIZE + j) * 4;
-                        var r = data[idx];
-                        var g = data[idx + 1];
-                        var b = data[idx + 2];
-                        var a = data[idx + 3];
-                        pixels.push([r, g, b, a]);
-                    }
-                }
-
-                // 如果启用色彩简化，进行量化
-                if (simplifyCheck.checked) {
-                    var colorCount = parseInt(colorCountSelect.value);
-                    // 只对不透明像素进行量化
-                    var opaquePixels = pixels.filter(function(p) { return p[3] > 128; }).map(function(p) { return [p[0], p[1], p[2]]; });
-                    if (opaquePixels.length > 0) {
-                        var quantized = quantizeColors(opaquePixels, colorCount);
-                        var qIdx = 0;
-                        for (var i = 0; i < pixels.length; i++) {
-                            if (pixels[i][3] > 128) {
-                                var q = quantized[qIdx++];
-                                pixels[i] = [q[0], q[1], q[2], 255];
-                            }
-                        }
-                    }
-                }
-
-                // 填充到画布
+                // 入撤销栈
                 history.push(snapshot());
                 if (history.length > 20) history.shift();
 
-                for (var i = 0; i < SIZE; i++) {
-                    for (var j = 0; j < SIZE; j++) {
-                        var px = pixels[i * SIZE + j];
-                        if (px[3] > 128) { // 半透明以上才填充
-                            cells[i][j] = rgbToHex(px[0], px[1], px[2]);
-                        } else {
-                            cells[i][j] = null; // 透明部分留空
-                        }
-                    }
-                }
-
-                renderAll();
+                // 处理并显示
+                processImportedImage();
                 showToast('已导入图片' + (simplifyCheck.checked ? '（' + colorCountSelect.value + '色简化）' : ''));
             };
             img.src = evt.target.result;
         };
         reader.readAsDataURL(file);
         fileInput.value = ''; // 清空以便重复导入同一文件
+    });
+
+    // 色彩简化选项变化时重新处理
+    simplifyCheck.addEventListener('change', function() {
+        if (importedImage) {
+            processImportedImage();
+            showToast(this.checked ? '已启用色彩简化（' + colorCountSelect.value + '色）' : '已关闭色彩简化');
+        }
+    });
+
+    colorCountSelect.addEventListener('change', function() {
+        if (importedImage && simplifyCheck.checked) {
+            processImportedImage();
+            showToast('已切换为 ' + this.value + ' 色简化');
+        }
     });
 
     // --- 导出 PNG ---
