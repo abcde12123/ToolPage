@@ -840,6 +840,60 @@ body.night .px-cell { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
 body.night .px-status { color: #64748B; }
 body.night .px-note { color: #64748B; }
 
+/* 像素画确认对话框 */
+.px-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000;
+    background: rgba(0,0,0,0); backdrop-filter: blur(0px);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.px-modal-overlay.px-modal-show { background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
+.px-modal-overlay.px-modal-closing { background: rgba(0,0,0,0); backdrop-filter: blur(0px); }
+.px-modal {
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+    border-radius: 16px; padding: 24px; min-width: 320px; max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: scale(0.9); opacity: 0; transition: all 0.2s;
+}
+.px-modal-show .px-modal { transform: scale(1); opacity: 1; }
+.px-modal-closing .px-modal { transform: scale(0.9); opacity: 0; }
+.px-modal-title {
+    font-size: 1.1rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;
+}
+.px-modal-message {
+    font-size: 0.9rem; color: #475569; line-height: 1.6; margin-bottom: 20px;
+}
+.px-modal-buttons {
+    display: flex; gap: 10px; justify-content: flex-end;
+}
+.px-modal-btn {
+    padding: 8px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s;
+}
+.px-modal-btn-cancel {
+    background: rgba(100,116,139,0.15); color: #64748B;
+}
+.px-modal-btn-cancel:hover { background: rgba(100,116,139,0.25); }
+.px-modal-btn-confirm {
+    background: rgba(167,139,250,0.35); color: #5B21B6;
+}
+.px-modal-btn-confirm:hover { background: rgba(167,139,250,0.5); }
+
+/* 夜间模式 */
+body.night .px-modal {
+    background: rgba(30,41,59,0.95);
+}
+body.night .px-modal-title { color: #E2E8F0; }
+body.night .px-modal-message { color: #94A3B8; }
+body.night .px-modal-btn-cancel {
+    background: rgba(100,116,139,0.2); color: #94A3B8;
+}
+body.night .px-modal-btn-cancel:hover { background: rgba(100,116,139,0.3); }
+body.night .px-modal-btn-confirm {
+    background: rgba(139,92,246,0.35); color: #C4B5FD;
+}
+body.night .px-modal-btn-confirm:hover { background: rgba(139,92,246,0.5); }
+
 /* ===== 正则测试器 (rx-) ===== */
 .rx-container { display: flex; flex-direction: column; gap: 16px; }
 .rx-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }

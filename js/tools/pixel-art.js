@@ -56,6 +56,53 @@ window.initPixelArt = function(container) {
             '<input type="file" id="pxFileInput" accept="image/*" style="display:none;" />' +
         '</div>';
 
+    // --- 自定义确认对话框 ---
+    function showConfirm(message, onConfirm, onCancel) {
+        var overlay = document.createElement('div');
+        overlay.className = 'px-modal-overlay';
+        overlay.innerHTML =
+            '<div class="px-modal">' +
+                '<div class="px-modal-title">提示</div>' +
+                '<div class="px-modal-message">' + message + '</div>' +
+                '<div class="px-modal-buttons">' +
+                    '<button class="px-modal-btn px-modal-btn-cancel">取消</button>' +
+                    '<button class="px-modal-btn px-modal-btn-confirm">确认</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        var modal = overlay.querySelector('.px-modal');
+        var cancelBtn = overlay.querySelector('.px-modal-btn-cancel');
+        var confirmBtn = overlay.querySelector('.px-modal-btn-confirm');
+
+        function close() {
+            overlay.classList.add('px-modal-closing');
+            setTimeout(function() {
+                if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }, 200);
+        }
+
+        cancelBtn.addEventListener('click', function() {
+            close();
+            if (onCancel) onCancel();
+        });
+
+        confirmBtn.addEventListener('click', function() {
+            close();
+            if (onConfirm) onConfirm();
+        });
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                close();
+                if (onCancel) onCancel();
+            }
+        });
+
+        setTimeout(function() { overlay.classList.add('px-modal-show'); }, 10);
+    }
+
     var gridEl = document.getElementById('pxGrid');
     var currentEl = document.getElementById('pxCurrent');
     var paletteEl = document.getElementById('pxPalette');
@@ -181,13 +228,25 @@ window.initPixelArt = function(container) {
         var hasImportedImage = importedImage !== null;
 
         if (hasContent && !hasImportedImage && n !== SIZE) {
-            if (!confirm('当前画布有内容，切换尺寸会清空画布，确认继续吗？')) {
-                // 用户取消，恢复输入框的值
-                sizeInput.value = SIZE;
-                return;
-            }
+            showConfirm(
+                '当前画布有内容，切换尺寸会清空画布，确认继续吗？',
+                function() {
+                    // 确认后执行切换
+                    applySizeChange(n);
+                },
+                function() {
+                    // 取消，恢复输入框的值
+                    sizeInput.value = SIZE;
+                }
+            );
+            return;
         }
 
+        // 没有内容或是导入的图片，直接切换
+        applySizeChange(n);
+    }
+
+    function applySizeChange(n) {
         SIZE = n;
         cellPx = GRID_W / n;
         gridEl.style.gridTemplateColumns = 'repeat(' + n + ',1fr)';
