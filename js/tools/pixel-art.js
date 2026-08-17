@@ -343,7 +343,7 @@ window.initPixelArt = function(container) {
 
         // 如果启用色彩简化，进行量化
         if (simplifyCheck.checked) {
-            var colorCount = parseInt(colorCountSelect.value);
+            var colorCount = parseInt(colorCountInput.value);
             // 只对不透明像素进行量化
             var opaquePixels = pixels.filter(function(p) { return p[3] > 128; }).map(function(p) { return [p[0], p[1], p[2]]; });
             if (opaquePixels.length > 0) {
