@@ -229,7 +229,6 @@
         loginBtn.textContent = '✓ 登录';
       });
   }
-  }
 
   function shakeInput() {
     passwordInput.classList.remove('shake');
@@ -479,97 +478,21 @@
       item.addEventListener('dragend', handleDragEnd);
       item.addEventListener('dragover', handleDragOver);
       item.addEventListener('drop', handleDrop);
-      item.addEventListener('dragenter', function() {
-        if (draggedItem && this !== draggedItem) {
-          this.classList.add('drag-over');
-        }
-      });
-      item.addEventListener('dragleave', function() {
-        this.classList.remove('drag-over');
-      });
 
       toolOrderList.appendChild(item);
     }
-
-    // 监听鼠标移动更新幽灵元素位置
-    document.addEventListener('dragover', function(e) {
-      if (ghostElement) {
-        ghostElement.style.left = e.clientX - ghostElement.offsetWidth / 2 + 'px';
-        ghostElement.style.top = e.clientY - 20 + 'px';
-      }
-    });
-
-    // 拖动时允许鼠标滚轮滚动列表
-    if (toolOrderList) {
-      // 监听滚轮事件，拖动时手动滚动
-      toolOrderList.addEventListener('wheel', function(e) {
-        if (draggedItem) {
-          // 阻止默认行为，手动滚动
-          e.preventDefault();
-          e.stopPropagation();
-          // 手动滚动列表
-          this.scrollTop += e.deltaY;
-        }
-      }, { passive: false });
-    }
   }
-
-  var ghostElement = null;
-  var lastTarget = null; // 记录上次的目标元素，避免重复触发
-  var lastTargetTime = 0; // 记录上次触发时间，用于防抖
 
   function handleDragStart(e) {
     draggedItem = this;
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
-
-    // 重置上次目标
-    lastTarget = null;
-    lastTargetTime = 0;
-
-    // 震动反馈
-    if (navigator.vibrate) navigator.vibrate(10);
-
-    // 创建跟随鼠标的幽灵元素
-    ghostElement = this.cloneNode(true);
-    ghostElement.classList.remove('dragging');
-    ghostElement.classList.add('drag-ghost');
-    ghostElement.style.position = 'fixed';
-    ghostElement.style.pointerEvents = 'none';
-    ghostElement.style.zIndex = '9999';
-    ghostElement.style.width = this.offsetWidth + 'px';
-    ghostElement.style.left = e.clientX - this.offsetWidth / 2 + 'px';
-    ghostElement.style.top = e.clientY - 20 + 'px';
-    document.body.appendChild(ghostElement);
-
-    // 设置透明的拖拽图像（隐藏默认幽灵）
-    var emptyImg = document.createElement('img');
-    emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(emptyImg, 0, 0);
   }
 
   function handleDragEnd(e) {
     this.classList.remove('dragging');
     draggedItem = null;
-    lastTarget = null; // 清理上次目标
-    lastTargetTime = 0; // 清理时间戳
-
-    // 震动反馈
-    if (navigator.vibrate) navigator.vibrate(15);
-
-    // 移除幽灵元素
-    if (ghostElement && ghostElement.parentNode) {
-      ghostElement.parentNode.removeChild(ghostElement);
-      ghostElement = null;
-    }
-
-    // 清理所有卡片的 transform（避免残留）
-    var items = toolOrderList.querySelectorAll('.tool-order-item');
-    for (var i = 0; i < items.length; i++) {
-      items[i].style.transform = '';
-      items[i].style.transition = '';
-    }
   }
 
   function handleDragOver(e) {
@@ -577,89 +500,14 @@
     e.dataTransfer.dropEffect = 'move';
 
     if (draggedItem && this !== draggedItem) {
-      // 计算鼠标在目标元素中的相对位置
-      var rect = this.getBoundingClientRect();
-      var mouseY = e.clientY;
-      var elementTop = rect.top;
-      var elementHeight = rect.height;
-      var relativeY = mouseY - elementTop;
-      var ratio = relativeY / elementHeight;
-
-      // 三区域判断：上40%、中20%、下40%
-      var insertBefore = false;
-      var insertAfter = false;
-
-      if (ratio < 0.4) {
-        // 鼠标在上部 → 插入到目标前面
-        insertBefore = true;
-      } else if (ratio > 0.6) {
-        // 鼠标在下部 → 插入到目标后面
-        insertAfter = true;
-      } else {
-        // 鼠标在中部 → 不移动
-        return false;
-      }
-
       var items = toolOrderList.querySelectorAll('.tool-order-item');
       var draggedIndex = Array.prototype.indexOf.call(items, draggedItem);
       var targetIndex = Array.prototype.indexOf.call(items, this);
 
-      // 根据区域判断是否需要移动
-      var needMove = false;
-      if (insertBefore && draggedIndex !== targetIndex - 1) {
-        // 要插入到目标前面，且当前不是已经在目标前面
-        needMove = true;
-      } else if (insertAfter && draggedIndex !== targetIndex + 1) {
-        // 要插入到目标后面，且当前不是已经在目标后面
-        needMove = true;
-      }
-
-      if (!needMove) {
-        return false;
-      }
-
-      // 清除所有 drag-over 类
-      for (var i = 0; i < items.length; i++) {
-        items[i].classList.remove('drag-over');
-      }
-
-      // 添加避让动画：记录所有卡片当前位置
-      var positions = [];
-      for (var i = 0; i < items.length; i++) {
-        if (items[i] !== draggedItem) {
-          positions.push({
-            element: items[i],
-            top: items[i].offsetTop
-          });
-        }
-      }
-
-      // 执行 DOM 重排
-      if (insertBefore) {
-        this.parentNode.insertBefore(draggedItem, this);
-      } else if (insertAfter) {
+      if (draggedIndex < targetIndex) {
         this.parentNode.insertBefore(draggedItem, this.nextSibling);
-      }
-
-      // 计算新位置并应用平滑过渡
-      for (var i = 0; i < positions.length; i++) {
-        var item = positions[i].element;
-        var oldTop = positions[i].top;
-        var newTop = item.offsetTop;
-        var delta = oldTop - newTop;
-
-        if (delta !== 0) {
-          // 瞬间移回旧位置
-          item.style.transform = 'translateY(' + delta + 'px)';
-          item.style.transition = 'none';
-
-          // 强制重排
-          item.offsetHeight;
-
-          // 平滑过渡到新位置
-          item.style.transition = 'transform 0.25s cubic-bezier(0.23, 1, 0.32, 1)';
-          item.style.transform = 'translateY(0)';
-        }
+      } else {
+        this.parentNode.insertBefore(draggedItem, this);
       }
     }
 
