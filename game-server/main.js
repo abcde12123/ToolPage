@@ -3,7 +3,9 @@
     'use strict';
 
     // ===== 配置 =====
-    const API_BASE = 'http://localhost:8500/api/gameserver';
+    const API_BASE = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+        ? 'http://localhost:8500/api/gameserver'
+        : 'https://xiaye.xyz/api/gameserver';
     const STORAGE_KEYS = {
         FAVORITES: 'gs_favorites',
         HISTORY: 'gs_history'
@@ -33,6 +35,16 @@
     };
 
     // ===== 工具函数 =====
+    function escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     function showToast(message, duration = 3000) {
         const toast = document.getElementById('toast');
         toast.textContent = message;
@@ -159,10 +171,10 @@
         }
 
         container.innerHTML = favorites.map((fav, index) => `
-            <div class="gs-favorite-item" data-game="${fav.game}" data-host="${fav.host}" data-port="${fav.port}">
+            <div class="gs-favorite-item" data-game="${escapeHtml(fav.game)}" data-host="${escapeHtml(fav.host)}" data-port="${escapeHtml(fav.port)}">
                 <div>
-                    <div class="gs-favorite-item__name">${fav.name || '未命名服务器'}</div>
-                    <div class="gs-favorite-item__addr">${fav.host}:${fav.port}</div>
+                    <div class="gs-favorite-item__name">${escapeHtml(fav.name || '未命名服务器')}</div>
+                    <div class="gs-favorite-item__addr">${escapeHtml(fav.host)}:${escapeHtml(fav.port)}</div>
                 </div>
                 <button class="gs-favorite-item__remove" data-index="${index}" title="移除">×</button>
             </div>
@@ -199,10 +211,10 @@
         }
 
         container.innerHTML = history.map(item => `
-            <div class="gs-history-item" data-game="${item.game}" data-host="${item.host}" data-port="${item.port}">
-                <div class="gs-history-item__game">${getGameName(item.game)}</div>
-                <div class="gs-history-item__addr">${item.host}:${item.port}</div>
-                <div class="gs-history-item__time">${formatRelativeTime(item.timestamp)}</div>
+            <div class="gs-history-item" data-game="${escapeHtml(item.game)}" data-host="${escapeHtml(item.host)}" data-port="${escapeHtml(item.port)}">
+                <div class="gs-history-item__game">${escapeHtml(getGameName(item.game))}</div>
+                <div class="gs-history-item__addr">${escapeHtml(item.host)}:${escapeHtml(item.port)}</div>
+                <div class="gs-history-item__time">${escapeHtml(formatRelativeTime(item.timestamp))}</div>
             </div>
         `).join('');
 
@@ -260,30 +272,30 @@
                 </div>
                 <div class="gs-status-item">
                     <div class="gs-status-item__label">延迟</div>
-                    <div class="gs-status-item__value">${result.ping} ms</div>
+                    <div class="gs-status-item__value">${escapeHtml(String(result.ping))} ms</div>
                 </div>
                 <div class="gs-status-item">
                     <div class="gs-status-item__label">在线玩家</div>
-                    <div class="gs-status-item__value">${result.players.current} / ${result.players.max}</div>
+                    <div class="gs-status-item__value">${escapeHtml(String(result.players.current))} / ${escapeHtml(String(result.players.max))}</div>
                 </div>
                 ${result.version ? `
                 <div class="gs-status-item">
                     <div class="gs-status-item__label">版本</div>
-                    <div class="gs-status-item__value" style="font-size: 1rem;">${result.version}</div>
+                    <div class="gs-status-item__value" style="font-size: 1rem;">${escapeHtml(result.version)}</div>
                 </div>
                 ` : ''}
             </div>
             ${result.name ? `
                 <div style="margin-top: 16px; padding: 16px; background: rgba(255, 255, 255, 0.6); border-radius: 12px; border: 1px solid rgba(120, 113, 108, 0.1);">
                     <div style="font-size: 0.85rem; color: #78716C; margin-bottom: 4px;">服务器名称</div>
-                    <div style="font-size: 1.1rem; font-weight: 600; color: #1E293B;">${result.name}</div>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #1E293B;">${escapeHtml(result.name)}</div>
                 </div>
             ` : ''}
             ${result.players.list && result.players.list.length > 0 ? `
                 <div class="gs-players-list">
                     <h4>在线玩家列表</h4>
                     <div class="gs-players-list__items">
-                        ${result.players.list.map(p => `<span class="gs-player-tag">${p}</span>`).join('')}
+                        ${result.players.list.map(p => `<span class="gs-player-tag">${escapeHtml(p)}</span>`).join('')}
                     </div>
                 </div>
             ` : ''}
