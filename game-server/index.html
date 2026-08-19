@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="游戏服务器状态查询工具 - 支持 Minecraft Java/基岩版、Palworld 等游戏服务器在线状态、玩家数、延迟查询">
+    <title>游戏服务器状态查询 - 夏夜工具集</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <link rel="stylesheet" href="/css/style.css?v=77">
+    <link rel="stylesheet" href="style.css?v=1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- 防白闪脚本 -->
+    <script>try{
+      var now=new Date(),md=localStorage.getItem('theme_manual_date'),night=false;
+      var today=''+now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+      if(md===today){night=(localStorage.getItem('theme_night')==='1');}
+      else{var h=now.getHours();night=(h>=19||h<6);}
+      if(night){document.body.classList.add('night');}
+    }catch(e){}</script>
+
+    <div id="orbContainer"></div>
+
+    <!-- 阳光光斑 -->
+    <div class="sunbeam-layer" aria-hidden="true">
+        <div class="sunbeam sunbeam--1"></div>
+        <div class="sunbeam sunbeam--2"></div>
+        <div class="sunbeam sunbeam--3"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a class="navbar__brand" href="/">
+                <span class="navbar__logo">✧</span>
+                <span>夏夜工具集</span>
+            </a>
+            <div class="navbar__links">
+                <a href="/" class="navbar__link">← 返回首页</a>
+                <button type="button" class="navbar__link navbar__btn-theme" id="btnTheme" title="切换夜间模式">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="gs-container">
+        <!-- 侧边栏 -->
+        <aside class="gs-sidebar">
+            <div class="gs-sidebar__section">
+                <h3 class="gs-sidebar__title">📌 收藏的服务器</h3>
+                <div id="favoritesList" class="gs-favorites">
+                    <p class="gs-empty">暂无收藏</p>
+                </div>
+            </div>
+            <div class="gs-sidebar__section">
+                <h3 class="gs-sidebar__title">🕐 查询历史</h3>
+                <div id="historyList" class="gs-history">
+                    <p class="gs-empty">暂无历史</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="gs-main">
+            <!-- 游戏类型 Tab -->
+            <div class="gs-tabs">
+                <button class="gs-tab active" data-game="minecraft" data-port="25565">
+                    🧱 Minecraft Java
+                </button>
+                <button class="gs-tab" data-game="minecraftbe" data-port="19132">
+                    📱 Minecraft 基岩版
+                </button>
+                <button class="gs-tab" data-game="palworld" data-port="8211">
+                    🦜 Palworld
+                </button>
+            </div>
+
+            <!-- 查询表单 -->
+            <div class="gs-card">
+                <h2 class="gs-card__title">🔍 查询服务器状态</h2>
+                <form id="queryForm" class="gs-form">
+                    <div class="gs-form__row">
+                        <div class="gs-form__group">
+                            <label for="serverHost">服务器地址</label>
+                            <input
+                                type="text"
+                                id="serverHost"
+                                placeholder="例如：mc.hypixel.net"
+                                required
+                            >
+                        </div>
+                        <div class="gs-form__group gs-form__group--small">
+                            <label for="serverPort">端口</label>
+                            <input
+                                type="number"
+                                id="serverPort"
+                                value="25565"
+                                min="1"
+                                max="65535"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <button type="submit" class="gs-btn gs-btn--primary" id="btnQuery">
+                        <span>查询状态</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- 查询结果 -->
+            <div id="resultSection" class="gs-result" style="display:none;">
+                <div class="gs-card">
+                    <div class="gs-card__header">
+                        <h2 class="gs-card__title">📊 服务器状态</h2>
+                        <button class="gs-btn gs-btn--icon" id="btnFavorite" title="收藏此服务器">
+                            ⭐
+                        </button>
+                    </div>
+                    <div id="resultContent"></div>
+                </div>
+
+                <!-- 历史曲线图 -->
+                <div class="gs-card">
+                    <div class="gs-card__header">
+                        <h2 class="gs-card__title">📈 历史趋势</h2>
+                        <div class="gs-chart-controls">
+                            <button class="gs-btn gs-btn--small active" data-days="7">7天</button>
+                            <button class="gs-btn gs-btn--small" data-days="30">30天</button>
+                        </div>
+                    </div>
+                    <div class="gs-chart-container">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="gs-toast"></div>
+
+    <!-- 主站脚本 -->
+    <script src="/js/main.js?v=45"></script>
+    <!-- 工具脚本 -->
+    <script src="main.js?v=1"></script>
+</body>
+</html>

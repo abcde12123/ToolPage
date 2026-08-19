@@ -1,0 +1,506 @@
+/* 游戏服务器查询工具样式 */
+
+/* ===== 布局 ===== */
+.gs-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 24px 60px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    position: relative;
+    z-index: 1;
+}
+
+.gs-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.gs-main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ===== 侧边栏 ===== */
+.gs-sidebar__section {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.gs-sidebar__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1E293B;
+    margin-bottom: 16px;
+}
+
+.gs-favorites, .gs-history {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gs-favorite-item, .gs-history-item {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.gs-favorite-item:hover, .gs-history-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(120, 113, 108, 0.2);
+    transform: translateX(4px);
+}
+
+.gs-favorite-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gs-favorite-item__name {
+    font-weight: 500;
+    color: #1E293B;
+}
+
+.gs-favorite-item__addr {
+    font-size: 0.8rem;
+    color: #78716C;
+    margin-top: 2px;
+}
+
+.gs-favorite-item__remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.gs-favorite-item__remove:hover {
+    opacity: 1;
+}
+
+.gs-history-item__game {
+    font-weight: 500;
+    color: #1E293B;
+}
+
+.gs-history-item__addr {
+    font-size: 0.8rem;
+    color: #78716C;
+    margin-top: 2px;
+}
+
+.gs-history-item__time {
+    font-size: 0.75rem;
+    color: #A8A29E;
+    margin-top: 4px;
+}
+
+.gs-empty {
+    text-align: center;
+    color: #A8A29E;
+    font-size: 0.85rem;
+    padding: 16px 0;
+}
+
+/* ===== 卡片 ===== */
+.gs-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.gs-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.gs-card__title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1E293B;
+    margin-bottom: 20px;
+}
+
+.gs-card__header .gs-card__title {
+    margin-bottom: 0;
+}
+
+/* ===== Tab 切换 ===== */
+.gs-tabs {
+    display: flex;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.gs-tab {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #78716C;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gs-tab:hover {
+    color: #1E293B;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.gs-tab.active {
+    color: #1E293B;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== 表单 ===== */
+.gs-form__row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.gs-form__group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gs-form__group--small {
+    flex: 0 0 140px;
+}
+
+.gs-form__group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1E293B;
+}
+
+.gs-form__group input {
+    padding: 12px 16px;
+    border: 1px solid rgba(120, 113, 108, 0.2);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.8);
+    color: #1E293B;
+    transition: all 0.2s;
+}
+
+.gs-form__group input:focus {
+    outline: none;
+    border-color: #F97316;
+    background: rgba(255, 255, 255, 1);
+}
+
+/* ===== 按钮 ===== */
+.gs-btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: rgba(255, 255, 255, 0.8);
+    color: #1E293B;
+}
+
+.gs-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gs-btn--primary {
+    background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+    color: white;
+    width: 100%;
+    font-size: 1rem;
+}
+
+.gs-btn--primary:hover {
+    background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+}
+
+.gs-btn--primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.gs-btn--small {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+}
+
+.gs-btn--small.active {
+    background: #F97316;
+    color: white;
+}
+
+.gs-btn--icon {
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== 结果展示 ===== */
+.gs-result {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.gs-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.gs-status-item {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(120, 113, 108, 0.1);
+}
+
+.gs-status-item__label {
+    font-size: 0.85rem;
+    color: #78716C;
+    margin-bottom: 8px;
+}
+
+.gs-status-item__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1E293B;
+}
+
+.gs-status-item__value--online {
+    color: #10B981;
+}
+
+.gs-status-item__value--offline {
+    color: #EF4444;
+}
+
+.gs-players-list {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(120, 113, 108, 0.1);
+}
+
+.gs-players-list h4 {
+    font-size: 0.95rem;
+    color: #1E293B;
+    margin-bottom: 12px;
+}
+
+.gs-players-list__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.gs-player-tag {
+    padding: 4px 10px;
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #F97316;
+}
+
+/* ===== 图表 ===== */
+.gs-chart-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.gs-chart-container {
+    position: relative;
+    height: 300px;
+    margin-top: 20px;
+}
+
+/* ===== Toast ===== */
+.gs-toast {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    padding: 14px 24px;
+    background: rgba(30, 41, 59, 0.95);
+    color: white;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.gs-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ===== 夜间模式 ===== */
+body.night .gs-sidebar__section,
+body.night .gs-card,
+body.night .gs-tabs {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(51, 65, 85, 0.8);
+}
+
+body.night .gs-sidebar__title,
+body.night .gs-card__title,
+body.night .gs-favorite-item__name,
+body.night .gs-history-item__game,
+body.night .gs-status-item__value,
+body.night .gs-players-list h4 {
+    color: #F8FAFC;
+}
+
+body.night .gs-favorite-item__addr,
+body.night .gs-history-item__addr,
+body.night .gs-status-item__label {
+    color: #94A3B8;
+}
+
+body.night .gs-history-item__time,
+body.night .gs-empty {
+    color: #64748B;
+}
+
+body.night .gs-favorite-item,
+body.night .gs-history-item,
+body.night .gs-status-item,
+body.night .gs-players-list {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(51, 65, 85, 0.5);
+}
+
+body.night .gs-favorite-item:hover,
+body.night .gs-history-item:hover {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+body.night .gs-form__group input {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(51, 65, 85, 0.5);
+    color: #F8FAFC;
+}
+
+body.night .gs-form__group input:focus {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: #F97316;
+}
+
+body.night .gs-form__group label {
+    color: #F8FAFC;
+}
+
+body.night .gs-tab {
+    color: #94A3B8;
+}
+
+body.night .gs-tab:hover,
+body.night .gs-tab.active {
+    color: #F8FAFC;
+    background: rgba(30, 41, 59, 0.8);
+}
+
+body.night .gs-btn {
+    background: rgba(30, 41, 59, 0.8);
+    color: #F8FAFC;
+}
+
+body.night .gs-btn--icon {
+    background: rgba(30, 41, 59, 0.6);
+}
+
+body.night .gs-toast {
+    background: rgba(248, 250, 252, 0.95);
+    color: #1E293B;
+}
+
+body.night .navbar::after {
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0));
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+    .gs-container {
+        grid-template-columns: 1fr;
+        padding: 60px 16px 40px;
+    }
+
+    .gs-sidebar {
+        order: 2;
+    }
+
+    .gs-main {
+        order: 1;
+    }
+
+    .gs-form__row {
+        flex-direction: column;
+    }
+
+    .gs-form__group--small {
+        flex: 1;
+    }
+
+    .gs-tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .gs-status {
+        grid-template-columns: 1fr;
+    }
+
+    .gs-card {
+        padding: 20px;
+    }
+
+    .gs-chart-container {
+        height: 250px;
+    }
+}
