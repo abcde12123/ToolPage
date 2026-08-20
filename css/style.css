@@ -705,7 +705,7 @@ body.night .bt-sub { color: #64748B; }
 .rk-buttons-panel {
     display: flex; flex-direction: column; gap: 8px; padding: 10px 12px;
     background: rgba(255,255,255,0.35); border-radius: 12px; border: 1px solid rgba(255,255,255,0.6);
-    flex-shrink: 0; max-height: 200px; overflow-y: auto;
+    flex-shrink: 0;
 }
 .rk-button-group {
     display: flex; flex-direction: column; gap: 5px;
@@ -757,7 +757,6 @@ body.night .bt-sub { color: #64748B; }
 .rk-card {
     padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.4);
     border: 1px solid rgba(255,255,255,0.55); display: flex; flex-direction: column; gap: 5px;
-    max-height: 150px; overflow-y: auto;
 }
 .rk-answer { font-size: 1.15rem; font-weight: 700; color: #1E293B; word-break: break-all; line-height: 1.4; }
 .rk-answer-dim { font-size: 0.85rem; font-weight: 500; color: #A8A29E; }
@@ -767,7 +766,7 @@ body.night .bt-sub { color: #64748B; }
 .rk-err { font-size: 0.85rem; font-weight: 600; color: #DC2626; }
 .rk-note { font-size: 0.72rem; color: #A8A29E; line-height: 1.5; padding: 6px 0; }
 .rk-quick-title { font-size: 0.75rem; font-weight: 600; color: #78716C; margin-top: 2px; flex-shrink: 0; }
-.rk-quick { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; max-height: 180px; overflow-y: auto; }
+.rk-quick { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
 .rk-qgroup { display: flex; flex-direction: column; gap: 4px; }
 .rk-qtitle { font-size: 0.7rem; font-weight: 600; color: #A8A29E; letter-spacing: 1px; }
 .rk-qitems { display: flex; gap: 5px; flex-wrap: wrap; }
