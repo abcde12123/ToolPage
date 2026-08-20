@@ -25,7 +25,7 @@ var TOOLS_DEFAULT = [
     { icon: '🧮', name: 'Cron 表达式解析', desc: '解析 cron 表达式，查看执行计划', file: 'cron-parser.js', initFn: 'initCronParser' },
     { icon: '🔗', name: 'URL 编解码', desc: 'URL encode / decode 互转', file: 'url-encode.js', initFn: 'initUrlEncode' },
     { icon: '🎲', name: '随机数生成器', desc: 'UUID v4、随机整数与小数', file: 'random-gen.js', initFn: 'initRandomGen' },
-    { icon: '📐', name: '单位换算器', desc: '长度/重量/温度/面积/体积/速度', file: 'unit-convert.js', initFn: 'initUnitConvert' },
+    { icon: '📐', name: '单位换算器', desc: '长度/重量/温度/面积/体积/速度/货币', file: 'unit-convert.js', initFn: 'initUnitConvert' },
 ];
 
 // 工具列表（会被管理员设置的顺序覆盖）
@@ -127,7 +127,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=40';
+    script.src = '/js/tools/' + tool.file + '?v=41';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];

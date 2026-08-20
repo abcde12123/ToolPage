@@ -12,6 +12,7 @@
     };
     const MAX_FAVORITES = 20;
     const MAX_HISTORY = 10;
+    const CACHE_VERSION = 42;
 
     // ===== 状态 =====
     let currentGame = 'minecraft';
@@ -36,8 +37,9 @@
 
     // ===== 工具函数 =====
     function escapeHtml(unsafe) {
-        if (typeof unsafe !== 'string') return '';
-        return unsafe
+        if (unsafe == null) return '';
+        const str = String(unsafe);
+        return str
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -205,12 +207,15 @@
         const history = getHistory();
         const container = elements.historyList;
 
-        if (history.length === 0) {
+        // 过滤掉没有端口号的旧记录
+        const validHistory = history.filter(item => item.port);
+
+        if (validHistory.length === 0) {
             container.innerHTML = '<p class="gs-empty">暂无历史</p>';
             return;
         }
 
-        container.innerHTML = history.map(item => `
+        container.innerHTML = validHistory.map(item => `
             <div class="gs-history-item" data-game="${escapeHtml(item.game)}" data-host="${escapeHtml(item.host)}" data-port="${escapeHtml(item.port)}">
                 <div class="gs-history-item__game">${escapeHtml(getGameName(item.game))}</div>
                 <div class="gs-history-item__addr">${escapeHtml(item.host)}:${escapeHtml(item.port)}</div>
@@ -249,6 +254,20 @@
         currentResult = result;
 
         if (!result.online) {
+            // 分析错误原因并给出友好提示
+            let errorHint = '';
+            const error = result.error || '';
+
+            if (error.includes('ECONNREFUSED')) {
+                errorHint = '💡 端口未开放或协议不匹配，请检查：<br>① 服务器是否已启动<br>② 端口号是否正确<br>③ 是否选择了正确的游戏类型';
+            } else if (error.includes('timed out') || error.includes('timeout')) {
+                errorHint = '⏱️ 连接超时，可能原因：<br>① 服务器防火墙限制了查询<br>② 网络延迟过高<br>③ 服务器未响应查询协议';
+            } else if (error.includes('ENOTFOUND') || error.includes('getaddrinfo')) {
+                errorHint = '🔍 无法解析域名，请检查：<br>① 服务器地址是否正确<br>② 域名是否已配置 DNS';
+            } else {
+                errorHint = '❌ 服务器未响应或不可达';
+            }
+
             elements.resultContent.innerHTML = `
                 <div class="gs-status">
                     <div class="gs-status-item">
@@ -256,9 +275,11 @@
                         <div class="gs-status-item__value gs-status-item__value--offline">离线</div>
                     </div>
                 </div>
-                <p style="margin-top: 16px; color: #78716C; text-align: center;">
-                    ${result.error || '服务器未响应或不可达'}
-                </p>
+                <div style="margin-top: 16px; padding: 12px; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; color: #92400E; font-size: 14px; line-height: 1.6;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">⚠️ 连接失败</div>
+                    <div style="font-size: 13px; color: #78716C; margin-bottom: 8px;">${escapeHtml(error)}</div>
+                    <div style="font-size: 13px;">${errorHint}</div>
+                </div>
             `;
             elements.resultSection.style.display = 'block';
             return;
@@ -486,6 +507,20 @@
             currentGame = tab.dataset.game;
             elements.portInput.value = tab.dataset.port;
         });
+    });
+
+    // 服务器地址输入框：粘贴时自动分离 host:port
+    elements.hostInput.addEventListener('paste', (e) => {
+        setTimeout(() => {
+            const value = elements.hostInput.value.trim();
+            const match = value.match(/^(.+):(\d+)$/);
+            if (match) {
+                const [, host, port] = match;
+                elements.hostInput.value = host;
+                elements.portInput.value = port;
+                showToast('已自动分离端口号');
+            }
+        }, 10);
     });
 
     // 表单提交
