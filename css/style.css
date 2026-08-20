@@ -273,7 +273,7 @@ body {
 }
 .modal__body {
     padding: 28px;
-    overflow: visible;
+    overflow-y: auto;
     flex: 1;
 }
 body.modal-open { overflow: hidden; }
@@ -654,7 +654,7 @@ body.night .bt-status { color: #C4B5FD; }
 body.night .bt-sub { color: #64748B; }
 
 /* ===== 亲戚称呼计算器 (rk-) ===== */
-.rk-wrap { display: flex; flex-direction: column; gap: 8px; max-height: 85vh; overflow-y: auto; }
+.rk-wrap { display: flex; flex-direction: column; gap: 8px; }
 .rk-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.35); border-radius: 100px; padding: 4px; width: fit-content; flex-wrap: wrap; max-width: 100%; flex-shrink: 0; }
 .rk-toggle-btn {
     padding: 6px 12px; border-radius: 100px; border: none; background: transparent;
