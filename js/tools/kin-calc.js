@@ -335,23 +335,23 @@ window.initKinCalc = function(container) {
     container.innerHTML =
         '<div class="rk-wrap">' +
             '<div class="rk-toggle">' +
-                '<button class="rk-toggle-btn active" id="rkMode1">&#x1F4AC; 我叫他/她什么</button>' +
-                '<button class="rk-toggle-btn" id="rkMode2">&#x1F504; 他/她叫我什么</button>' +
+                '<button class="rk-toggle-btn active" id="rkMode1">💬 我叫他/她什么</button>' +
+                '<button class="rk-toggle-btn" id="rkMode2">🔄 他/她叫我什么</button>' +
             '</div>' +
             '<div class="rk-sex" id="rkSexRow">' +
-                '<span class="rk-sex-label">&#x2640;&#xFE0F;&#x200D;&#x2642;&#xFE0F; 我的性别（反向模式需要）：</span>' +
+                '<span class="rk-sex-label">♀️‍♂️ 我的性别（反向模式需要）：</span>' +
                 '<label class="rk-seg"><input type="radio" name="rkSex" value="男" checked /> 男</label>' +
                 '<label class="rk-seg"><input type="radio" name="rkSex" value="女" /> 女</label>' +
             '</div>' +
             '<div class="rk-path-display" id="rkPath"></div>' +
             '<div class="rk-buttons-panel" id="rkButtons"></div>' +
             '<div class="rk-actions">' +
-                '<button class="rk-action-btn" id="rkUndo" disabled>&#x21A9;&#xFE0F; 撤销</button>' +
-                '<button class="rk-action-btn" id="rkReset" disabled>&#x1F504; 重置</button>' +
+                '<button class="rk-action-btn" id="rkUndo" disabled>⬅️ 回退 (Backspace)</button>' +
+                '<button class="rk-action-btn" id="rkReset" disabled>🔄 重置 (Esc)</button>' +
             '</div>' +
             '<div class="rk-result" id="rkResult"></div>' +
             '<div class="rk-note">⚠️ 方言差异：外公/外婆在北方常称「姥爷/姥姥」，姑妈/姑姑、姨妈叫法各地有差；首版收录普通话通用叫法，反向「他叫我」多为背称，当面一般叫名字。</div>' +
-            '<div class="rk-quick-title">常见称呼速查（点击自动构建）</div>' +
+            '<div class="rk-quick-title">💡 常见称呼速查（点击自动构建）</div>' +
             '<div class="rk-quick" id="rkQuick"></div>' +
         '</div>';
 
@@ -587,6 +587,29 @@ window.initKinCalc = function(container) {
             }
         });
     }
+
+    // 键盘快捷键支持
+    function handleKeyDown(e) {
+        // Backspace 回退
+        if (e.key === 'Backspace' && relationChain.length > 0) {
+            e.preventDefault();
+            undoRelation();
+        }
+        // Esc 重置
+        if (e.key === 'Escape' && relationChain.length > 0) {
+            e.preventDefault();
+            resetRelation();
+        }
+    }
+
+    // 监听键盘事件
+    document.addEventListener('keydown', handleKeyDown);
+
+    // 清理函数（工具切换时移除监听）
+    container.dataset.cleanup = 'kinCalcCleanup';
+    window.kinCalcCleanup = function() {
+        document.removeEventListener('keydown', handleKeyDown);
+    };
 
     // 初始化
     renderButtons();
