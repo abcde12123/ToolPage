@@ -364,13 +364,13 @@ window.initKinCalc = function(container) {
     var undoBtn = document.getElementById('rkUndo');
     var resetBtn = document.getElementById('rkReset');
 
-    // 常用关系按钮数据
+    // 常用关系按钮数据（仅包含基础关系词，不包含需要组合计算的复合关系）
     var COMMON_RELATIONS = [
         { title: '直系', items: ['爸爸', '妈妈', '儿子', '女儿'] },
         { title: '同辈', items: ['哥哥', '姐姐', '弟弟', '妹妹'] },
         { title: '配偶', items: ['丈夫', '妻子'] },
-        { title: '父系', items: ['伯父', '叔叔', '姑妈', '堂哥', '堂弟', '堂姐', '堂妹'] },
-        { title: '母系', items: ['舅舅', '姨妈', '表哥', '表弟', '表姐', '表妹'] }
+        { title: '父系', items: ['伯父', '叔叔', '姑妈'] },
+        { title: '母系', items: ['舅舅', '姨妈'] }
     ];
 
     // 渲染关系按钮
