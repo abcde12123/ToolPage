@@ -330,6 +330,7 @@ window.initKinCalc = function(container) {
     // --- UI ---
     var currentMode = 1; // 1 = 我叫他/她什么，2 = 他/她叫我什么
     var mySex = '男';
+    var relationChain = []; // 累积的关系链
 
     container.innerHTML =
         '<div class="rk-wrap">' +
@@ -342,22 +343,167 @@ window.initKinCalc = function(container) {
                 '<label class="rk-seg"><input type="radio" name="rkSex" value="男" checked /> 男</label>' +
                 '<label class="rk-seg"><input type="radio" name="rkSex" value="女" /> 女</label>' +
             '</div>' +
-            '<div class="rk-field-row">' +
-                '<input class="rk-input" id="rkInput" placeholder="如：爸爸的哥哥、妈妈的姐姐的丈夫" autocomplete="off" spellcheck="false" />' +
-                '<button class="rk-btn" id="rkGo">查询</button>' +
+            '<div class="rk-path-display" id="rkPath"></div>' +
+            '<div class="rk-buttons-panel" id="rkButtons"></div>' +
+            '<div class="rk-actions">' +
+                '<button class="rk-action-btn" id="rkUndo" disabled>&#x21A9;&#xFE0F; 撤销</button>' +
+                '<button class="rk-action-btn" id="rkReset" disabled>&#x1F504; 重置</button>' +
             '</div>' +
-            '<div class="rk-hint">支持关系链逐级组合，如「爸爸的哥哥的妻子」= 伯母；用「的」连接各词</div>' +
             '<div class="rk-result" id="rkResult"></div>' +
             '<div class="rk-note">⚠️ 方言差异：外公/外婆在北方常称「姥爷/姥姥」，姑妈/姑姑、姨妈叫法各地有差；首版收录普通话通用叫法，反向「他叫我」多为背称，当面一般叫名字。</div>' +
-            '<div class="rk-quick-title">常见称呼速查（点击填入）</div>' +
+            '<div class="rk-quick-title">常见称呼速查（点击自动构建）</div>' +
             '<div class="rk-quick" id="rkQuick"></div>' +
         '</div>';
 
     var mode1 = document.getElementById('rkMode1');
     var mode2 = document.getElementById('rkMode2');
-    var inputEl = document.getElementById('rkInput');
+    var pathEl = document.getElementById('rkPath');
+    var buttonsEl = document.getElementById('rkButtons');
     var resultEl = document.getElementById('rkResult');
     var quickEl = document.getElementById('rkQuick');
+    var undoBtn = document.getElementById('rkUndo');
+    var resetBtn = document.getElementById('rkReset');
+
+    // 常用关系按钮数据
+    var COMMON_RELATIONS = [
+        { title: '直系', items: ['爸爸', '妈妈', '儿子', '女儿'] },
+        { title: '同辈', items: ['哥哥', '姐姐', '弟弟', '妹妹'] },
+        { title: '配偶', items: ['丈夫', '妻子'] },
+        { title: '父系', items: ['伯父', '叔叔', '姑妈', '堂哥', '堂弟', '堂姐', '堂妹'] },
+        { title: '母系', items: ['舅舅', '姨妈', '表哥', '表弟', '表姐', '表妹'] }
+    ];
+
+    // 渲染关系按钮
+    function renderButtons() {
+        var html = '';
+        for (var i = 0; i < COMMON_RELATIONS.length; i++) {
+            var group = COMMON_RELATIONS[i];
+            html += '<div class="rk-button-group">';
+            html += '<div class="rk-group-title">' + group.title + '</div>';
+            html += '<div class="rk-group-items">';
+            for (var j = 0; j < group.items.length; j++) {
+                html += '<button class="rk-rel-btn" data-word="' + group.items[j] + '">' + group.items[j] + '</button>';
+            }
+            html += '</div></div>';
+        }
+        buttonsEl.innerHTML = html;
+        var btns = buttonsEl.querySelectorAll('.rk-rel-btn');
+        for (var k = 0; k < btns.length; k++) {
+            btns[k].addEventListener('click', function() {
+                addRelation(this.getAttribute('data-word'));
+            });
+        }
+    }
+
+    // 添加关系
+    function addRelation(word) {
+        relationChain.push(word);
+        updateDisplay();
+    }
+
+    // 撤销关系
+    function undoRelation() {
+        if (relationChain.length > 0) {
+            relationChain.pop();
+            updateDisplay();
+        }
+    }
+
+    // 重置关系
+    function resetRelation() {
+        relationChain = [];
+        updateDisplay();
+    }
+
+    // 更新显示
+    function updateDisplay() {
+        // 更新撤销/重置按钮状态
+        var hasChain = relationChain.length > 0;
+        undoBtn.disabled = !hasChain;
+        resetBtn.disabled = !hasChain;
+
+        // 空链提示
+        if (!hasChain) {
+            pathEl.innerHTML = '<div class="rk-path-empty">点击下方按钮开始累积关系链 ↓</div>';
+            resultEl.innerHTML = '<div class="rk-card"><div class="rk-answer rk-answer-dim">等待输入...</div></div>';
+            return;
+        }
+
+        // 检查关系链过长
+        if (relationChain.length > 10) {
+            pathEl.innerHTML = '<div class="rk-path-empty">⚠️ 关系链过长（超过10步），建议重置后简化</div>';
+            resultEl.innerHTML = '<div class="rk-card"><div class="rk-err">关系链太复杂了，试试简化一下～</div></div>';
+            return;
+        }
+
+        // 计算关系
+        var res = resolveChain(relationChain);
+
+        // 构建路径显示
+        var pathHtml = '<span class="rk-path-item rk-path-start">我</span>';
+        for (var i = 0; i < relationChain.length; i++) {
+            pathHtml += '<span class="rk-path-arrow">→</span>';
+            pathHtml += '<span class="rk-path-item">' + relationChain[i] + '</span>';
+        }
+
+        if (res.error) {
+            pathHtml += '<span class="rk-path-arrow">→</span>';
+            pathHtml += '<span class="rk-path-item rk-path-error">❌</span>';
+            pathEl.innerHTML = pathHtml;
+            resultEl.innerHTML = '<div class="rk-card"><div class="rk-err">' + res.error + '</div></div>';
+            return;
+        }
+
+        var key = res.key;
+        var kin = KIN[key];
+        pathHtml += '<span class="rk-path-arrow">=</span>';
+        pathHtml += '<span class="rk-path-item rk-path-result">' + displayName(key) + '</span>';
+        pathEl.innerHTML = pathHtml;
+
+        // 显示结果
+        if (currentMode === 1) {
+            // 我叫他/她什么
+            var aliasHtml = kin.aliases.length ? '，也叫 <span class="rk-aliases">' + kin.aliases.join('、') + '</span>' : '';
+            var branchNote = '';
+            if (key === '堂兄弟' || key === '堂姐妹' || key === '表兄弟' || key === '表姐妹') {
+                branchNote = '<div class="rk-note">' + kin.desc + ' —— 对方比你大还是小，要用年龄来定。' + '</div>';
+            }
+            resultEl.innerHTML =
+                '<div class="rk-card rk-ok">' +
+                    '<div class="rk-answer">' + displayName(key) + '</div>' +
+                    '<div class="rk-sub">' + relationChain.join('的') + ' = ' + kin.name + aliasHtml + '</div>' +
+                    (kin.desc ? '<div class="rk-desc">&#x1F4CC; ' + kin.desc + '</div>' : '') +
+                    branchNote +
+                '</div>';
+        } else {
+            // 他/她叫我什么
+            var rev = REVERSE[key];
+            if (!rev) {
+                resultEl.innerHTML = '<div class="rk-card"><div class="rk-err">「' + kin.name + '」叫我什么这条暂时没收录，可以反馈给我～</div></div>';
+                return;
+            }
+            var you;
+            if (rev.both) {
+                you = rev.both;
+                resultEl.innerHTML =
+                    '<div class="rk-card rk-ok">' +
+                        '<div class="rk-answer">' + kin.name + ' 叫你：' + you + '</div>' +
+                        '<div class="rk-sub">' + relationChain.join('的') + ' → 对方称呼你的背称</div>' +
+                        (kin.desc ? '<div class="rk-desc">&#x1F4CC; ' + kin.desc + '</div>' : '') +
+                    '</div>';
+            } else {
+                var mAns = rev.m, fAns = rev.f;
+                var ans = mySex === '男' ? mAns : fAns;
+                resultEl.innerHTML =
+                    '<div class="rk-card rk-ok">' +
+                        '<div class="rk-answer">' + kin.name + ' 叫你：' + ans + '</div>' +
+                        '<div class="rk-sub">' + relationChain.join('的') + ' → 对方称呼你' + (mySex === '男' ? '（你为男性）' : '（你为女性）') + '</div>' +
+                        '<div class="rk-desc">&#x1F4CC; 若你是' + (mySex === '男' ? '女性则为 ' + fAns : '男性则为 ' + mAns) + '。' + '</div>' +
+                        (kin.desc ? '<div class="rk-desc">关系：' + kin.desc + '</div>' : '') +
+                    '</div>';
+            }
+        }
+    }
 
     // 速查表
     var quickHtml = '';
@@ -374,8 +520,10 @@ window.initKinCalc = function(container) {
     var chips = quickEl.querySelectorAll('[data-chain]');
     for (var ci = 0; ci < chips.length; ci++) {
         chips[ci].addEventListener('click', function() {
-            inputEl.value = this.getAttribute('data-chain');
-            doQuery();
+            var chain = this.getAttribute('data-chain');
+            var parts = chain.split('的').filter(function(p) { return p !== ''; });
+            relationChain = parts;
+            updateDisplay();
         });
     }
 
@@ -413,86 +561,34 @@ window.initKinCalc = function(container) {
         return kin.name;
     }
 
-    function doQuery() {
-        var parsed = parseParts(inputEl.value);
-        if (parsed.empty) {
-            resultEl.innerHTML = '<div class="rk-card"><div class="rk-answer rk-answer-dim">输入一个关系，如「爸爸的哥哥」</div></div>';
-            return;
-        }
-        var res = resolveChain(parsed.parts);
-        if (res.error) {
-            resultEl.innerHTML = '<div class="rk-card"><div class="rk-err">' + res.error + '</div></div>';
-            return;
-        }
-        var key = res.key;
-        var kin = KIN[key];
-        if (currentMode === 1) {
-            // 我叫他/她什么
-            var aliasHtml = kin.aliases.length ? '，也叫 <span class="rk-aliases">' + kin.aliases.join('、') + '</span>' : '';
-            var branchNote = '';
-            if (key === '堂兄弟' || key === '堂姐妹' || key === '表兄弟' || key === '表姐妹') {
-                branchNote = '<div class="rk-note">' + kin.desc + ' —— 对方比你大还是小，要用年龄来定。' + '</div>';
-            }
-            resultEl.innerHTML =
-                '<div class="rk-card rk-ok">' +
-                    '<div class="rk-answer">' + displayName(key) + '</div>' +
-                    '<div class="rk-sub">' + inputEl.value.trim() + ' = ' + kin.name + aliasHtml + '</div>' +
-                    (kin.desc ? '<div class="rk-desc">&#x1F4CC; ' + kin.desc + '</div>' : '') +
-                    branchNote +
-                '</div>';
-        } else {
-            // 他/她叫我什么
-            var rev = REVERSE[key];
-            if (!rev) {
-                resultEl.innerHTML = '<div class="rk-card"><div class="rk-err">「' + kin.name + '」叫我什么这条暂时没收录，可以反馈给我～</div></div>';
-                return;
-            }
-            var you;
-            if (rev.both) {
-                you = rev.both;
-                resultEl.innerHTML =
-                    '<div class="rk-card rk-ok">' +
-                        '<div class="rk-answer">' + kin.name + ' 叫你：' + you + '</div>' +
-                        '<div class="rk-sub">' + inputEl.value.trim() + ' → 对方称呼你的背称</div>' +
-                        (kin.desc ? '<div class="rk-desc">&#x1F4CC; ' + kin.desc + '</div>' : '') +
-                    '</div>';
-            } else {
-                var mAns = rev.m, fAns = rev.f;
-                var ans = mySex === '男' ? mAns : fAns;
-                resultEl.innerHTML =
-                    '<div class="rk-card rk-ok">' +
-                        '<div class="rk-answer">' + kin.name + ' 叫你：' + ans + '</div>' +
-                        '<div class="rk-sub">' + inputEl.value.trim() + ' → 对方称呼你' + (mySex === '男' ? '（你为男性）' : '（你为女性）') + '</div>' +
-                        '<div class="rk-desc">&#x1F4CC; 若你是' + (mySex === '男' ? '女性则为 ' + fAns : '男性则为 ' + mAns) + '。' + '</div>' +
-                        (kin.desc ? '<div class="rk-desc">关系：' + kin.desc + '</div>' : '') +
-                    '</div>';
-            }
-        }
-    }
-
     // --- 事件 ---
     function switchMode(mode) {
         currentMode = mode;
         mode1.classList.toggle('active', mode === 1);
         mode2.classList.toggle('active', mode === 2);
-        resultEl.innerHTML = '<div class="rk-card"><div class="rk-answer rk-answer-dim">' +
-            (mode === 1 ? '输入「爸爸的哥哥」查该叫他什么' : '输入「爸爸」查他叫你什么（按你选的性别）') +
-            '</div></div>';
+        if (relationChain.length > 0) {
+            updateDisplay();
+        } else {
+            pathEl.innerHTML = '<div class="rk-path-empty">点击下方按钮开始累积关系链 ↓</div>';
+            resultEl.innerHTML = '<div class="rk-card"><div class="rk-answer rk-answer-dim">等待输入...</div></div>';
+        }
     }
     mode1.addEventListener('click', function() { switchMode(1); });
     mode2.addEventListener('click', function() { switchMode(2); });
-    document.getElementById('rkGo').addEventListener('click', doQuery);
-    inputEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') doQuery(); });
+    undoBtn.addEventListener('click', undoRelation);
+    resetBtn.addEventListener('click', resetRelation);
 
     var sexBtns = container.querySelectorAll('input[name="rkSex"]');
     for (var si = 0; si < sexBtns.length; si++) {
         sexBtns[si].addEventListener('change', function() {
             mySex = this.value;
-            if (currentMode === 2 && inputEl.value.trim()) doQuery();
+            if (currentMode === 2 && relationChain.length > 0) {
+                updateDisplay();
+            }
         });
     }
 
-    // 初始示例
-    inputEl.value = '爸爸的哥哥';
-    doQuery();
+    // 初始化
+    renderButtons();
+    updateDisplay();
 };
