@@ -274,7 +274,7 @@ body {
 }
 .modal__body {
     padding: 28px;
-    overflow-y: auto;
+    overflow-y: scroll; /* 强制始终显示滚动条占位 */
     flex: 1;
 }
 body.modal-open { overflow: hidden; }
