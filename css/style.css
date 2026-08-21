@@ -10,6 +10,7 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: scroll; /* 强制始终显示滚动条占位，避免下拉框弹出时页面宽度抖动 */
     position: relative;
 }
 
