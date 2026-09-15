@@ -604,10 +604,30 @@ function render(timestamp) {
 
 // ---------------------------------------------------------------- 启动
 
+/** 在遮罩层上显示启动失败的原因 + 重试按钮 */
+function showStartError(hint, detail) {
+    const title = document.getElementById('btOverlayTitle');
+    const desc = document.getElementById('btOverlayDesc');
+    const btn = document.getElementById('btStart');
+    if (title) title.textContent = '无法打开摄像头';
+    if (desc) desc.textContent = hint;
+    if (btn) { btn.disabled = false; btn.textContent = '重试'; }
+    statusEl.textContent = detail || '';
+    overlay.classList.remove('hidden');
+}
+
 async function start() {
     const btn = document.getElementById('btStart');
     btn.disabled = true;
+    btn.textContent = '正在请求…';
     statusEl.textContent = '正在请求摄像头…';
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showStartError('当前浏览器不支持摄像头，或页面不是 https 访问。',
+            'navigator.mediaDevices 不可用');
+        return;
+    }
+
     let stream;
     try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -615,9 +635,21 @@ async function start() {
             audio: false,
         });
     } catch (err) {
-        statusEl.textContent = '无法打开摄像头：' + (err && err.message ? err.message : err)
-            + '（请检查浏览器权限，或改用 https 访问）';
-        btn.disabled = false;
+        const name = (err && err.name) || '';
+        let hint;
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+            hint = '浏览器拒绝了摄像头权限。请点地址栏左侧的相机图标，把权限改为「允许」后重试。';
+        } else if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') {
+            hint = '摄像头被其他程序占用了——常见的是相机/会议软件，或本地那个桌面版美颜程序。'
+                + '请先关闭它们（任务管理器里结束 BeautyCam.exe 等），再点重试。';
+        } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+            hint = '没有检测到摄像头设备，请确认设备已连接。';
+        } else if (name === 'OverconstrainedError') {
+            hint = '摄像头不支持请求的分辨率，可换个浏览器或设备再试。';
+        } else {
+            hint = '打开摄像头失败：' + ((err && err.message) || name || err);
+        }
+        showStartError(hint, name ? `${name}: ${(err && err.message) || ''}` : '');
         return;
     }
     video.srcObject = stream;
