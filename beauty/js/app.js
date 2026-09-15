@@ -83,7 +83,13 @@ let dragOffset = [0, 0];
 let lastFrame = null;           // 完整帧（坐标基准）
 let displayInfo = { cropX: 0, cropY: 0, cropW: 0, cropH: 0 };
 /** 运行设置（不进预设）：处理分辨率直接影响帧率，可按机器性能调 */
-const settings = { processWidth: 480 };
+const settings = {
+    processWidth: 480,
+    // 记住上次选的摄像头（系统里可能存在「手机作为摄像头」等虚拟设备）
+    deviceId: (() => { try { return localStorage.getItem('beauty_cam_device') || ''; } catch (e) { return ''; } })(),
+};
+
+let currentStream = null;
 
 let prevFaces = 0;
 let fpsAvg = 0;
@@ -283,6 +289,20 @@ function buildPanel() {
     qSel.onchange = () => { settings.processWidth = Number(qSel.value); };
     qRow.appendChild(qSel);
     disp.appendChild(qRow);
+
+    // 摄像头选择：系统里可能出现多个视频设备（例如 Windows 的「手机作为摄像头」
+    // 或虚拟摄像头），默认那个不一定是我们要的，所以给出手动选择。
+    const cRow = el('div', 'bt-row');
+    cRow.appendChild(el('label', null, '摄像头'));
+    const cSel = document.createElement('select');
+    cSel.className = 'bt-btn';
+    cSel.style.flex = '1';
+    cSel.appendChild(new Option('（默认设备）', ''));
+    cSel.onchange = () => switchCamera(cSel.value);
+    cRow.appendChild(cSel);
+    disp.appendChild(cRow);
+    panel._cameraSelect = cSel;
+
     panel.appendChild(disp);
 
     // ---- 贴纸 ----
@@ -630,12 +650,17 @@ async function start() {
 
     let stream;
     try {
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-            audio: false,
-        });
+        const videoConstraints = { width: { ideal: 640 }, height: { ideal: 480 } };
+        if (settings.deviceId) videoConstraints.deviceId = { exact: settings.deviceId };
+        stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
     } catch (err) {
         const name = (err && err.name) || '';
+        // 上次记住的摄像头已经不存在了（拔掉了/换设备了）：清掉记录用默认设备重试一次
+        if ((name === 'OverconstrainedError' || name === 'NotFoundError') && settings.deviceId) {
+            settings.deviceId = '';
+            try { localStorage.removeItem('beauty_cam_device'); } catch (e) { /* ignore */ }
+            return start();
+        }
         let hint;
         if (name === 'NotAllowedError' || name === 'SecurityError') {
             hint = '浏览器拒绝了摄像头权限。请点地址栏左侧的相机图标，把权限改为「允许」后重试。';
@@ -652,8 +677,19 @@ async function start() {
         showStartError(hint, name ? `${name}: ${(err && err.message) || ''}` : '');
         return;
     }
+    // 记下实际使用的设备，并刷新选择器
+    try {
+        const track = stream.getVideoTracks()[0];
+        const id = track && track.getSettings ? track.getSettings().deviceId : '';
+        if (id) {
+            settings.deviceId = id;
+            try { localStorage.setItem('beauty_cam_device', id); } catch (e) { /* ignore */ }
+        }
+    } catch (e) { /* ignore */ }
+    currentStream = stream;
     video.srcObject = stream;
     await video.play().catch(() => { });
+    refreshCameraList();
 
     if (!detector) {
         detector = new FaceDetector('.');
@@ -670,6 +706,36 @@ async function start() {
     overlay.classList.add('hidden');
     running = true;
     requestAnimationFrame(render);
+}
+
+/** 刷新「摄像头」下拉框（拿到权限后 label 才有内容） */
+async function refreshCameraList() {
+    const sel = panel._cameraSelect;
+    if (!sel || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    let cams = [];
+    try {
+        cams = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+    } catch (e) { return; }
+    sel.innerHTML = '';
+    sel.appendChild(new Option('（默认设备）', ''));
+    cams.forEach((c, i) => sel.appendChild(new Option(c.label || `摄像头 ${i + 1}`, c.deviceId)));
+    if (settings.deviceId) sel.value = settings.deviceId;
+}
+
+/** 切换摄像头：停掉当前流并用新设备重启 */
+async function switchCamera(deviceId) {
+    settings.deviceId = deviceId || '';
+    try {
+        if (settings.deviceId) localStorage.setItem('beauty_cam_device', settings.deviceId);
+        else localStorage.removeItem('beauty_cam_device');
+    } catch (e) { /* ignore */ }
+    if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
+    }
+    running = false;
+    lastTime = 0;
+    await start();
 }
 
 document.getElementById('btStart').addEventListener('click', start);
