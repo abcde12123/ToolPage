@@ -8,7 +8,7 @@ import {
     FILTERS, applyBlush, applyEyes, applyFilter, applySlim, applySmooth, applyWhiten,
     computeSkinAlpha, drawHeatmap, drawMesh, faceGate, faceRoi,
 } from './effects.js?v=6';
-import { drawFacePlane, drawSticker, drawStickerBox, faceFrame, screenToFace } from './ar.js?v=6';
+import { drawFacePlane, drawSticker, drawStickerBox, faceFrame, screenToFace } from './ar.js?v=7';
 import { builtinStickers, loadCustomSticker } from './stickers.js?v=6';
 
 // ---------------------------------------------------------------- 参数
