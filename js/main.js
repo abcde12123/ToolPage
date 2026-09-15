@@ -3,6 +3,7 @@
 // --- 工具卡片数据（默认顺序） ---
 var TOOLS_DEFAULT = [
     { icon: '🤖', name: 'AI 聊天', desc: '智能 AI 对话助手，随时提问', url: '/ai/' },
+    { icon: '💄', name: '美颜相机', desc: '实时磨皮、美白、瘦脸、大眼、滤镜与 AR 贴纸', url: '/beauty/' },
     { icon: '📥', name: '文件下载', desc: '访问工具文件下载区', url: '/downloads-public/' },
     { icon: '{}', name: 'JSON 格式化', desc: '格式化、校验、压缩 JSON 数据', file: 'json-formatter.js', initFn: 'initJSONFormatter' },
     { icon: '🔤', name: 'Base64 编解码', desc: '文本与 Base64 互转', file: 'base64.js', initFn: 'initBase64' },
@@ -127,7 +128,7 @@ function openTool(tool) {
 
     // 动态加载脚本
     var script = document.createElement('script');
-    script.src = '/js/tools/' + tool.file + '?v=43';
+    script.src = '/js/tools/' + tool.file + '?v=44';
     script.onload = function() {
         TOOL_LOADED[tool.file] = true;
         var initFn = window[tool.initFn];

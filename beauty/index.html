@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏夜美颜相机 · 夏夜工具集</title>
+<meta name="description" content="浏览器里的实时美颜相机：人脸检测、磨皮、美白、瘦脸、大眼、红润、滤镜与 AR 贴纸，全部在本地运行。">
+<link rel="stylesheet" href="/css/style.css?v=30">
+<link rel="stylesheet" href="beauty.css?v=1">
+</head>
+<body class="beauty-page">
+
+<header class="bt-header">
+    <a class="bt-back" href="/">← 返回夏夜工具集</a>
+    <h1 class="bt-title">夏夜美颜相机</h1>
+    <p class="bt-sub">实时磨皮 · 美白 · 瘦脸 · 大眼 · 红润 · 滤镜 · AR 贴纸 —— 全部在你的浏览器里本地运行，画面不会上传</p>
+</header>
+
+<main class="bt-main">
+    <section class="bt-stage">
+        <div class="bt-video-wrap">
+            <video id="btVideo" playsinline muted></video>
+            <canvas id="btCanvas"></canvas>
+            <div id="btOverlay" class="bt-overlay">
+                <div class="bt-overlay-card">
+                    <h2>准备开始</h2>
+                    <p>需要摄像头权限。点下面的按钮后，浏览器会请求打开摄像头。</p>
+                    <button id="btStart" class="bt-btn bt-btn--primary">开启摄像头</button>
+                    <p id="btStatus" class="bt-status"></p>
+                </div>
+            </div>
+        </div>
+        <div class="bt-statusbar">
+            <span id="btFps">FPS --</span>
+            <span id="btFaces">人脸 0</span>
+            <span id="btRes">--</span>
+            <span id="btHint">拖动画面中的贴纸可移动；滚轮缩放，Shift+滚轮旋转</span>
+        </div>
+    </section>
+
+    <aside class="bt-panel" id="btPanel"></aside>
+</main>
+
+<footer class="bt-footer">
+    小组成员：庹芮豪、王晨锋　|　© 2026 版权所有　解释权归本小组所有
+</footer>
+
+<script type="module" src="js/app.js?v=1"></script>
+</body>
+</html>
