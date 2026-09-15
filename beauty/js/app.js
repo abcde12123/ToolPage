@@ -818,3 +818,21 @@ if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
 
 // 预加载贴纸缩略图（触发像素画生成）
 builtinStickers();
+
+// 右上角「下载 Windows 版」入口：顺带显示桌面版最新版本号
+// （与 /beauty-cam/version.json 同源，拿不到就保持默认文案，不影响下载）
+(async () => {
+    const link = document.getElementById('btDownload');
+    if (!link) return;
+    try {
+        const resp = await fetch('/beauty-cam/version.json?_=' + Date.now(), { cache: 'no-store' });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (!data || !data.version) return;
+        const text = link.querySelector('.bt-download-text');
+        if (text) text.textContent = `下载 Windows 版 v${data.version}`;
+        link.title = `下载 Windows 桌面版 v${data.version}（不依赖浏览器，性能更好）`;
+    } catch (e) {
+        /* 忽略：只影响版本号显示 */
+    }
+})();
