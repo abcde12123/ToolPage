@@ -1,4 +1,4 @@
-/* 夏夜美颜相机 · 页面样式（与站点玻璃拟态风格保持一致） */
+﻿/* 夏夜美颜相机 · 页面样式（与站点玻璃拟态风格保持一致） */
 
 .beauty-page {
     margin: 0;
@@ -11,7 +11,7 @@
 }
 
 .bt-header {
-    padding: 28px 24px 12px;
+    padding: 16px 24px 6px;
     max-width: 1360px;
     margin: 0 auto;
     width: 100%;
@@ -19,31 +19,31 @@
 }
 .bt-back {
     display: inline-block;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #78716C;
     text-decoration: none;
-    margin-bottom: 10px;
+    margin-bottom: 4px;
     transition: color .2s;
 }
 .bt-back:hover { color: #DB2777; }
 .bt-title {
-    margin: 0 0 6px;
-    font-size: 1.6rem;
+    margin: 0 0 2px;
+    font-size: 1.4rem;
     font-weight: 800;
     letter-spacing: .01em;
 }
 .bt-sub {
     margin: 0;
     color: #78716C;
-    font-size: .92rem;
+    font-size: .85rem;
 }
 
 .bt-main {
     flex: 1;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 18px;
-    padding: 16px 24px 24px;
+    gap: 16px;
+    padding: 10px 24px 12px;
     max-width: 1360px;
     width: 100%;
     margin: 0 auto;
@@ -107,10 +107,20 @@
     gap: 12px;
     max-height: calc(100vh - 150px);
     overflow-y: auto;
-    padding-right: 4px;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(200, 180, 200, .6) transparent;
 }
-.bt-panel::-webkit-scrollbar { width: 6px; }
-.bt-panel::-webkit-scrollbar-thumb { background: rgba(200, 180, 200, .5); border-radius: 3px; }
+/* 滚动条加粗、留出抓取区域，避免"太细不好拖" */
+.bt-panel::-webkit-scrollbar { width: 12px; }
+.bt-panel::-webkit-scrollbar-track { background: transparent; }
+.bt-panel::-webkit-scrollbar-thumb {
+    background: rgba(200, 180, 200, .55);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+.bt-panel::-webkit-scrollbar-thumb:hover { background: rgba(255, 111, 165, .85); background-clip: content-box; }
 
 .bt-group {
     background: rgba(255, 255, 255, .62);
@@ -252,9 +262,39 @@ input[type="range"]::-moz-range-thumb {
 
 .bt-footer {
     text-align: center;
-    padding: 14px 20px 22px;
-    font-size: .8rem;
+    padding: 6px 20px 8px;
+    font-size: .75rem;
     color: #a8a29e;
+}
+
+/*
+ * 桌面端：整页不滚动 —— 左侧画面按「可用高度」自适应缩放，
+ * 右侧面板独占剩余高度并独立滚动。这样两边都能完整使用、无需上下滚。
+ */
+@media (min-width: 901px) {
+    html, body { height: 100%; }
+    .beauty-page { height: 100vh; overflow: hidden; }
+
+    .bt-main {
+        flex: 1 1 auto;
+        min-height: 0;          /* 关键：允许 grid 行收缩 */
+        align-items: stretch;   /* 让面板撑满高度 */
+    }
+    .bt-stage { display: flex; flex-direction: column; min-height: 0; }
+
+    .bt-video-wrap {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        /* 由剩余高度反推最大宽度，保证 4:3 画面完整可见 */
+        max-width: min(100%, calc((100vh - 272px) * 1.3333));
+        margin: 0 auto;
+    }
+    .bt-panel {
+        height: 100%;
+        min-height: 0;
+        max-height: none;       /* 由父级高度决定，滚动条自然变长 */
+    }
+    .bt-statusbar { flex: 0 0 auto; }
 }
 
 @media (max-width: 900px) {
