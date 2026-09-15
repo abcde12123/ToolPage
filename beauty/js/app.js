@@ -297,9 +297,14 @@ function buildPanel() {
     const cSel = document.createElement('select');
     cSel.className = 'bt-btn';
     cSel.style.flex = '1';
+    cSel.style.minWidth = '0';
     cSel.appendChild(new Option('（默认设备）', ''));
     cSel.onchange = () => switchCamera(cSel.value);
-    cRow.appendChild(cSel);
+    const cBtn = el('button', 'bt-btn', '刷新');
+    cBtn.title = '重新扫描摄像头设备（插拔设备后可用）';
+    cBtn.style.padding = '4px 8px';
+    cBtn.onclick = async () => { await refreshCameraList(); toast('已刷新摄像头列表'); };
+    cRow.append(cSel, cBtn);
     disp.appendChild(cRow);
     panel._cameraSelect = cSel;
 
@@ -708,18 +713,38 @@ async function start() {
     requestAnimationFrame(render);
 }
 
-/** 刷新「摄像头」下拉框（拿到权限后 label 才有内容） */
+/**
+ * 刷新「摄像头」下拉框。
+ * 注意：**未授予权限时** enumerateDevices 拿不到设备名称（浏览器隐私策略），
+ * 此时仍会列出设备条目但用「摄像头 1/2」占位；授权后再刷新就能看到真实名称。
+ * 因此页面一打开就调用一次，授权成功后、插拔设备时也会再调用。
+ */
 async function refreshCameraList() {
     const sel = panel._cameraSelect;
-    if (!sel || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    if (!sel) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
     let cams = [];
     try {
         cams = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
     } catch (e) { return; }
+
+    const named = cams.some(c => c.label);
     sel.innerHTML = '';
     sel.appendChild(new Option('（默认设备）', ''));
     cams.forEach((c, i) => sel.appendChild(new Option(c.label || `摄像头 ${i + 1}`, c.deviceId)));
+
+    // 未授权时给一行提示，避免用户以为「只有一个设备」
+    if (cams.length > 0 && !named) {
+        sel.appendChild(new Option(`（授权后可显示设备名称）`, '__hint__')).disabled = true;
+    }
     if (settings.deviceId) sel.value = settings.deviceId;
+
+    // 当前正在使用的设备（流里带的 deviceId）优先选上
+    try {
+        const track = currentStream && currentStream.getVideoTracks()[0];
+        const id = track && track.getSettings ? track.getSettings().deviceId : '';
+        if (id && [...sel.options].some(o => o.value === id)) sel.value = id;
+    } catch (e) { /* ignore */ }
 }
 
 /** 切换摄像头：停掉当前流并用新设备重启 */
@@ -741,6 +766,12 @@ async function switchCamera(deviceId) {
 document.getElementById('btStart').addEventListener('click', start);
 buildPanel();
 syncAll();
+
+// 页面一打开就先列出设备（未授权时名称是占位的，但至少能先选）
+refreshCameraList();
+if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+    navigator.mediaDevices.addEventListener('devicechange', () => refreshCameraList());
+}
 
 // 预加载贴纸缩略图（触发像素画生成）
 builtinStickers();
