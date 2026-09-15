@@ -286,7 +286,7 @@ input[type="range"]::-moz-range-thumb {
         width: 100%;
         aspect-ratio: 4 / 3;
         /* 由剩余高度反推最大宽度，保证 4:3 画面完整可见 */
-        max-width: min(100%, calc((100vh - 272px) * 1.3333));
+        max-width: min(100%, calc((100vh - 240px) * 1.3333));
         margin: 0 auto;
     }
     .bt-panel {

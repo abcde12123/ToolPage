@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 夏夜美颜相机 · 美颜效果
  * 桌面版 Python 算法的浏览器移植：磨皮 / 美白 / 瘦脸 / 大眼 / 红润 / 滤镜 / 皮肤权重图
  *
@@ -8,7 +8,7 @@
  *   3) 颜色映射能用 LUT 的都用 LUT；
  *   4) 盒式滤波走积分图，O(1)/像素。
  */
-import { blur, boxFilter, clamp, distanceTransform, lut256 } from './imageops.js';
+import { blur, boxFilter, clamp, distanceTransform, lut256 } from './imageops.js?v=6';
 
 // ---------------------------------------------------------------- 关键点索引
 

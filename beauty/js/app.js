@@ -1,15 +1,15 @@
-/**
+﻿/**
  * 夏夜美颜相机 · 主程序
  * 采集 -> 检测 -> 美颜流水线 -> 可视化 -> 显示
  * 全部在浏览器本地完成，画面不上传。
  */
-import { FaceDetector } from './detector.js';
+import { FaceDetector } from './detector.js?v=6';
 import {
     FILTERS, applyBlush, applyEyes, applyFilter, applySlim, applySmooth, applyWhiten,
     computeSkinAlpha, drawHeatmap, drawMesh, faceGate, faceRoi,
-} from './effects.js';
-import { drawFacePlane, drawSticker, drawStickerBox, faceFrame, screenToFace } from './ar.js';
-import { builtinStickers, loadCustomSticker } from './stickers.js';
+} from './effects.js?v=6';
+import { drawFacePlane, drawSticker, drawStickerBox, faceFrame, screenToFace } from './ar.js?v=6';
+import { builtinStickers, loadCustomSticker } from './stickers.js?v=6';
 
 // ---------------------------------------------------------------- 参数
 
@@ -153,7 +153,9 @@ function makeSlider(parent, label, key, kind, narrow) {
         params[key] = real;
         num.value = fmt(real, kind);
     };
-    range.addEventListener('input', () => apply(Number(range.value) / 1000));
+    // 注意：range 的取值是 0~1000，apply 也按 0~1000 解释，
+    // 之前多除了一次 1000，导致拖到底也只有 0.1% 的效果（看起来"没反应"）
+    range.addEventListener('input', () => apply(Number(range.value)));
     num.addEventListener('change', () => {
         const txt = num.value.trim();
         const pctLike = txt.includes('%');
@@ -549,8 +551,9 @@ function render(timestamp) {
     resizeWork(pw, ph);
     wctx.drawImage(video, 0, 0, pw, ph);
 
-    // ① 检测
-    const faces = detector ? detector.detect(video, timestamp) : [];
+    // ① 检测：传 video（走 GPU 快路径），但把坐标换算到处理画布尺寸，
+    //    这样既保持帧率，改了画质后关键点也不会错位
+    const faces = detector ? detector.detect(video, timestamp, pw, ph) : [];
 
     // 人脸丢失提示（连续 ~0.6s 没人脸才提示，避免抖动刷屏）
     if (faces.length === 0 && prevFaces > 0) {

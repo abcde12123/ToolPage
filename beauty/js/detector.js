@@ -44,9 +44,20 @@ export class FaceDetector {
 
     /**
      * 检测一帧。
+     *
+     * 注意两点：
+     *  1) 必须把 video 元素交给 MediaPipe（走 GPU 快路径）；传 canvas 会退化成
+     *     逐帧 CPU 读回，帧率会掉到个位数。
+     *  2) 关键点要换算到**处理画布**的尺寸（outW/outH）而不是 video 的尺寸，
+     *     否则改了画质后坐标会整体错位（人脸跑到画面角落）。
+     *
+     * @param {HTMLVideoElement} video 视频源
+     * @param {number} timestampMs 递增的时间戳（MediaPipe 要求）
+     * @param {number} [outW] 目标坐标宽（不传则用视频尺寸）
+     * @param {number} [outH] 目标坐标高
      * @returns {Array<{bbox:number[], landmarks:Float32Array|null, score:number}>}
      */
-    detect(video, timestampMs) {
+    detect(video, timestampMs, outW, outH) {
         if (!this.landmarker) return [];
         let result;
         try {
@@ -56,8 +67,10 @@ export class FaceDetector {
             return [];
         }
         // 兼容 video / canvas / img：canvas 与 img 没有 videoWidth
-        const vw = video.videoWidth || video.naturalWidth || video.width;
-        const vh = video.videoHeight || video.naturalHeight || video.height;
+        const vw = video.videoWidth || video.naturalWidth || video.width || outW || 1;
+        const vh = video.videoHeight || video.naturalHeight || video.height || outH || 1;
+        // MediaPipe 返回的是归一化坐标，这里换到目标（处理画布）坐标系
+        const sx = (outW || vw) / vw, sy = (outH || vh) / vh;
         const faces = [];
         const list = result.faceLandmarks || [];
         for (let f = 0; f < list.length; f++) {
@@ -66,7 +79,7 @@ export class FaceDetector {
             const pts = new Float32Array(n * 2);
             let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
             for (let i = 0; i < n; i++) {
-                const x = src[i].x * vw, y = src[i].y * vh;
+                const x = src[i].x * vw * sx, y = src[i].y * vh * sy;
                 pts[i * 2] = x; pts[i * 2 + 1] = y;
                 if (x < minX) minX = x; if (x > maxX) maxX = x;
                 if (y < minY) minY = y; if (y > maxY) maxY = y;
