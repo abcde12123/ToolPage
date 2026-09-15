@@ -59,7 +59,8 @@ export function drawSticker(ctx, frame, sticker) {
     // 之前直接把「面部上方向」当成了贴纸的 y 轴，导致贴纸整体上下颠倒。
     const rx = frame.ex * d, ry = frame.ey * d;
     const dx = -frame.ux * d, dy = -frame.uy * d;
-    // 贴纸自身旋转（屏幕空间，正角 = 视觉上顺时针）
+    // 贴纸自身旋转（在 canvas 坐标系里，正角 = 顺时针；显示端整体水平镜像，
+    // 所以屏幕上看起来是逆时针，滑块方向与此保持一致即可）
     const bx = cos * rx + sin * dx, by = cos * ry + sin * dy;
     const cx = -sin * rx + cos * dx, cy = -sin * ry + cos * dy;
     const [px, py] = faceToScreen(frame, sticker.u, sticker.v);

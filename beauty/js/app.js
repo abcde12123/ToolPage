@@ -3,13 +3,13 @@
  * 采集 -> 检测 -> 美颜流水线 -> 可视化 -> 显示
  * 全部在浏览器本地完成，画面不上传。
  */
-import { FaceDetector } from './detector.js?v=6';
+import { FaceDetector } from './detector.js?v=8';
 import {
     FILTERS, applyBlush, applyEyes, applyFilter, applySlim, applySmooth, applyWhiten,
     computeSkinAlpha, drawHeatmap, drawMesh, faceGate, faceRoi,
-} from './effects.js?v=6';
-import { drawFacePlane, drawSticker, drawStickerBox, faceFrame, screenToFace } from './ar.js?v=7';
-import { builtinStickers, loadCustomSticker } from './stickers.js?v=6';
+} from './effects.js?v=8';
+import { drawFacePlane, drawSticker, drawStickerBox, faceFrame, screenToFace } from './ar.js?v=8';
+import { builtinStickers, loadCustomSticker } from './stickers.js?v=8';
 
 // ---------------------------------------------------------------- 参数
 
@@ -91,6 +91,11 @@ const settings = {
 
 let currentStream = null;
 
+/** 渲染循环句柄：切换摄像头/重新启动前必须取消，否则会叠加出多个循环 */
+let rafId = 0;
+/** 启动令牌：只有最新一次 start() 有权收尾，避免并发启动产生双循环 */
+let runToken = 0;
+
 let prevFaces = 0;
 let fpsAvg = 0;
 let lastTime = 0;
@@ -161,7 +166,9 @@ function makeSlider(parent, label, key, kind, narrow) {
         const pctLike = txt.includes('%');
         let val = parseFloat(txt.replace(/[^0-9.\-]/g, ''));
         if (!isFinite(val)) { num.value = fmt(params[key], kind); return; }
-        if (pctLike) val = val / 100 * hi;
+        // 显示侧是 value*100（如 0.5 -> "50%"），解析必须原样除回来，与上限 hi 无关。
+        // 之前在磨皮/美白/红润（上限 0.8）上会算成 50/100*0.8 = 0.4，与显示数字对不上。
+        if (pctLike) val = val / 100;
         val = Math.min(Math.max(val, lo), hi);
         params[key] = val;
         range.value = String(Math.round((val - lo) / (hi - lo) * 1000));
@@ -180,6 +187,8 @@ function makeSlider(parent, label, key, kind, narrow) {
 // ---------------------------------------------------------------- 面板构建
 
 const sliders = [];
+/** 显示开关（网格/平面/外框/热力图）的复选框引用，供 syncAll 同步 */
+const showCtl = {};
 
 function buildPanel() {
     panel.innerHTML = '';
@@ -271,6 +280,7 @@ function buildPanel() {
         cb.type = 'checkbox';
         cb.checked = params[key];
         cb.onchange = () => { params[key] = cb.checked; };
+        showCtl[key] = cb;
         wrap.appendChild(cb); wrap.appendChild(document.createTextNode(label));
         checks.appendChild(wrap);
     }
@@ -400,6 +410,9 @@ function buildPanel() {
 
 function syncAll() {
     for (const s of sliders) s.ctl.sync();
+    // 复选框也要同步：恢复默认参数/应用预设会改动 showMesh 等，
+    // 不同步的话界面还勾着、渲染却不画，看起来像"功能坏了"
+    for (const k in showCtl) showCtl[k].checked = !!params[k];
     const fb = panel._filterButtons;
     if (fb) for (const k in fb) fb[k].classList.toggle('bt-btn--on', k === params.filterName);
 }
@@ -478,6 +491,9 @@ canvas.addEventListener('mousemove', (e) => {
     selected.v = v + dragOffset[1];
 });
 window.addEventListener('mouseup', () => { dragging = false; });
+// 鼠标移出窗口后松开（或切到别的窗口）不会触发 mouseup，补一次复位，
+// 否则回来时光标划过画布会继续拖动贴纸
+window.addEventListener('blur', () => { dragging = false; });
 canvas.addEventListener('wheel', (e) => {
     if (!selected) return;
     e.preventDefault();
@@ -540,8 +556,8 @@ function resizeWork(w, h) {
 }
 
 function render(timestamp) {
-    if (!running) return;
-    requestAnimationFrame(render);
+    if (!running) { rafId = 0; return; }
+    rafId = requestAnimationFrame(render);
     if (video.readyState < 2) return;
 
     // 处理分辨率（可调；JS 逐像素处理较吃 CPU，默认 480p）
@@ -645,6 +661,8 @@ function showStartError(hint, detail) {
 }
 
 async function start() {
+    // 并发保护：快速连点「重试」或连续切换摄像头时，旧的那次启动会被新令牌作废
+    const myToken = ++runToken;
     const btn = document.getElementById('btStart');
     btn.disabled = true;
     btn.textContent = '正在请求…';
@@ -662,6 +680,8 @@ async function start() {
         if (settings.deviceId) videoConstraints.deviceId = { exact: settings.deviceId };
         stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
     } catch (err) {
+        // 已被更新的一次启动取代：本次的失败不再弹提示，避免覆盖新状态
+        if (myToken !== runToken) return;
         const name = (err && err.name) || '';
         // 上次记住的摄像头已经不存在了（拔掉了/换设备了）：清掉记录用默认设备重试一次
         if ((name === 'OverconstrainedError' || name === 'NotFoundError') && settings.deviceId) {
@@ -685,6 +705,11 @@ async function start() {
         showStartError(hint, name ? `${name}: ${(err && err.message) || ''}` : '');
         return;
     }
+    // 拿流是异步的：期间如果又发起了一次启动，本次要把刚拿到的流还回去
+    if (myToken !== runToken) {
+        stream.getTracks().forEach(t => t.stop());
+        return;
+    }
     // 记下实际使用的设备，并刷新选择器
     try {
         const track = stream.getVideoTracks()[0];
@@ -699,21 +724,33 @@ async function start() {
     await video.play().catch(() => { });
     refreshCameraList();
 
-    if (!detector) {
+    if (!detector || !detector.landmarker) {
         detector = new FaceDetector('.');
         try {
             const backend = await detector.load((s) => { statusEl.textContent = s; });
             toast('检测器已就绪（' + backend + '）');
         } catch (err) {
             console.error(err);
+            // 关键：置回 null，否则「重试」会跳过加载直接起循环，
+            // 而 landmarker 永远是 null —— 不刷新页面就再也恢复不了
+            detector = null;
+            if (currentStream) {
+                currentStream.getTracks().forEach(t => t.stop());
+                currentStream = null;
+            }
+            video.srcObject = null;
+            if (myToken !== runToken) return;
             statusEl.textContent = '检测器加载失败：' + (err && err.message ? err.message : err);
             btn.disabled = false;
+            btn.textContent = '重试';
             return;
         }
     }
+    if (myToken !== runToken) return;
     overlay.classList.add('hidden');
     running = true;
-    requestAnimationFrame(render);
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(render);
 }
 
 /**
@@ -762,7 +799,10 @@ async function switchCamera(deviceId) {
         currentStream = null;
     }
     running = false;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     lastTime = 0;
+    // 复位提示/FPS 状态，避免切完摄像头后立刻冒一次「人脸丢失」或 FPS 残留
+    prevFaces = 0; faceMissingSince = 0; fpsAvg = 0;
     await start();
 }
 

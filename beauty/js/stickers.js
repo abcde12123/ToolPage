@@ -146,6 +146,8 @@ export function loadCustomSticker(file) {
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
+            // 图片已解码，blob URL 不再需要；不释放的话反复添加自定义贴纸会持续占内存
+            URL.revokeObjectURL(url);
             _customSeq += 1;
             resolve({
                 name: `custom_${_customSeq}`,

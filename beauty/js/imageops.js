@@ -54,8 +54,10 @@ export function boxFilter(src, w, h, r, dst) {
 }
 
 /**
- * 三次盒式滤波近似高斯（可分离 + 滑动求和，非常快）。
- * sigma 与盒半径的关系：r ≈ sigma * sqrt(3 * n / 4)，n=3 时 r ≈ 1.5*sigma
+ * 盒式滤波近似高斯（可分离 + 滑动求和，非常快）。
+ * 说明：这里实际只做了 **两次** boxFilter；半径按 r ≈ 1.5*sigma 取
+ *（该系数对应三次的形式化近似），即真实模糊量略强于标称 sigma。
+ * 注意：`blur()` 在美颜主路径上，改动 pass 数或系数会改变观感，勿轻易动。
  */
 export function blur(src, w, h, sigma, dst) {
     const out = dst || new Float32Array(w * h);
@@ -72,6 +74,7 @@ export function blur(src, w, h, sigma, dst) {
  */
 export function guidedFilter(guide, src, w, h, r, eps) {
     const meanI = boxFilter(guide, w, h, r);
+    const meanP = boxFilter(src, w, h, r);
     const ii = new Float32Array(w * h);
     for (let i = 0; i < w * h; i++) ii[i] = guide[i] * guide[i];
     const meanII = boxFilter(ii, w, h, r);
@@ -82,10 +85,14 @@ export function guidedFilter(guide, src, w, h, r, eps) {
 
     const a = new Float32Array(w * h), b = new Float32Array(w * h);
     for (let i = 0; i < w * h; i++) {
+        // 标准形式：a = cov(I,p)/(var(I)+eps)，b = mean(p) - a*mean(I)
+        // 之前误用原始像素 src[i]/guide[i] 代替窗口均值，平坦区会残留原图、
+        // 保边失效。该函数当前无调用方（effects.js 里是另写的正确实现），
+        // 修正后不影响线上路径。
         const varI = meanII[i] - meanI[i] * meanI[i];
-        const covIP = meanIP[i] - meanI[i] * src[i] === 0 ? 0 : meanIP[i] - meanI[i] * src[i];
+        const covIP = meanIP[i] - meanI[i] * meanP[i];
         a[i] = covIP / (varI + eps);
-        b[i] = src[i] - a[i] * guide[i];
+        b[i] = meanP[i] - a[i] * meanI[i];
     }
     const meanA = boxFilter(a, w, h, r), meanB = boxFilter(b, w, h, r);
     const out = new Float32Array(w * h);
@@ -93,16 +100,18 @@ export function guidedFilter(guide, src, w, h, r, eps) {
     return out;
 }
 
-/** 图像按比例缩放（双线性，RGBA -> RGBA），用于降采样提速 */
+/** 图像按比例缩放（双线性，RGBA -> RGBA），用于降采样提速。
+ *  注意：下界夹取是必须的 —— 放大采样时 (y+0.5)*ys-0.5 会小于 0，
+ *  只夹上界会让插值权重变负、退化成外推，边缘出现振铃。 */
 export function resizeRGBA(src, sw, sh, dw, dh) {
     const out = new Uint8ClampedArray(dw * dh * 4);
     const xs = sw / dw, ys = sh / dh;
     for (let y = 0; y < dh; y++) {
-        const sy = Math.min((y + 0.5) * ys - 0.5, sh - 1);
+        const sy = Math.min(Math.max((y + 0.5) * ys - 0.5, 0), sh - 1);
         const y0 = Math.max(0, Math.floor(sy)), y1 = Math.min(y0 + 1, sh - 1);
         const wy = sy - y0;
         for (let x = 0; x < dw; x++) {
-            const sx = Math.min((x + 0.5) * xs - 0.5, sw - 1);
+            const sx = Math.min(Math.max((x + 0.5) * xs - 0.5, 0), sw - 1);
             const x0 = Math.max(0, Math.floor(sx)), x1 = Math.min(x0 + 1, sw - 1);
             const wx = sx - x0;
             const o = (y * dw + x) * 4;

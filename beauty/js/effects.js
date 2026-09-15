@@ -23,6 +23,8 @@ const CHEEK_L = [50, 101, 118, 117, 123];
 const CHEEK_R = [280, 330, 347, 346, 352];
 const NOSE_TIP = 1;
 const CHIN = 152;
+// 下颚推动点集合（JAW 里本来就含 CHIN，去重后提为常量，避免每帧每脸重建 Set）
+const JAW_CHIN = [...new Set([...JAW, CHIN])];
 
 /** 需要整块保护的特征区域（左右分开，凸包才不会横跨脸中间） */
 const FEATURE_GROUPS = [LEFT_EYE, RIGHT_EYE, LEFT_BROW, RIGHT_BROW, LIPS];
@@ -48,7 +50,11 @@ export function faceRoi(faces, w, h, margin = 0.25) {
     const mx = (x1 - x0) * margin, my = (y1 - y0) * margin;
     const X0 = clamp(Math.floor(x0 - mx), 0, w), Y0 = clamp(Math.floor(y0 - my), 0, h);
     const X1 = clamp(Math.ceil(x1 + mx), 0, w), Y1 = clamp(Math.ceil(y1 + my), 0, h);
-    return { x: X0, y: Y0, w: Math.max(1, X1 - X0), h: Math.max(1, Y1 - Y0) };
+    // 人脸框完全落在画面外时，X0 可能等于 w，此时 x=w、w=1 会越出右边界一行，
+    // 这里再夹一次（正常路径 X0<X1<=w，结果不变）
+    const rx = Math.min(X0, Math.max(0, w - 1));
+    const ry = Math.min(Y0, Math.max(0, h - 1));
+    return { x: rx, y: ry, w: Math.max(1, X1 - rx), h: Math.max(1, Y1 - ry) };
 }
 
 /** 凸包（Andrew monotone chain），输入扁平 [x0,y0,x1,y1,...] */
@@ -228,7 +234,10 @@ export function computeSkinAlpha(frameSource, roi, faces, params) {
 
 /** 按全分辨率坐标在权重图上取值（已是 ROI 分辨率，直接下标访问） */
 export function sampleAlpha(sk, fx, fy) {
-    const x = (fx - sk.x) | 0, y = (fy - sk.y) | 0;
+    // 用 floor 而不是 |0：|0 对 (-1,0) 的负数会向零截断成 0，
+    // 导致 ROI 左/上外沿 0~1px 的亚像素坐标取到第 0 列而不是返回 0。
+    // 对整数输入二者结果相同，正常路径不受影响。
+    const x = Math.floor(fx - sk.x), y = Math.floor(fy - sk.y);
     if (x < 0 || y < 0 || x >= sk.w || y >= sk.h) return 0;
     return sk.data[y * sk.w + x];
 }
@@ -350,7 +359,6 @@ export function applyWhiten(imgData, sk, params) {
     const lutG = lut256(v => v + (255 - v) * lift + warm * 0.15);
     const lutB = lut256(v => v + (255 - v) * lift - warm * 0.5);
 
-    const inv = 1;
     for (let y = sk.y; y < sk.y + sk.h; y++) {
         const arow = (y - sk.y) * sk.w;
         for (let x = sk.x; x < sk.x + sk.w; x++) {
@@ -450,7 +458,9 @@ export const FILTERS = {
 };
 
 export function applyFilter(imgData, name, strength) {
-    const f = FILTERS[name];
+    // hasOwnProperty 兜底：FILTERS[name] 对 'constructor'/'__proto__' 之类的键
+    // 会命中原型链上的真值，随后 f.R/f.b 为 undefined -> LUT 全 NaN -> 整幅变黑
+    const f = (name && Object.prototype.hasOwnProperty.call(FILTERS, name)) ? FILTERS[name] : null;
     if (!f || !name || name === 'none' || strength <= 0) return;
     const { width: w, height: h, data } = imgData;
     const s = clamp(strength, 0, 1);
@@ -613,7 +623,7 @@ export function applySlim(imgData, faces, params, gate) {
         const maxShift = clamp(params.slim_shift, 0, 0.15) * fw * strength;
         const sigma = Math.max(clamp(params.slim_sigma, 0.04, 0.25) * fw, 6);
         const moves = [];
-        for (const idx of new Set([...JAW, CHIN])) {
+        for (const idx of JAW_CHIN) {
             const px = lm[idx * 2], py = lm[idx * 2 + 1];
             const relY = (py - by) / Math.max(fh, 1);
             if (relY < 0.45) continue;                       // 颧骨以上不推
