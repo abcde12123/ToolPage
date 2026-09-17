@@ -283,7 +283,7 @@ function buildAppCard(app) {
         '</div>' +
         '<p class="app-card__desc">' + app.desc + '</p>' +
         '<div class="app-card__actions">' +
-            '<a class="app-card__btn" href="' + app.url + '">⬇ 下载</a>' +
+            '<a class="app-card__btn" href="' + app.url + '">查看详情 →</a>' +
             (app.second ? '<a class="app-card__btn app-card__btn--ghost" href="' + app.second.url + '">' + app.second.text + '</a>' : '') +
         '</div>';
 

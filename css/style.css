@@ -92,8 +92,8 @@ body {
     margin:0 auto; line-height:1.7;
 }
 
-/* 我的软件区（完整程序，与小工具区分） */
-.apps { position:relative; z-index:1; padding:8px 0 16px; }
+/* 我的软件区（完整程序，与小工具区分；放在工具区之后、关于区之前） */
+.apps { position:relative; z-index:1; padding:0 0 40px; }
 .apps__title {
     font-size:1.9rem; font-weight:800;
     letter-spacing:-0.03em; color:#1E293B;
