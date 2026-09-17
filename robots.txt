@@ -2,7 +2,10 @@ User-agent: *
 Disallow: /umami
 Disallow: /ai/
 Disallow: /pm-update/
+Disallow: /travel-update/
+Disallow: /fit-update/
 Disallow: /downloads/
 Disallow: /downloads-public/
+Disallow: /beauty-cam/*.exe
 
 Sitemap: https://xiaye.xyz/sitemap.xml

@@ -10,7 +10,7 @@
     <meta name="google-site-verification" content="ZwpbEwjlcTh965rYx36JnjeBfb3ZMSe1UegLFAu3u_Y" />
     <title>夏夜工具集 - 免费在线工具箱</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
-    <link rel="stylesheet" href="/css/style.css?v=92">
+    <link rel="stylesheet" href="/css/style.css?v=95">
 </head>
 <body>
     <!-- 防白闪：当天手动锁定优先、否则按时间(19:00-06:00=夜)在样式就位前把 .night 挂到 body，避免先渲染米白底再跳黑 -->
@@ -37,6 +37,7 @@
             </a>
             <div class="navbar__links">
                 <a href="#hero" class="navbar__link active" data-section="hero">首页</a>
+                <a href="#apps" class="navbar__link" data-section="apps">软件</a>
                 <a href="#tools" class="navbar__link" data-section="tools">工具</a>
                 <a href="#about" class="navbar__link" data-section="about">关于</a>
                 <button type="button" class="navbar__link navbar__btn-feedback" id="btnFeedback" title="反馈与建议">💬 反馈</button>
@@ -53,6 +54,15 @@
                 <p class="hero__subtitle">随手做的小工具，希望能帮到你～ 慢慢添加中...</p>
                 <p class="hero__greeting" id="heroGreeting"></p>
             </div>
+        </div>
+    </section>
+
+    <!-- 我的软件：自己写的完整程序（安卓 App / Windows 桌面），与下面的小工具区分开 -->
+    <section class="apps" id="apps">
+        <div class="container">
+            <h2 class="apps__title">我的软件 ✧</h2>
+            <p class="apps__subtitle">业余写的完整程序，下载即用，数据都在本地～</p>
+            <div class="apps__grid" id="appsGrid"></div>
         </div>
     </section>
 
@@ -90,6 +100,8 @@
             <p>✧ 夏夜工具集 &mdash; <span id="year"></span></p>
             <p class="footer__tag">🚧 持续建设中...</p>
             <p class="footer__lunar" id="lunarInfo"></p>
+            <p class="footer__icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026108783号</a></p>
+            <p class="footer__legal"><a href="/privacy.html">隐私声明</a></p>
         </div>
     </footer>
 
@@ -260,7 +272,7 @@
 
     <script src="/js/modal.js?v=41"></script>
     <script src="/js/console.js?v=43"></script>
-    <script src="/js/main.js?v=76"></script>
+    <script src="/js/main.js?v=77"></script>
     <script src="/js/micro-glow.js?v=1"></script>
     <script src="/js/starfield.js?v=7"></script>
     <script src="/js/festival.js?v=5"></script>

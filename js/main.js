@@ -18,7 +18,7 @@ var TOOLS_DEFAULT = [
     { icon: '🎨', name: '色值转换', desc: 'HEX / RGB / HSL 色值互转', file: 'color-converter.js', initFn: 'initColorConverter' },
     { icon: '📱', name: '二维码生成', desc: '将文本或链接转换成二维码图片', file: 'qrcode.js', initFn: 'initQRCode' },
     { icon: '🛠️', name: '图片工坊', desc: '上传/裁剪/旋转翻转/调色/水印/压缩/格式转换/像素风，一条龙导出', url: '/image-workshop/' },
-    { icon: '📄', name: 'PDF 工具箱', desc: '合并多个 PDF / 转图片 / 优化体积，首次打开会加载引擎', file: 'pdf-tools.js', initFn: 'initPdfTools' },
+    { icon: '📄', name: 'PDF 工具箱', desc: '合并/拆分/旋转/删页/图转PDF/水印/转图片/优化体积，首次打开会加载引擎', file: 'pdf-tools.js', initFn: 'initPdfTools' },
     { icon: '📝', name: '文字识别', desc: 'OCR 识别图片中的文字，快速提取', file: 'ocr.js', initFn: 'initOCR' },
     { icon: '📝', name: 'Markdown 编辑器', desc: '实时预览与导出 HTML', file: 'markdown.js', initFn: 'initMarkdown' },
     { icon: '🔐', name: '密码生成器', desc: '安全随机密码，可配置复杂度', file: 'password.js', initFn: 'initPassword' },
@@ -93,10 +93,11 @@ function buildCard(tool) {
 }
 
 // 按真实渲染位置给卡片打行号（同一 offsetTop 为一行），并标记是否在首屏内；入场动画在进入视口时按行逐张计算
-function stampRows() {
-    if (!grid) return;
+function stampRows(targetGrid) {
+    var g = targetGrid || grid;
+    if (!g) return;
     var rowTop = null, rowIdx = -1, viewH = window.innerHeight;
-    grid.querySelectorAll('.glass-card').forEach(function(card) {
+    g.querySelectorAll('.glass-card, .app-card').forEach(function(card) {
         var top = card.offsetTop;
         if (rowTop === null || Math.abs(top - rowTop) > 4) {
             rowIdx++;
@@ -246,6 +247,75 @@ function loadAdminToolOrder() {
 loadAdminToolOrder().then(function() {
     reRenderGrid(true);
 });
+
+// --- 我的软件（自己写的完整程序；独立于小工具，不参与使用次数排序，也不受控制台工具顺序影响） ---
+// versionUrl 指向各自的更新清单，取到后在卡片右上角显示版本号；取不到就不显示
+var APPS_LIST = [
+    {
+        icon: '🧳', name: '夏夜旅记', platform: 'Android',
+        desc: '全离线的旅行记账：行程、账单、车票、美食、待办一站式，支持车票截图识别与 CSV 导出。',
+        url: '/travel-ledger/', versionUrl: '/travel-update/update.json'
+    },
+    {
+        icon: '💪', name: '夏夜の健身记录', platform: 'Android',
+        desc: '动作与体重打卡，日历、历史、统计图表齐全，训练数据全部留在手机本地。',
+        url: '/fitness/', versionUrl: '/fit-update/update.json'
+    },
+    {
+        icon: '💄', name: '实时美颜相机', platform: 'Windows',
+        desc: '磨皮、美白、瘦脸、大眼、红润、滤镜与 AR 贴纸，摄像头实时 30 FPS。',
+        url: '/beauty-cam/', versionUrl: '/beauty-cam/version.json',
+        second: { text: '🌐 在线试用', url: '/beauty/' }
+    }
+];
+
+function buildAppCard(app) {
+    var card = document.createElement('div');
+    card.className = 'app-card';
+    card.innerHTML =
+        '<div class="app-card__head">' +
+            '<span class="app-card__icon">' + app.icon + '</span>' +
+            '<h3 class="app-card__name">' + app.name + '</h3>' +
+            '<span class="app-card__badges">' +
+                '<span class="app-card__badge">' + app.platform + '</span>' +
+                '<span class="app-card__badge app-card__badge--ver" hidden></span>' +
+            '</span>' +
+        '</div>' +
+        '<p class="app-card__desc">' + app.desc + '</p>' +
+        '<div class="app-card__actions">' +
+            '<a class="app-card__btn" href="' + app.url + '">⬇ 下载</a>' +
+            (app.second ? '<a class="app-card__btn app-card__btn--ghost" href="' + app.second.url + '">' + app.second.text + '</a>' : '') +
+        '</div>';
+
+    if (app.versionUrl) {
+        var verEl = card.querySelector('.app-card__badge--ver');
+        fetch(app.versionUrl, { cache: 'no-store' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(d) {
+                var v = d && (d.versionName || d.version);
+                if (v) { verEl.textContent = 'v' + v; verEl.hidden = false; }
+            })
+            .catch(function() { /* 取不到版本号就不显示，不影响卡片 */ });
+    }
+
+    return card;
+}
+
+function reRenderApps() {
+    var appGrid = document.getElementById('appsGrid');
+    if (!appGrid) return;
+    APPS_LIST.forEach(function(app) { appGrid.appendChild(buildAppCard(app)); });
+    stampRows(appGrid);
+    appGrid.querySelectorAll('.app-card').forEach(function(card) {
+        if (observer) {
+            observer.observe(card);
+        } else {
+            card.classList.add('visible');
+        }
+    });
+}
+
+reRenderApps();
 
 // 重置排序：清空使用次数回到原始顺序（低调按钮在「关于」区）
 var resetSortBtn = document.getElementById('resetSort');

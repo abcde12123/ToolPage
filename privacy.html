@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="夏夜工具集隐私声明：说明本站收集与不收集哪些信息、桌面程序「实时美颜相机」如何使用摄像头权限，以及你的权利与联系方式。">
+    <title>隐私声明 · 夏夜工具集</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #FFFAF7;
+            --text: #1E293B;
+            --text-soft: #57534E;
+            --text-mute: #78716C;
+            --accent: #6D28D9;
+            --panel-bg: rgba(255,255,255,0.55);
+            --panel-border: rgba(255,255,255,0.8);
+            --card-bg: rgba(255,255,255,0.6);
+            --card-border: rgba(255,255,255,0.85);
+            --rule: rgba(30,41,59,0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #14161d;
+                --text: #E8ECF4;
+                --text-soft: #C3CBD9;
+                --text-mute: #8B97AD;
+                --accent: #A78BFA;
+                --panel-bg: rgba(28,32,42,0.72);
+                --panel-border: rgba(255,255,255,0.08);
+                --card-bg: rgba(33,38,50,0.72);
+                --card-border: rgba(255,255,255,0.06);
+                --rule: rgba(255,255,255,0.08);
+            }
+        }
+        body {
+            min-height: 100vh;
+            font-family: system-ui, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 40px 24px;
+            position: relative;
+            overflow-x: hidden;
+            line-height: 1.85;
+            transition: background-color 0.4s;
+        }
+        /* 背景光团：与主站同款柔和渐变 blob（每团 2-3 层渐变 + 大模糊 + 漂浮呼吸） */
+        #orbContainer { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; pointer-events: none; animation: orbFloat 14s ease-in-out infinite alternate; }
+        .orb-inner { position: absolute; inset: 0; animation: orbBreathe 9s ease-in-out infinite alternate; }
+        @keyframes orbFloat { from { transform: translate(0, 0); } to { transform: translate(28px, -22px); } }
+        @keyframes orbBreathe { from { transform: scale(1) rotate(0deg); } to { transform: scale(1.14) rotate(6deg); } }
+
+        .panel {
+            position: relative; z-index: 1;
+            width: min(820px, 100%);
+            margin: 0 auto;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 36px 32px 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid var(--panel-border);
+        }
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 5px;
+            cursor: pointer; font-family: inherit;
+            padding: 6px 14px; border-radius: 100px;
+            border: 1px solid rgba(124,58,237,0.25);
+            background: transparent;
+            color: var(--accent); font-weight: 600; font-size: 0.8rem;
+            margin-bottom: 18px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .btn-back:hover { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.4); }
+        .btn-back:active { transform: scale(0.97); }
+
+        header { text-align: center; margin-bottom: 10px; }
+        .logo { font-size: 2.2rem; }
+        h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; }
+        .sub { font-size: 0.85rem; color: var(--text-mute); margin-top: 6px; }
+
+        h2 {
+            font-size: 1.02rem; font-weight: 700;
+            margin: 26px 0 8px; padding-top: 16px;
+            border-top: 1px solid var(--rule);
+            color: var(--text);
+        }
+        h2:first-of-type { border-top: none; padding-top: 0; }
+        h3 { font-size: 0.92rem; font-weight: 700; margin: 14px 0 4px; color: var(--text-soft); }
+        p, li { font-size: 0.9rem; color: var(--text-soft); }
+        p + p { margin-top: 8px; }
+        ul { margin: 6px 0 0 1.15em; }
+        li { margin: 3px 0; }
+        strong { color: var(--text); font-weight: 700; }
+        code {
+            font-family: ui-monospace, Consolas, monospace; font-size: 0.82rem;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 6px; padding: 1px 5px; color: var(--text);
+        }
+        .note {
+            margin-top: 10px; padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-left: 3px solid var(--accent);
+            border-radius: 12px;
+        }
+        .note p { font-size: 0.86rem; }
+        .mail { color: var(--accent); font-weight: 700; cursor: pointer; }
+        .mail:hover { text-decoration: underline; }
+        footer {
+            text-align: center; font-size: 0.75rem; color: var(--text-mute);
+            margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--rule);
+        }
+        @media (max-width: 560px) {
+            body { padding: 20px 12px; }
+            .panel { padding: 26px 20px 22px; border-radius: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="orbContainer" aria-hidden="true"></div>
+
+    <main class="panel">
+        <a class="btn-back" href="https://xiaye.xyz/">← 返回工具集</a>
+
+        <header>
+            <div class="logo">✧</div>
+            <h1>隐私声明</h1>
+            <p class="sub">生效日期：2026 年 9 月 16 日 · 最后更新：2026 年 9 月 16 日</p>
+        </header>
+
+        <h2>一、概述</h2>
+        <p>夏夜工具集（<code>xiaye.xyz</code>，以下简称「本站」）是一个由个人独立维护的免费在线小工具站点，并提供一款 Windows 桌面程序「实时美颜相机」（以下简称「本程序」）。</p>
+        <p>我们非常重视你的隐私。本声明说明我们<strong>收集什么、不收集什么、为什么</strong>，以及你对个人信息拥有的权利。一句话概括：<strong>本站不收集你的个人信息，你使用在线工具时输入的内容也不会离开你的设备。</strong></p>
+
+        <h2>二、我们在网站上收集的信息</h2>
+
+        <h3>1. 你主动提交的信息（唯一的例外）</h3>
+        <p>本站设有「反馈与建议」功能。当你主动使用它时，可以<strong>自愿</strong>填写：</p>
+        <ul>
+            <li><strong>昵称</strong>（选填，最多 30 字）</li>
+            <li><strong>联系方式</strong>（选填，最多 60 字，如 QQ / 邮箱 / 微信）</li>
+            <li><strong>反馈内容</strong>（必填，最多 2000 字）</li>
+        </ul>
+        <p><strong>用途：</strong>仅用于回复你本人的反馈、排查你报告的问题。昵称与联系方式均为选填，不填写也可以正常提交。</p>
+
+        <h3>2. 服务器自动记录的访问日志</h3>
+        <p>与绝大多数网站一样，服务器会记录：IP 地址、浏览器 User-Agent、访问时间、请求的路径与状态码。</p>
+        <p><strong>用途：</strong>仅用于安全防护、防止滥用攻击、排查服务故障。<strong>保留期限：</strong>不超过 30 天，之后自动轮转删除。</p>
+
+        <h3>3. 存储在你浏览器本地的数据</h3>
+        <p>本站使用浏览器 <code>localStorage</code> 保存少量偏好设置，例如：夜间模式开关、常用工具的点击次数、最近使用的颜色、汇率缓存。</p>
+        <p>这些数据<strong>仅保存在你自己的浏览器中，不会上传到服务器</strong>，你清除浏览器数据即可删除。</p>
+
+        <h2>三、我们不收集的信息</h2>
+        <ul>
+            <li><strong>无账号系统</strong>：本站不需要注册或登录，不收集用户名、密码、手机号、邮箱。</li>
+            <li><strong>无跟踪与广告</strong>：本站不设置用于追踪的 Cookie，不含第三方统计、分析或广告脚本，不含任何跨站跟踪代码。</li>
+            <li><strong>在线工具的输入内容不上传</strong>：图片工坊、PDF 工具箱、OCR、Markdown、JSON/Base64 转换等所有在线工具<strong>均为纯前端实现</strong>，你上传或输入的图片、文本、文档<strong>全部在你的浏览器本地处理，不会被发送到服务器</strong>。</li>
+            <li>不收集精确地理位置、通讯录、短信、相册、剪贴板等任何系统隐私数据。</li>
+        </ul>
+
+        <h2>四、桌面程序「实时美颜相机」</h2>
+        <p>本程序为 Windows 10 / 11 64 位桌面软件，可从 <code>https://xiaye.xyz/beauty-cam/</code> 下载。</p>
+
+        <h3>1. 摄像头权限</h3>
+        <p>本程序的核心功能是实时美颜，因此需要访问你的摄像头。摄像头访问<strong>必须经你在 Windows 系统中明确授权</strong>后才会启用；你随时可以在「设置 → 隐私和安全性 → 相机」中关闭该权限。</p>
+        <p><strong>画面仅在你的电脑本机内存中实时处理，不录制、不保存、不上传、不传输到任何服务器。</strong>我们不收集、不存储、不分析任何人脸图像或面部特征数据。</p>
+
+        <h3>2. 自动更新</h3>
+        <p>本程序启动时会向 <code>https://xiaye.xyz/beauty-cam/version.json</code> 请求一次版本清单，用于判断是否有新版本。该请求<strong>仅包含版本号、系统架构等运行所必需的信息，不包含任何个人数据</strong>。</p>
+
+        <h3>3. 本地文件</h3>
+        <p>本程序产生的运行日志与截图保存在安装目录下的 <code>logs\</code> 与 <code>captures\</code> 文件夹中，<strong>仅存在于你的电脑上</strong>，卸载时可一并删除。</p>
+
+        <div class="note">
+            <p><strong>关于「发布者：未知」：</strong>本程序的安装包目前未做商业代码签名，因此 Windows 与 Edge 可能提示「未知发布者」或「通常不会下载」。这属于未签名软件的常规信誉提示，<strong>并非病毒或安全警告</strong>，你可以核对本站公布的 SHA256 校验值确认文件未被篡改。</p>
+        </div>
+
+        <h2>五、信息共享</h2>
+        <p>我们<strong>不出售、不出租、不交易、不分享</strong>任何收集到的信息给任何第三方。仅在法律法规明确要求，或为保护本站与用户合法权益所必需（如配合司法机关调查）时，才会依法提供。</p>
+
+        <h2>六、数据保留与删除</h2>
+        <ul>
+            <li>反馈信息：处理完你的反馈后即不再需要，你可随时来信要求删除。</li>
+            <li>服务器访问日志：保留不超过 30 天，之后自动删除。</li>
+            <li>浏览器本地数据：完全由你控制，清除浏览器数据即可删除。</li>
+        </ul>
+
+        <h2>七、你的权利</h2>
+        <p>你可以随时通过下方邮箱联系我们，要求查询、更正或删除与你相关的信息。我们会在收到请求后尽快处理。</p>
+
+        <h2>八、未成年人</h2>
+        <p>本站不面向 13 岁以下儿童，也不会主动收集儿童的个人信息。若监护人发现有未成年人向我们提交了信息，请联系我们删除。</p>
+
+        <h2>九、本声明的变更</h2>
+        <p>若本声明发生实质性变更，我们会在本页面更新，并同步修改页面顶部的「最后更新」日期。继续使用本站即视为接受更新后的声明。</p>
+
+        <h2>十、联系我们</h2>
+        <p>对本声明有任何疑问，或希望行使上述权利，请通过邮箱联系我们：<span class="mail" id="contactEmail" title="点击复制邮箱"></span></p>
+        <p class="sub" style="text-align:left;margin-top:4px">（也可在<a href="https://xiaye.xyz/" style="color:inherit">主站首页</a>「关于」区块中复制邮箱）</p>
+
+        <footer>✧ 夏夜工具集 · <a href="https://xiaye.xyz/" style="color:inherit">xiaye.xyz</a> · 隐私声明</footer>
+    </main>
+
+    <script>
+        // 邮箱分片拼接，HTML 里不出现完整地址，防普通爬虫抓取（与主站 contact.js 同策略）
+        (function () {
+            var el = document.getElementById('contactEmail');
+            if (!el) return;
+            var addr = ['xiaye', '121', '23', '@', 'qq', '.', 'com'].join('');
+            el.textContent = addr;
+            el.addEventListener('click', function () {
+                var done = function () { el.textContent = '✅ 已复制 ' + addr; setTimeout(function () { el.textContent = addr; }, 1600); };
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(addr).then(done).catch(function () {});
+                } else {
+                    var ta = document.createElement('textarea');
+                    ta.value = addr; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                    document.body.appendChild(ta); ta.select();
+                    try { document.execCommand('copy'); done(); } catch (e) {}
+                    document.body.removeChild(ta);
+                }
+            });
+        })();
+
+        // ===== 背景光团（复刻主站同款柔和渐变 blob，静态 + CSS 动画）=====
+        (function () {
+            var container = document.getElementById('orbContainer');
+            if (!container) return;
+            function rand(min, max) { return Math.random() * (max - min) + min; }
+            function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+            for (var n = 0; n < 5; n++) {
+                var size = rand(220, 320);
+                var orb = document.createElement('div');
+                orb.className = 'orb';
+                orb.style.width = size + 'px';
+                orb.style.height = size + 'px';
+                orb.style.left = rand(-12, 84) + '%';
+                orb.style.top = rand(-12, 84) + '%';
+                orb.style.animationDuration = rand(12, 18) + 's';
+                var layers = randInt(2, 3);
+                for (var i = 0; i < layers; i++) {
+                    var inner = document.createElement('div');
+                    inner.className = 'orb-inner';
+                    var r = Math.round(rand(195, 255)), g = Math.round(rand(195, 255)), b = Math.round(rand(205, 255));
+                    var alpha = rand(0.45, 0.75);
+                    inner.style.background =
+                        'radial-gradient(circle at 30% 30%, rgba(' + r + ',' + g + ',' + b + ',' + alpha + ') 0%, ' +
+                        'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.3) + ') 55%, transparent 100%)';
+                    inner.style.transform = 'scale(' + rand(0.5, 1.0) + ') rotate(' + rand(0, 360) + 'deg)';
+                    inner.style.filter = 'blur(' + rand(25, 60) + 'px)';
+                    inner.style.borderRadius = '60% 40% 55% 45% / 50% 60% 40% 50%';
+                    inner.style.animationDelay = '-' + rand(0, 8) + 's';
+                    inner.style.animationDuration = rand(8, 12) + 's';
+                    orb.appendChild(inner);
+                }
+                container.appendChild(orb);
+            }
+        })();
+    </script>
+</body>
+</html>
