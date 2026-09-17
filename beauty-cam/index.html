@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="实时美颜相机 - Windows 桌面程序：磨皮、美白、瘦脸、大眼、红润、滤镜与 AR 贴纸，摄像头实时约 30 FPS。也可直接在网页上试用。免费下载安装包。">
+<title>实时美颜相机 · 下载 - 夏夜工具集</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✧</text></svg>">
+<script>try{
+  var now=new Date(),md=localStorage.getItem('theme_manual_date'),night=false;
+  var today=''+now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+  if(md===today){night=(localStorage.getItem('theme_night')==='1');}
+  else{var h=now.getHours();night=(h>=19||h<6);}
+  if(night){document.documentElement.classList.add('night');}
+}catch(e){}</script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 40px 20px 64px;
+    font-family: 'Inter', -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background-color: #FFFAF7; color: #1E293B; line-height: 1.7;
+  }
+  html.night body { background-color: #0B1026; color: #E2E8F0; }
+  main { width: min(760px, 100%); margin: 0 auto; }
+  .back {
+    display: inline-block; margin-bottom: 18px; padding: 7px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; text-decoration: none; color: #57534E;
+    background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.07); transition: background 0.2s;
+  }
+  .back:hover { background: #fff; }
+  html.night .back { color: #CBD5E1; background: rgba(51,65,85,0.7); border-color: rgba(148,163,184,0.2); }
+  html.night .back:hover { background: rgba(71,85,105,0.9); }
+  .card {
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.85); border-radius: 22px; padding: 34px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+  }
+  html.night .card { background: rgba(30,41,59,0.55); border-color: rgba(148,163,184,0.18); box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+  .head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .icon { font-size: 2.6rem; line-height: 1; }
+  .head-text { flex: 1; min-width: 180px; }
+  h1 { margin: 0; font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em; }
+  .sub { margin: 4px 0 0; font-size: 0.86rem; color: #78716C; }
+  html.night .sub { color: #94A3B8; }
+  .badge { font-size: 0.72rem; padding: 3px 11px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .badge--os { background: rgba(245,158,11,0.14); color: #B45309; }
+  .badge--ver { background: rgba(99,102,241,0.14); color: #4F46E5; }
+  html.night .badge--os { background: rgba(245,158,11,0.16); color: #FBBF24; }
+  html.night .badge--ver { background: rgba(129,140,248,0.18); color: #A5B4FC; }
+  .desc { margin: 20px 0 16px; font-size: 0.95rem; color: #57534E; }
+  html.night .desc { color: #94A3B8; }
+  .feats { margin: 0 0 24px; padding: 0; list-style: none; }
+  .feats li { position: relative; padding-left: 8px; margin-bottom: 8px; font-size: 0.92rem; color: #57534E; }
+  html.night .feats li { color: #94A3B8; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 14px 30px; border-radius: 14px;
+    font-size: 1rem; font-weight: 700; color: #fff; text-decoration: none;
+    background: linear-gradient(135deg, #F59E0B, #F97316);
+    box-shadow: 0 10px 26px rgba(245,158,11,0.32); transition: filter 0.2s, transform 0.2s;
+  }
+  .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn[hidden] { display: none; }
+  .btn--ghost {
+    background: rgba(255,255,255,0.7); color: #57534E; padding: 13px 24px;
+    border: 1px solid rgba(0,0,0,0.08); box-shadow: none;
+  }
+  .btn--ghost:hover { background: #fff; filter: none; }
+  html.night .btn--ghost { background: rgba(51,65,85,0.7); color: #CBD5E1; border-color: rgba(148,163,184,0.2); }
+  html.night .btn--ghost:hover { background: rgba(71,85,105,0.9); }
+  .meta { margin: 10px 0 0; font-size: 0.8rem; color: #A8A29E; word-break: break-all; }
+  html.night .meta { color: #64748B; }
+  h2 { font-size: 0.98rem; margin: 30px 0 10px; color: #44403C; }
+  html.night h2 { color: #CBD5E1; }
+  pre {
+    margin: 0; padding: 16px; border-radius: 14px; white-space: pre-wrap; word-break: break-word;
+    background: rgba(0,0,0,0.035); border: 1px solid rgba(0,0,0,0.05);
+    font: 13.5px/1.8 ui-monospace, Consolas, 'Microsoft YaHei', monospace; color: #57534E;
+    max-height: 360px; overflow: auto;
+  }
+  html.night pre { background: rgba(11,16,38,0.6); border-color: rgba(148,163,184,0.14); color: #CBD5E1; }
+  .tip { margin: 20px 0 0; font-size: 0.8rem; color: #A8A29E; }
+  html.night .tip { color: #64748B; }
+  .foot { margin: 24px 0 0; text-align: center; font-size: 0.8rem; color: #A8A29E; }
+  html.night .foot { color: #64748B; }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="/">← 返回夏夜工具集</a>
+  <section class="card">
+    <header class="head">
+      <span class="icon">💄</span>
+      <div class="head-text">
+        <h1>实时美颜相机</h1>
+        <p class="sub">Windows 桌面程序 · 也可以直接在网页上试用</p>
+      </div>
+      <span class="badge badge--os">Windows</span>
+      <span class="badge badge--ver" id="ver">读取中…</span>
+    </header>
+
+    <p class="desc">
+      打开摄像头就能实时美颜：磨皮、美白、瘦脸、大眼、红润、滤镜和 AR 贴纸，
+      参数可以随手拖，也可以用预设一键切换。画面完全在本机处理，不联网、不上传。
+    </p>
+
+    <ul class="feats">
+      <li>✨ 磨皮 / 美白：引导滤波 + 高反差保留，自动排除头发、眉毛、眼睛和嘴唇</li>
+      <li>🙂 瘦脸 / 大眼：平滑变形，只动脸部、背景不乱扭</li>
+      <li>🎨 滤镜与红润：自然 / 冷白 / 暖阳 / 复古 / 清新，浓度可调</li>
+      <li>🐱 AR 贴纸：爱心、星星、皇冠、猫耳、墨镜…可拖动、缩放、旋转</li>
+      <li>⚙️ 13 项高级参数 + 预设保存，支持一键截图</li>
+    </ul>
+
+    <div class="actions">
+      <a class="btn" id="dl" href="#" hidden>⬇ 下载安装包</a>
+      <a class="btn btn--ghost" href="/beauty/">🌐 在线试用</a>
+    </div>
+    <p class="meta" id="meta">正在读取版本信息…</p>
+
+    <h2>更新日志</h2>
+    <pre id="notes">加载中…</pre>
+
+    <p class="tip">
+      需要 Windows 10 / 11（64 位），安装包约 127 MB。装好后启动程序会自动检查更新，
+      也可以在程序里点「检查更新」。
+    </p>
+  </section>
+  <p class="foot">✧ 夏夜工具集 · <a href="/">xiaye.xyz</a></p>
+</main>
+
+<script>
+(function() {
+  var verEl = document.getElementById('ver');
+  var dlEl = document.getElementById('dl');
+  var metaEl = document.getElementById('meta');
+  var notesEl = document.getElementById('notes');
+  fetch('/beauty-cam/version.json?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d) {
+      var v = d.version || '';
+      verEl.textContent = v ? ('v' + v) : '最新版';
+      if (d.url) {
+        dlEl.href = d.url;
+        dlEl.hidden = false;
+        dlEl.textContent = '⬇ 下载安装包' + (v ? ' (v' + v + ')' : '');
+        metaEl.textContent = '安装包下载地址：' + d.url;
+      } else {
+        metaEl.textContent = '';
+      }
+      notesEl.textContent = d.notes || '（本版本未提供更新说明）';
+    })
+    .catch(function(e) {
+      verEl.textContent = '读取失败';
+      metaEl.textContent = '';
+      notesEl.textContent = '无法读取版本信息：' + e.message + '\n请刷新重试，或直接访问 /beauty-cam/version.json';
+    });
+})();
+</script>
+</body>
+</html>
